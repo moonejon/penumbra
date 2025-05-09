@@ -137,14 +137,10 @@ export const fetchMetadataAction = async (formData: FormData): Promise<void> => 
   const headers = new Headers()
   headers.set('Authorization', `${process.env.ISBN_DB_API_KEY}`)
   headers.set('Content-Type', 'application/json')
-  headers.set('Accept', '*/*')
 
-  console.log('headers: ', headers)
   const isbn = formData.get('isbn')
-  console.log(process.env.ISBN_DB_API_KEY)
-  console.log('ISBN: ', isbn)
 
-  const response = await fetch(`https://api2.isbndb.com/book/0307762718`, {
+  const response = await fetch(`https://api2.isbndb.com/book/${isbn}`, {
     method: 'GET',
     headers: headers
   })
