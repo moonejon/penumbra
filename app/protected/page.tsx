@@ -1,4 +1,3 @@
-import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
 import { createClient } from "@/utils/supabase/server";
 import { SearchBook } from "@/components/library/search-book";
 import { InfoIcon } from "lucide-react";
