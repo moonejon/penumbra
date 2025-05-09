@@ -15,7 +15,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/sign-up",
-      "Email and password are required",
+      "Email and password are required"
     );
   }
 
@@ -34,7 +34,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "success",
       "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
+      "Thanks for signing up! Please check your email for a verification link."
     );
   }
 };
@@ -75,7 +75,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password",
+      "Could not reset password"
     );
   }
 
@@ -86,7 +86,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "Check your email for a link to reset your password."
   );
 };
 
@@ -100,7 +100,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password and confirm password are required",
+      "Password and confirm password are required"
     );
   }
 
@@ -108,7 +108,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Passwords do not match",
+      "Passwords do not match"
     );
   }
 
@@ -120,7 +120,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password update failed",
+      "Password update failed"
     );
   }
 
@@ -133,20 +133,22 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
-export const fetchMetadataAction = async (formData: FormData): Promise<void> => {
-  const headers = new Headers()
-  headers.set('Authorization', `${process.env.ISBN_DB_API_KEY}`)
-  headers.set('Content-Type', 'application/json')
-
-  const isbn = formData.get('isbn')
+export const fetchMetadataAction = async (initialState: any, formData: FormData): Promise<any> => {
+  const headers = new Headers();
+  headers.set("Authorization", `${process.env.ISBN_DB_API_KEY}`);
+  headers.set("Content-Type", "application/json");
+  
+  const isbn = formData.get("isbn");
 
   const response = await fetch(`https://api2.isbndb.com/book/${isbn}`, {
-    method: 'GET',
-    headers: headers
-  })
+    method: "GET",
+    headers: headers,
+  });
 
   const result = await response.json();
 
-  console.log(result.book)
-  return result;
-}
+  console.log(result.book);
+  return {
+    book: result.book,
+  };
+};
