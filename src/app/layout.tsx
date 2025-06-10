@@ -1,6 +1,26 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { Roboto } from "next/font/google";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "../theme";
+import {
+  ClerkProvider,
+  UserButton,
+  SignInButton,
+  SignUpButton,
+  SignedOut,
+  SignedIn,
+} from "@clerk/nextjs";
+import Button from "@mui/material/Button"
+
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,10 +43,46 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={roboto.variable}>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>
+              <Navbar />
+              {children}
+            </ThemeProvider>
+          </AppRouterCacheProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
+
+const Navbar = () => {
+  return (
+    <header
+      style={{
+        display: "flex",
+        justifyContent: "end",
+        alignItems: "center",
+        padding: 4,
+        gap: 4,
+        // height: 16,
+      }}
+    >
+      <SignedOut>
+        <SignInButton>
+          <Button variant="outlined">Sign In</Button>
+          </SignInButton>
+        <SignUpButton>
+          <Button variant="outlined">Sign Up</Button>
+          </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+    </header>
+  );
+};
