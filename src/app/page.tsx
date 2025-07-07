@@ -10,7 +10,6 @@ export default function Home() {
           <Grid width={4}/>
           <Grid width={4}>
             <Container>
-              
             </Container>
           </Grid>
           <Grid width={4}/>
