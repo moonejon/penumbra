@@ -1,64 +1,53 @@
 "use client";
 import { FC, useState } from "react";
-import { Box, Button, Container, TextField } from "@mui/material";
-import Book from "../components/book";
+import { Box } from "@mui/material";
 import { BookType } from "@/shared.types";
-import { fetchMetadata } from "../api/isbndb/fetchMetadata";
+import Book from "../components/book";
+import Queue from "../components/queue";
+import Search from "../components/search";
 
 type ImportProps = object;
 
+export const initialBookData = {
+  title: "",
+  authors: [],
+  image_original: "",
+  publisher: "",
+  synopsis: "",
+  pages: 0,
+  date_published: "",
+  subjects: [],
+  isbn10: "",
+  isbn13: "",
+  binding: "",
+};
+
 // eslint-disable-next-line no-empty-pattern
 const Import: FC<ImportProps> = ({}) => {
-  const [isbn, setIsbn] = useState("");
-  const [bookData, setBookData] = useState<BookType>({
-    title: "",
-    image_original: "",
-  });
-  // const [importQueue, setImportQueue] = useState([]);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    fetchMetadata(isbn).then((value) => {
-      setBookData({
-        title: value.book.title,
-        image_original: value.book.image_original,
-      });
-    });
-    setIsbn("");
-  };
+  const [bookData, setBookData] = useState<BookType>(initialBookData);
+  const [importQueue, setImportQueue] = useState<Array<BookType>>([]);
 
   return (
-    <Box sx={{ width: "500px" }}>
-      <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-        <Container
-          sx={{
-            margin: "50px",
-            padding: "50px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <TextField
-            label="Enter ISBN number"
-            variant="outlined"
-            name="isbn"
-            onChange={(event) => setIsbn(event.target.value)}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            size="medium"
-            sx={{ width: "10%", alignSelf: "flex-end" }}
-          >
-            Submit
-          </Button>
-        </Container>
-      </form>
-
-      <Book book={bookData} />
-    </Box>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+      }}
+    >
+      <Box sx={{ width: "500px" }}>
+        <Search setBookData={setBookData} />
+        <Book
+          book={bookData}
+          setBookData={setBookData}
+          importQueue={importQueue}
+          setImportQueue={setImportQueue}
+        />
+      </Box>
+      <Box sx={{ width: "500px" }}>
+        <Queue books={importQueue} />
+      </Box>
+    </div>
   );
 };
 
