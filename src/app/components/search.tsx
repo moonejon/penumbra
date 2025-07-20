@@ -51,7 +51,7 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
   return (
     <Card
       sx={{
-        minWidth: "500px",
+        minWidth: "40%",
         margin: "50px",
       }}
     >
@@ -61,10 +61,10 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
           <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
             <Container
               sx={{
-                padding: "50px",
+                padding: "25px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 2,
+                gap: 1,
               }}
             >
               <Controller

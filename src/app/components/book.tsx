@@ -16,7 +16,9 @@ const Book: FC<BookProps> = ({
   importQueue,
   setImportQueue,
 }) => {
-  let title = book?.title;
+  const { authors, binding, date_published } = book;
+
+  let { title } = book;
   let subtitle = "";
   if (book?.title?.includes(":")) {
     const splitTitle = book.title.split(":");
@@ -48,28 +50,34 @@ const Book: FC<BookProps> = ({
   };
 
   return (
-    <Card sx={{ minWidth: "500px", margin: "50px" }}>
+    <Card sx={{ margin: "50px" }}>
       <CardContent>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Preview</Typography>
-          {book && (
+          {(book !== initialBookData) && (
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-              <div style={{ display: "flex", flexDirection: "column", margin: "25px"}}>
-                <div style={{ display: "inline-flex", gap: "25px" }}>
+              <div style={{ display: "flex", flexDirection: "column", margin: "25px 10px 0"}}>
+                <div style={{ display: "inline-flex", gap: "15px" }}>
                   {book?.image_original ? (
                     <img src={book?.image_original} height="250px" />
                   ) : (
                     <div style={{ height: "250px" }} />
                   )}
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography gutterBottom variant="h6">
+                    <Typography gutterBottom variant="h6" fontWeight={700}>
                       {title}
                     </Typography>
-                    {subtitle && (
-                      <Typography gutterBottom variant="subtitle2">
+                    <Typography gutterBottom variant="subtitle2">
+                      {authors.join(', ')}
+                    </Typography>
+                    <Typography gutterBottom sx={{ marginTop: "2em" }} variant="caption">
+                      {binding} ✧ {date_published.toString().split('-')[0]}
+                    </Typography>
+                    {/* {subtitle && (
+                      <Typography gutterBottom variant="subtitle2" fontWeight={700}>
                         {subtitle}
                       </Typography>
-                    )}
+                    )} */}
                   </div>
                 </div>
                 <Button

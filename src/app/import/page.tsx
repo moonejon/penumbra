@@ -35,7 +35,7 @@ const Import: FC<ImportProps> = ({}) => {
         justifyContent: "space-evenly",
       }}
     >
-      <Box sx={{ width: "500px" }}>
+      <Box sx={{ width: "50%" }}>
         <Search setBookData={setBookData} />
         <Book
           book={bookData}
@@ -44,7 +44,7 @@ const Import: FC<ImportProps> = ({}) => {
           setImportQueue={setImportQueue}
         />
       </Box>
-      <Box sx={{ width: "500px" }}>
+      <Box sx={{ width: "50%" }}>
         <Queue books={importQueue} />
       </Box>
     </div>

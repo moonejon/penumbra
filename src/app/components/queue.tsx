@@ -8,7 +8,7 @@ interface QueueProps {
 }
 const Queue: FC<QueueProps> = ({ books }) => {
   return (
-    <Card sx={{ minWidth: "500px", minHeight: "80vh", margin: "50px 25px" }}>
+    <Card sx={{ minWidth: "500px", minHeight: "80vh", margin: "50px" }}>
       <CardContent>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Queue</Typography>
