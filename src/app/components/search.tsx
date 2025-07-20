@@ -1,6 +1,13 @@
 import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { Button, Container, TextField } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { BookType } from "@/shared.types";
 import { fetchMetadata } from "../api/isbndb/fetchMetadata";
 
@@ -13,12 +20,9 @@ type Inputs = {
 };
 
 const Search: FC<SearchProps> = ({ setBookData }) => {
-  const {
-    control,
-    reset,
-    handleSubmit,
-    formState,
-  } = useForm<Inputs>({defaultValues: { isbn: ""}});
+  const { control, reset, handleSubmit, formState } = useForm<Inputs>({
+    defaultValues: { isbn: "" },
+  });
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     fetchMetadata(data.isbn).then((value) => {
@@ -40,44 +44,54 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
-      reset({ isbn: "" })
+      reset({ isbn: "" });
     }
-  }, [formState, reset])
+  }, [formState, reset]);
 
   return (
-    <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-      <Container
-        sx={{
-          margin: "50px",
-          padding: "50px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          background: "white",
-        }}
-      >
-        <Controller
-          name="isbn"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <TextField
-              label="Enter ISBN number"
-              variant="outlined"
-              {...field}
-            />
-          )}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          size="medium"
-          sx={{ width: "10%", alignSelf: "flex-end" }}
-        >
-          Submit
-        </Button>
-      </Container>
-    </form>
+    <Card
+      sx={{
+        minWidth: "500px",
+        margin: "50px",
+      }}
+    >
+      <CardContent>
+        <div style={{ display: "flex", flexDirection: "column"}}>
+          <Typography variant="h6">Search</Typography>
+          <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <Container
+              sx={{
+                padding: "50px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              <Controller
+                name="isbn"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TextField
+                    label="Enter ISBN number"
+                    variant="outlined"
+                    {...field}
+                  />
+                )}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                size="medium"
+                sx={{ width: "10%", alignSelf: "flex-end" }}
+              >
+                Submit
+              </Button>
+            </Container>
+          </form>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

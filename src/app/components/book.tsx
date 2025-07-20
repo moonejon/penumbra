@@ -50,36 +50,39 @@ const Book: FC<BookProps> = ({
   return (
     <Card sx={{ minWidth: "500px", margin: "50px" }}>
       <CardContent>
-        {book && (
-          <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "inline-flex", gap: "25px" }}>
-                {book?.image_original ? (
-                  <img src={book?.image_original} height="250px" />
-                ) : (
-                  <div style={{ height: "250px" }} />
-                )}
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <Typography gutterBottom variant="h6">
-                    {title}
-                  </Typography>
-                  {subtitle && (
-                    <Typography gutterBottom variant="subtitle2">
-                      {subtitle}
-                    </Typography>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Typography variant="h6">Preview</Typography>
+          {book && (
+            <form noValidate autoComplete="off" onSubmit={handleSubmit}>
+              <div style={{ display: "flex", flexDirection: "column", margin: "25px"}}>
+                <div style={{ display: "inline-flex", gap: "25px" }}>
+                  {book?.image_original ? (
+                    <img src={book?.image_original} height="250px" />
+                  ) : (
+                    <div style={{ height: "250px" }} />
                   )}
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <Typography gutterBottom variant="h6">
+                      {title}
+                    </Typography>
+                    {subtitle && (
+                      <Typography gutterBottom variant="subtitle2">
+                        {subtitle}
+                      </Typography>
+                    )}
+                  </div>
                 </div>
+                <Button
+                  type="submit"
+                  size="medium"
+                  sx={{ width: "30%", alignSelf: "flex-end" }}
+                >
+                  Add to queue
+                </Button>
               </div>
-              <Button
-                type="submit"
-                size="medium"
-                sx={{ width: "30%", alignSelf: "flex-end" }}
-              >
-                Add to queue
-              </Button>
-            </div>
-          </form>
-        )}
+            </form>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -12,9 +12,11 @@ const Queue: FC<QueueProps> = ({ books }) => {
       <CardContent>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Queue</Typography>
-          {books?.map((book, i) => (
-            <Item title={book.title} authors={book.authors} key={i} />
-          ))}
+          <div style={{ padding: "25px" }}>
+            {books?.map((book, i) => (
+              <Item title={book.title} authors={book.authors} key={i} />
+            ))}
+          </div>
         </div>
         {/* {books.length === 0 && <Typography>Add books to queue</Typography>} */}
       </CardContent>
