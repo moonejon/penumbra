@@ -22,21 +22,21 @@ model User {
 }
 
 model Book {
-  id              Int      @id @default(autoincrement())
-  owner           User     @relation(fields: [ownerId], references: [id])
-  ownerId         Int
-  isbn10          String   @db.VarChar(10)
-  isbn13          String   @db.VarChar(13)
-  title           String
-  titleLong       String
-  language        String
-  synopsis        String
-  image           String
-  imageOriginal   String
-  edition         String
-  pageCount       Int
-  publicationDate DateTime
-  genres          String[]
-  authors         String[]
-  binding         String
+  id            Int      @id @default(autoincrement())
+  owner         User     @relation(fields: [ownerId], references: [id])
+  ownerId       Int
+  isbn10        String   @unique @db.VarChar(10)
+  isbn13        String   @unique @db.VarChar(13)
+  title         String
+  titleLong     String
+  language      String
+  synopsis      String
+  image         String
+  imageOriginal String
+  edition       String
+  pageCount     Int
+  datePublished DateTime
+  subjects      String[]
+  authors       String[]
+  binding       String
 }

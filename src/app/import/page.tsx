@@ -11,15 +11,19 @@ type ImportProps = object;
 export const initialBookData = {
   title: "",
   authors: [],
-  image_original: "",
+  image: "",
+  imageOriginal: "",
   publisher: "",
   synopsis: "",
-  pages: 0,
-  date_published: "",
+  pageCount: 0,
+  datePublished: "",
   subjects: [],
   isbn10: "",
   isbn13: "",
   binding: "",
+  language: "",
+  titleLong: "",
+  edition: "",
 };
 
 // eslint-disable-next-line no-empty-pattern

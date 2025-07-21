@@ -16,7 +16,7 @@ const Book: FC<BookProps> = ({
   importQueue,
   setImportQueue,
 }) => {
-  const { authors, binding, date_published } = book;
+  const { authors, binding, datePublished } = book;
 
   let { title } = book;
   let subtitle = "";
@@ -33,16 +33,20 @@ const Book: FC<BookProps> = ({
     newImportQueue.push({
       title: title,
       subtitle: subtitle,
-      image_original: book.image_original,
+      image: book.image,
+      imageOriginal: book.imageOriginal,
       publisher: book.publisher,
       synopsis: book.synopsis,
-      pages: book.pages,
-      date_published: book.date_published,
+      pageCount: book.pageCount,
+      datePublished: book.datePublished,
       authors: book.authors,
       subjects: book.subjects,
       isbn10: book.isbn10,
       isbn13: book.isbn13,
       binding: book.binding,
+      edition: book.edition,
+      language: book.language,
+      titleLong: book.titleLong,
     });
 
     setImportQueue(newImportQueue);
@@ -58,8 +62,8 @@ const Book: FC<BookProps> = ({
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
               <div style={{ display: "flex", flexDirection: "column", margin: "25px 10px 0"}}>
                 <div style={{ display: "inline-flex", gap: "15px" }}>
-                  {book?.image_original ? (
-                    <img src={book?.image_original} height="250px" />
+                  {book?.imageOriginal ? (
+                    <img src={book?.imageOriginal} height="250px" />
                   ) : (
                     <div style={{ height: "250px" }} />
                   )}
@@ -71,7 +75,7 @@ const Book: FC<BookProps> = ({
                       {authors.join(', ')}
                     </Typography>
                     <Typography gutterBottom sx={{ marginTop: "2em" }} variant="caption">
-                      {binding} ✧ {date_published.toString().split('-')[0]}
+                      {binding} ✧ {datePublished.toString().split('-')[0]}
                     </Typography>
                     {/* {subtitle && (
                       <Typography gutterBottom variant="subtitle2" fontWeight={700}>

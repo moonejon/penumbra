@@ -29,15 +29,19 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
       setBookData({
         title: value.book.title,
         authors: value.book.authors,
-        image_original: value.book.image_original,
+        image: value.book.image,
+        imageOriginal: value.book.image_original,
         publisher: value.book.publisher,
         synopsis: value.book.string,
-        pages: value.book.pages,
-        date_published: value.book.date_published,
+        pageCount: value.book.pages,
+        datePublished: value.book.date_published,
         subjects: value.book.subjects,
         isbn10: value.book.isbn10,
         isbn13: value.book.isbn13,
         binding: value.book.binding,
+        language: value.book.language,
+        titleLong: value.book.titleLong,
+        edition: value.book.edition,
       });
     });
   };
