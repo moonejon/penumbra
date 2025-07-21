@@ -45,7 +45,7 @@ const Import: FC<ImportProps> = ({}) => {
         />
       </Box>
       <Box sx={{ width: "50%" }}>
-        <Queue books={importQueue} />
+        <Queue books={importQueue} setBooks={setImportQueue} />
       </Box>
     </div>
   );
