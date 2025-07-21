@@ -33,9 +33,10 @@ model Book {
   synopsis      String
   image         String
   imageOriginal String
+  publisher     String
   edition       String
   pageCount     Int
-  datePublished DateTime
+  datePublished String
   subjects      String[]
   authors       String[]
   binding       String

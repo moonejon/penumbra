@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { BookType } from "@/shared.types";
 import { fetchMetadata } from "../api/isbndb/fetchMetadata";
+import { initialBookData } from "../import/page";
 
 type SearchProps = {
   setBookData: Dispatch<SetStateAction<BookType>>;
@@ -26,22 +27,24 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     fetchMetadata(data.isbn).then((value) => {
+      const { book } = value;
+      console.log( book )
       setBookData({
-        title: value.book.title,
-        authors: value.book.authors,
-        image: value.book.image,
-        imageOriginal: value.book.image_original,
-        publisher: value.book.publisher,
-        synopsis: value.book.string,
-        pageCount: value.book.pages,
-        datePublished: value.book.date_published,
-        subjects: value.book.subjects,
-        isbn10: value.book.isbn10,
-        isbn13: value.book.isbn13,
-        binding: value.book.binding,
-        language: value.book.language,
-        titleLong: value.book.titleLong,
-        edition: value.book.edition,
+        title: book.title,
+        authors: book.authors,
+        image: book.image,
+        imageOriginal: book.image_original,
+        publisher: book.publisher,
+        synopsis: book.synopsis,
+        pageCount: book.pages,
+        datePublished: book.date_published,
+        subjects: book.subjects,
+        isbn10: book.isbn10,
+        isbn13: book.isbn13,
+        binding: book.binding,
+        language: book.language,
+        titleLong: book.title_long,
+        edition: book.edition || initialBookData.edition,
       });
     });
   };
@@ -60,7 +63,7 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
       }}
     >
       <CardContent>
-        <div style={{ display: "flex", flexDirection: "column"}}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Search</Typography>
           <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
             <Container

@@ -19,11 +19,11 @@ const Book: FC<BookProps> = ({
   const { authors, binding, datePublished } = book;
 
   let { title } = book;
-  let subtitle = "";
+  // let subtitle = "";
   if (book?.title?.includes(":")) {
     const splitTitle = book.title.split(":");
     title = splitTitle[0];
-    subtitle = splitTitle[1];
+    // subtitle = splitTitle[1];
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -31,8 +31,8 @@ const Book: FC<BookProps> = ({
 
     const newImportQueue = importQueue.slice();
     newImportQueue.push({
+      ...book,
       title: title,
-      subtitle: subtitle,
       image: book.image,
       imageOriginal: book.imageOriginal,
       publisher: book.publisher,
@@ -44,9 +44,9 @@ const Book: FC<BookProps> = ({
       isbn10: book.isbn10,
       isbn13: book.isbn13,
       binding: book.binding,
-      edition: book.edition,
       language: book.language,
       titleLong: book.titleLong,
+      edition: book.edition || initialBookData.edition
     });
 
     setImportQueue(newImportQueue);

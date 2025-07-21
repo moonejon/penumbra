@@ -1,19 +1,25 @@
 import { Dispatch, FC, SetStateAction } from "react";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Button, Card, CardContent, Typography } from "@mui/material";
 import { BookType } from "@/shared.types";
 import Item from "./item";
+import { importBooks } from "../actions";
 
 interface QueueProps {
   books: Array<BookType>;
-  setBooks: Dispatch<SetStateAction<BookType[]>>
+  setBooks: Dispatch<SetStateAction<BookType[]>>;
 }
 const Queue: FC<QueueProps> = ({ books, setBooks }) => {
-
   const handleDelete = (key: number) => {
+    const updatedBooks = books.filter((_, index) => index !== key);
 
-    const updatedBooks = books.filter((_, index) => index !== key)
+    return setBooks(updatedBooks);
+  };
 
-    return setBooks(updatedBooks)
+  const handleSubmit = () => {
+    importBooks(books).then((value) => {
+      console.log(value)
+      return value
+    })
   }
 
   return (
@@ -23,9 +29,22 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
           <Typography variant="h6">Queue</Typography>
           <div style={{ padding: "25px" }}>
             {books?.map((book, i) => (
-              <Item title={book.title} authors={book.authors} key={i} itemKey={i} handleDelete={handleDelete} />
+              <Item
+                title={book.title}
+                authors={book.authors}
+                key={i}
+                itemKey={i}
+                handleDelete={handleDelete}
+              />
             ))}
           </div>
+          <Button
+            onClick={handleSubmit}
+            size="medium"
+            sx={{ width: "30%", alignSelf: "flex-end" }}
+          >
+            Add to queue
+          </Button>
         </div>
       </CardContent>
     </Card>
