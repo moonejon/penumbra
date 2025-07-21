@@ -14,7 +14,7 @@ type BookType = {
   binding: string;
   language: string;
   titleLong: string;
-  edition?: string;
+  edition: string;
 };
 
 export type { BookType }
