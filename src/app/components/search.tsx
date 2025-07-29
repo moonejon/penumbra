@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { BookType } from "@/shared.types";
-import { fetchMetadata } from "../api/isbndb/fetchMetadata";
+import { fetchMetadata } from "../../utils/actions/isbndb/fetchMetadata";
 import { initialBookData } from "../import/page";
 
 type SearchProps = {

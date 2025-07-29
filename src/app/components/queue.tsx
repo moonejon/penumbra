@@ -2,7 +2,7 @@ import { Dispatch, FC, SetStateAction } from "react";
 import { Button, Card, CardContent, Typography } from "@mui/material";
 import { BookType } from "@/shared.types";
 import Item from "./item";
-import { importBooks } from "../actions";
+import { importBooks } from "@/utils/actions/books";
 
 interface QueueProps {
   books: Array<BookType>;

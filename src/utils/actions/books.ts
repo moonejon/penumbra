@@ -26,3 +26,25 @@ export async function importBooks( importQueue: BookType[]) {
     }))
   });
 }
+
+export async function fetchBooks() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found in database");
+  }
+
+  return await prisma.book.findMany({
+    where: {
+      ownerId: user.id
+    }
+  })
+}
