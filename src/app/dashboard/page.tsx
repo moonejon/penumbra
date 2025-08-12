@@ -1,15 +1,14 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
+import { Container, Typography } from "@mui/material"
+import { DataGrid } from "@mui/x-data-grid";
 import { fetchBooks } from "@/utils/actions/books";
 import { BookType } from "@/shared.types";
-import { Box, Grid, Stack } from "@mui/material";
-import Item from "../library/components/item";
-import Details from "./components/details";
-type LibraryProps = object;
+type DashboardProps = object;
 
 // eslint-disable-next-line no-empty-pattern
-const Library: FC<LibraryProps> = ({}) => {
+const Dashboard: FC<DashboardProps> = ({}) => {
   // TODO: implement server-side data fetching using the customDataSource feature of MUI Data Grid
 
   //   interface GridDataSource {
@@ -39,7 +38,19 @@ const Library: FC<LibraryProps> = ({}) => {
   //   };
 
   const [rows, setRows] = useState<Array<BookType>>([]);
-  const [selectedBook, setSelectedBook] = useState<BookType>();
+
+  const colNames = [
+    'title',
+    'authors',
+    'binding',
+    'publisher',
+    'pageCount',
+    'datePublished',
+  ]
+
+  const columns = colNames.map((colName) => {
+    return { field: colName};
+  });
 
   useEffect(() => {
     async function fetchRows() {
@@ -50,37 +61,10 @@ const Library: FC<LibraryProps> = ({}) => {
     fetchRows();
   }, []);
 
-  useEffect(() => {
-    console.log(selectedBook);
-  }, []);
-
-  return (
-    <>
-      {!selectedBook ? (
-        <Grid container spacing={2}>
-          <Grid size={4}></Grid>
-          <Grid size={8}>
-            <Stack spacing={1} sx={{ padding: "2em" }}>
-              {rows?.map((book, i) => (
-                <Item book={book} key={i} setSelectedBook={setSelectedBook} />
-              ))}
-              {/* <Pagination count={10} /> */}
-            </Stack>
-          </Grid>
-        </Grid>
-      ) : (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-          minWidth="100vw"
-          flexDirection="column"
-        >
-          <Details book={selectedBook} setSelectedBook={setSelectedBook}/>
-        </Box>
-      )}
-    </>
-  );
+  return <Container sx={{padding: '25px'}}>
+    <Typography gutterBottom variant="h3">Dashboard</Typography>
+    {<DataGrid columns={columns} rows={rows} pagination />}
+    </Container>;
 };
-export default Library;
+
+export default Dashboard;

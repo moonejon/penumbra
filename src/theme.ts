@@ -5,6 +5,11 @@ const theme = createTheme({
   palette: {
     mode: "dark",
   },
+  components: {
+    // MuiCard: {
+    //   backgroundColor: 
+    // }
+  },
   typography: {
     fontFamily: "var(--font-space-mono)",
   },
