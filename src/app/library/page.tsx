@@ -4,9 +4,12 @@ import Library from "./components/library";
 export default async function LibraryPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string}>;
 }) {
-  const page = Number(searchParams.page) || 1;
+
+  const params = await searchParams;
+
+  const page = Number(params.page) || 1;
 
   const result = await fetchBooksPaginated({ page: page });
 
