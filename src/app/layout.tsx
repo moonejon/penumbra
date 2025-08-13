@@ -27,6 +27,7 @@ import { Navbar } from "./components/navbar";
 const spaceMono = Space_Mono({
   weight: ["400", "700"],
   variable: "--font-space-mono",
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
