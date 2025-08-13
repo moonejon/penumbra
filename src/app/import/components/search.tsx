@@ -8,12 +8,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { BookType } from "@/shared.types";
-import { fetchMetadata } from "../../utils/actions/isbndb/fetchMetadata";
-import { initialBookData } from "../import/page";
+import { BookImportDataType } from "@/shared.types";
+import { fetchMetadata } from "../../../utils/actions/isbndb/fetchMetadata";
+import { initialBookImportData } from "./import";
 
 type SearchProps = {
-  setBookData: Dispatch<SetStateAction<BookType>>;
+  setBookData: Dispatch<SetStateAction<BookImportDataType>>;
 };
 
 type Inputs = {
@@ -44,7 +44,7 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
         binding: book.binding,
         language: book.language,
         titleLong: book.title_long,
-        edition: book.edition || initialBookData.edition,
+        edition: book.edition || initialBookImportData.edition,
       });
     });
   };

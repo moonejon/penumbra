@@ -5,6 +5,7 @@ import { Dispatch, FC, SetStateAction } from "react";
 import { Grid, Pagination, Stack } from "@mui/material";
 import Item from "./item";
 import { useRouter } from "next/navigation";
+import theme from "@/theme";
 
 type ListProps = {
   rows: BookType[];
@@ -28,11 +29,21 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
           {rows?.map((book, i) => (
             <Item book={book} key={i} setSelectedBook={setSelectedBook} />
           ))}
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={handlePageChange}
-          />
+          <span style={{ width: '100%', alignContent: "center" }}>
+            <Pagination
+              variant="outlined"
+              size="large"
+              shape="rounded"
+              count={pageCount}
+              page={page}
+              sx={{
+                button: {
+                  background: theme.palette.background.default,
+                },
+              }}
+              onChange={handlePageChange}
+            />
+          </span>
         </Stack>
       </Grid>
     </Grid>

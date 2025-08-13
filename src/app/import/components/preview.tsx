@@ -1,16 +1,16 @@
 import { Dispatch, FC, SetStateAction } from "react";
 import { Button, Card, CardContent, Typography } from "@mui/material";
-import { BookType } from "@/shared.types";
-import { initialBookData } from "../import/page";
+import { BookImportDataType } from "@/shared.types";
+import { initialBookImportData } from "./import";
 
 interface BookProps {
-  book: BookType;
-  setBookData: Dispatch<SetStateAction<BookType>>;
-  importQueue: BookType[];
-  setImportQueue: Dispatch<SetStateAction<BookType[]>>;
+  book: BookImportDataType;
+  setBookData: Dispatch<SetStateAction<BookImportDataType>>;
+  importQueue: BookImportDataType[];
+  setImportQueue: Dispatch<SetStateAction<BookImportDataType[]>>;
 }
 
-const Book: FC<BookProps> = ({
+const Preview: FC<BookProps> = ({
   book,
   setBookData,
   importQueue,
@@ -46,11 +46,11 @@ const Book: FC<BookProps> = ({
       binding: book.binding,
       language: book.language,
       titleLong: book.titleLong,
-      edition: book.edition || initialBookData.edition
+      edition: book.edition || initialBookImportData.edition
     });
 
     setImportQueue(newImportQueue);
-    setBookData(initialBookData);
+    setBookData(initialBookImportData);
   };
 
   return (
@@ -58,7 +58,7 @@ const Book: FC<BookProps> = ({
       <CardContent>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Preview</Typography>
-          {(book !== initialBookData) && (
+          {(book !== initialBookImportData) && (
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
               <div style={{ display: "flex", flexDirection: "column", margin: "25px 10px 0"}}>
                 <div style={{ display: "inline-flex", gap: "15px" }}>
@@ -77,11 +77,6 @@ const Book: FC<BookProps> = ({
                     <Typography gutterBottom sx={{ marginTop: "2em" }} variant="caption">
                       {binding} ✧ {datePublished.toString().split('-')[0]}
                     </Typography>
-                    {/* {subtitle && (
-                      <Typography gutterBottom variant="subtitle2" fontWeight={700}>
-                        {subtitle}
-                      </Typography>
-                    )} */}
                   </div>
                 </div>
                 <Button
@@ -100,4 +95,4 @@ const Book: FC<BookProps> = ({
   );
 };
 
-export default Book;
+export default Preview;

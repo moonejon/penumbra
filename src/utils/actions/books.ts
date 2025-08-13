@@ -2,9 +2,9 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { BookType } from "@/shared.types";
+import { BookImportDataType } from "@/shared.types";
 
-export async function importBooks(importQueue: BookType[]) {
+export async function importBooks(importQueue: BookImportDataType[]) {
   const { userId } = await auth();
 
   if (!userId) {

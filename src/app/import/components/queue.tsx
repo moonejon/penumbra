@@ -1,12 +1,12 @@
 import { Dispatch, FC, SetStateAction } from "react";
 import { Button, Card, CardContent, Typography } from "@mui/material";
-import { BookType } from "@/shared.types";
+import { BookImportDataType } from "@/shared.types";
 import Item from "./item";
 import { importBooks } from "@/utils/actions/books";
 
 interface QueueProps {
-  books: Array<BookType>;
-  setBooks: Dispatch<SetStateAction<BookType[]>>;
+  books: Array<BookImportDataType>;
+  setBooks: Dispatch<SetStateAction<BookImportDataType[]>>;
 }
 const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   const handleDelete = (key: number) => {
