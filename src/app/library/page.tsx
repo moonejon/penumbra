@@ -1,86 +1,18 @@
-"use client";
 
-import { FC, useEffect, useState } from "react";
-import { fetchBooks } from "@/utils/actions/books";
-import { BookType } from "@/shared.types";
-import { Box, Grid, Stack } from "@mui/material";
-import Item from "../library/components/item";
-import Details from "./components/details";
-type LibraryProps = object;
+import { fetchBooksPaginated } from "@/utils/actions/books";
+import Library from "./components/library";
 
-// eslint-disable-next-line no-empty-pattern
-const Library: FC<LibraryProps> = ({}) => {
-  // TODO: implement server-side data fetching using the customDataSource feature of MUI Data Grid
+export default async function LibraryPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
 
-  //   interface GridDataSource {
-  //     /**
-  //      * This method is called when the grid needs to fetch rows.
-  //      * @param {GridGetRowsParams} params The parameters required to fetch the rows.
-  //      * @returns {Promise<GridGetRowsResponse>} A promise that resolves to the data of
-  //      * type [GridGetRowsResponse].
-  //      */
-  //     getRows(params: GridGetRowsParams): Promise<GridGetRowsResponse>;
-  //   }
+  const page = Number(searchParams.page) || 1
 
-  //   const customDataSource: GridDataSource = {
-  //     getRows: async (
-  //       params: GridGetRowsParams
-  //     ): Promise<GridGetRowsResponse> => {
-  //       const response = await fetch('/books');
-  //       const data = await response;
+  const result = await fetchBooksPaginated({ page: page });
 
-  //       console.log(data);
+  const { books, pageCount } = result;
 
-  //       return {
-  //         rows: {},
-  //         rowCount: {},
-  //       };
-  //     },
-  //   };
-
-  const [rows, setRows] = useState<Array<BookType>>([]);
-  const [selectedBook, setSelectedBook] = useState<BookType>();
-
-  useEffect(() => {
-    async function fetchRows() {
-      const books = await fetchBooks();
-      setRows(books);
-    }
-
-    fetchRows();
-  }, []);
-
-  useEffect(() => {
-    console.log(selectedBook);
-  }, []);
-
-  return (
-    <>
-      {!selectedBook ? (
-        <Grid container spacing={2}>
-          <Grid size={4}></Grid>
-          <Grid size={8}>
-            <Stack spacing={1} sx={{ padding: "2em" }}>
-              {rows?.map((book, i) => (
-                <Item book={book} key={i} setSelectedBook={setSelectedBook} />
-              ))}
-              {/* <Pagination count={10} /> */}
-            </Stack>
-          </Grid>
-        </Grid>
-      ) : (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-          minWidth="100vw"
-          flexDirection="column"
-        >
-          <Details book={selectedBook} setSelectedBook={setSelectedBook}/>
-        </Box>
-      )}
-    </>
-  );
-};
-export default Library;
+  return <Library books={books} page={page} pageCount={pageCount} />;
+}

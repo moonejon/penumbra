@@ -9,6 +9,7 @@ import Search from "../components/search";
 type ImportProps = object;
 
 export const initialBookData = {
+  id: 0,
   title: "",
   authors: [],
   image: "",

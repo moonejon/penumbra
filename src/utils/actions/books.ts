@@ -50,13 +50,11 @@ export async function fetchBooks() {
 }
 
 export async function fetchBooksPaginated({
-  pageSize,
-  cursor,
-  skip,
+  pageSize = 10,
+  page = 1,
 }: {
-  pageSize: number;
-  cursor: number;
-  skip: number;
+  pageSize?: number;
+  page?: number;
 }) {
   const { userId } = await auth();
 
@@ -74,25 +72,12 @@ export async function fetchBooksPaginated({
 
   const filters = {
     ownerId: user.id,
-  }
+  };
 
-  // useEffect(() => {
-
-  // })
-
-  if (cursor) {
-    const remainingPagesOfResults = await prisma.book.findMany({
-      take: pageSize ?? 10,
-      skip: skip ?? 1,
-      where: filters,
-      cursor: {
-        id: cursor,
-      },
-    });
-  } else {
-    const [firstPageOfResults, totalCount] = await prisma.$transaction([
+  const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({
       take: pageSize,
+      skip: (page - 1) * pageSize,
       where: filters,
       orderBy: {
         id: "asc",
@@ -101,8 +86,11 @@ export async function fetchBooksPaginated({
     prisma.book.count({
       where: filters,
     }),
-    ]);
-  }
+  ]);
 
   return {
+    books: results,
+    pageCount: Math.ceil(totalCount / pageSize),
+    totalCount: totalCount,
+  };
 }
