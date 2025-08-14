@@ -15,16 +15,15 @@ type LibraryProps = {
 const Library: FC<LibraryProps> = ({ books, pageCount, page }) => {
   const [selectedBook, setSelectedBook] = useState<BookType | undefined>();
 
-
   return (
     <>
       {!selectedBook ? (
-        <List
-          rows={books}
-          setSelectedBook={setSelectedBook}
-          page={page}
-          pageCount={pageCount}
-        />
+          <List
+            rows={books}
+            setSelectedBook={setSelectedBook}
+            page={page}
+            pageCount={pageCount}
+          />
       ) : (
         <Box
           display="flex"
