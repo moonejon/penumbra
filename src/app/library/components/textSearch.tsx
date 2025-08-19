@@ -2,39 +2,39 @@
 
 import { TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, FC, useState } from "react";
+import { ChangeEvent, FC } from "react";
 import _ from "lodash";
 import theme from "@/theme";
 
-type SearchProps = object;
+type TextSearchProps = {
+  filterType: "title";
+};
 
-// eslint-disable-next-line no-empty-pattern
-const Search: FC<SearchProps> = ({}) => {
-  const [searchType, setSearchType] = useState<string>("title");
-
+const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const params = new URLSearchParams(searchParams);
-
-    if (searchType === "title") params.set("title", e.target.value);
+    
+    params.set(filterType, e.target.value);
     params.delete("page");
     router.push(`library/?${params.toString()}`);
   };
 
-  return (
-    <>
+  if (filterType == "title") {
+    return (
       <TextField
         id="outlined-basic"
         variant="filled"
         label="title"
-        fullWidth
         sx={{ backgroundColor: theme.palette.background.default }}
         onChange={_.debounce(handleSearchChange, 500)}
       />
-    </>
-  );
+    );
+  }
+
+
 };
 
-export default Search;
+export default TextSearch;

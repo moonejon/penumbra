@@ -11,8 +11,6 @@ export const fetchMetadata = async (isbn: string): Promise<any> => {
 
   const result = await response.json();
 
-  console.log(result);
-
   return {
     book: result.book,
   };

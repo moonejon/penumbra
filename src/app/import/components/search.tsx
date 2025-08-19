@@ -28,7 +28,7 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     fetchMetadata(data.isbn).then((value) => {
       const { book } = value;
-      console.log( book )
+
       setBookData({
         title: book.title,
         authors: book.authors,

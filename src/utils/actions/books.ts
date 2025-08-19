@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client";
 import { BookImportDataType } from "@/shared.types";
 
 export async function importBooks(importQueue: BookImportDataType[]) {
@@ -54,11 +54,14 @@ export async function fetchBooksPaginated({
   pageSize = 10,
   page = 1,
   title,
+  authors,
 }: {
   pageSize?: number;
   page?: number;
   title?: string;
+  authors?: string;
 }) {
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -78,7 +81,12 @@ export async function fetchBooksPaginated({
     ...(title && {
       title: {
         contains: title,
-        mode: Prisma.QueryMode.insensitive
+        mode: Prisma.QueryMode.insensitive,
+      },
+    }),
+    ...(authors && {
+      authors: {
+        hasSome: authors.split(','),
       },
     }),
   };

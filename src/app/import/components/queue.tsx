@@ -17,7 +17,6 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
 
   const handleSubmit = () => {
     importBooks(books).then((value) => {
-      console.log(value)
       return value
     })
   }

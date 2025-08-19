@@ -3,27 +3,36 @@
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
 import List from "./list";
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import Details from "./details";
+import Filters from "./filters";
 
 type LibraryProps = {
   books: BookType[];
+  authors: string[];
   pageCount: number;
   page: number;
 };
 
-const Library: FC<LibraryProps> = ({ books, pageCount, page }) => {
+const Library: FC<LibraryProps> = ({ books, authors, pageCount, page }) => {
   const [selectedBook, setSelectedBook] = useState<BookType | undefined>();
 
   return (
     <>
       {!selectedBook ? (
-          <List
-            rows={books}
-            setSelectedBook={setSelectedBook}
-            page={page}
-            pageCount={pageCount}
-          />
+        <Grid container spacing={2}>
+          <Grid size={4}>
+            <Filters authors={authors} />
+          </Grid>
+          <Grid size={8}>
+            <List
+              rows={books}
+              setSelectedBook={setSelectedBook}
+              page={page}
+              pageCount={pageCount}
+            />
+          </Grid>
+        </Grid>
       ) : (
         <Box
           display="flex"
