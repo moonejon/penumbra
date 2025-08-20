@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FC, SyntheticEvent } from "react";
 
 type AutoCompleteSearchProps = {
-    filterType: 'authors',
+    filterType: 'authors' | 'subjects',
     values: string[]
 }
 

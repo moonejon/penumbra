@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
-export async function fetchAuthors() {
+export async function fetchFilters() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -20,7 +20,8 @@ export async function fetchAuthors() {
 
   return await prisma.book.findMany({
     select: {
-        authors: true
+        authors: true,
+        subjects: true
     }
   })
 }

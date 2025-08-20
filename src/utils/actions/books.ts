@@ -55,11 +55,13 @@ export async function fetchBooksPaginated({
   page = 1,
   title,
   authors,
+  subjects
 }: {
   pageSize?: number;
   page?: number;
   title?: string;
   authors?: string;
+  subjects?: string;
 }) {
 
   const { userId } = await auth();
@@ -89,7 +91,14 @@ export async function fetchBooksPaginated({
         hasSome: authors.split(','),
       },
     }),
+    ...(subjects && {
+      subjects: {
+        hasSome: subjects.split(',')
+      }
+    })
   };
+
+  console.log(filters)
 
   const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({
