@@ -17,34 +17,62 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
 
   const handleSubmit = () => {
     importBooks(books).then((value) => {
-      return value
-    })
-  }
+      return value;
+    });
+  };
 
   return (
-    <Card sx={{ minWidth: "500px", minHeight: "80vh", margin: "50px" }}>
-      <CardContent>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6">Queue</Typography>
-          <div style={{ padding: "25px" }}>
-            {books?.map((book, i) => (
-              <Item
-                title={book.title}
-                authors={book.authors}
-                key={i}
-                itemKey={i}
-                handleDelete={handleDelete}
-              />
-            ))}
-          </div>
-          <Button
-            onClick={handleSubmit}
-            size="medium"
-            sx={{ width: "30%", alignSelf: "flex-end" }}
-          >
-            Add to queue
-          </Button>
-        </div>
+    <Card
+      sx={{
+        display: "flex",
+        minWidth: "500px",
+        minHeight: "80vh",
+        margin: "50px",
+      }}
+    >
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          width: "100%",
+        }}
+      >
+        <Typography variant="h6">Queue</Typography>
+        {books?.length ? (
+          <>
+            <div style={{ padding: "25px" }}>
+              {books &&
+                books?.map((book, i) => (
+                  <Item
+                    title={book.title}
+                    authors={book.authors}
+                    key={i}
+                    itemKey={i}
+                    handleDelete={handleDelete}
+                  />
+                ))}
+            </div>
+            <Button
+              onClick={handleSubmit}
+              size="medium"
+              sx={{ width: "30%", alignSelf: "flex-end" }}
+            >
+              Add to queue
+            </Button>
+          </>
+        ) : (
+          <div
+            style={{
+              border: "2px solid grey",
+              backgroundColor: "grey",
+              opacity: "5%",
+              margin: "10px",
+              borderRadius: "5%",
+              flex: 1,
+            }}
+          ></div>
+        )}
       </CardContent>
     </Card>
   );
