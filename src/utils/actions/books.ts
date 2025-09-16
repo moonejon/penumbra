@@ -20,12 +20,52 @@ export async function importBooks(importQueue: BookImportDataType[]) {
     throw new Error("User not found in database");
   }
 
-  return await prisma.book.createMany({
-    data: importQueue.map((book) => ({
-      ...book,
-      ownerId: user.id,
-    })),
+  try {
+    const result = await prisma.book.createMany({
+      data: importQueue.map((book) => ({
+        ...book,
+        ownerId: user.id,
+      })),
+    });
+    return {
+      success: true,
+      count: result.count,
+      message: `Successfully imported ${result.count} books`,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+        count: 0,
+      };
+    }
+  }
+}
+
+export async function checkRecordExists(isbn13: string): Promise<boolean> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
   });
+
+  if (!user) {
+    throw new Error("User not found in database");
+  }
+
+  return (
+    (await prisma.book.count({
+      where: {
+        isbn13: isbn13,
+        ownerId: user.id,
+      },
+    })) > 0
+  );
 }
 
 export async function fetchBooks() {
@@ -55,7 +95,7 @@ export async function fetchBooksPaginated({
   page = 1,
   title,
   authors,
-  subjects
+  subjects,
 }: {
   pageSize?: number;
   page?: number;
@@ -63,7 +103,6 @@ export async function fetchBooksPaginated({
   authors?: string;
   subjects?: string;
 }) {
-
   const { userId } = await auth();
 
   if (!userId) {
@@ -88,17 +127,17 @@ export async function fetchBooksPaginated({
     }),
     ...(authors && {
       authors: {
-        hasSome: authors.split(','),
+        hasSome: authors.split(","),
       },
     }),
     ...(subjects && {
       subjects: {
-        hasSome: subjects.split(',')
-      }
-    })
+        hasSome: subjects.split(","),
+      },
+    }),
   };
 
-  console.log(filters)
+  console.log(filters);
 
   const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({

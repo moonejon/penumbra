@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { FC, useState } from "react";
 import { Box } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
@@ -28,7 +28,10 @@ export const initialBookImportData = {
 
 // eslint-disable-next-line no-empty-pattern
 const Import: FC<ImportProps> = ({}) => {
-  const [bookData, setBookData] = useState<BookImportDataType>(initialBookImportData);
+  const [bookData, setBookData] = useState<BookImportDataType>(
+    initialBookImportData,
+  );
+  const [loading, setLoading] = useState<boolean>(false);
   const [importQueue, setImportQueue] = useState<Array<BookImportDataType>>([]);
 
   return (
@@ -40,10 +43,11 @@ const Import: FC<ImportProps> = ({}) => {
       }}
     >
       <Box sx={{ width: "50%" }}>
-        <Search setBookData={setBookData} />
+        <Search setBookData={setBookData} setLoading={setLoading} />
         <Preview
           book={bookData}
           setBookData={setBookData}
+          loading={loading}
           importQueue={importQueue}
           setImportQueue={setImportQueue}
         />

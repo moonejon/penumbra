@@ -15,7 +15,7 @@ type BookType = {
   binding: string;
   language: string;
   titleLong: string;
-  edition: string;
+  edition: string | null;
 };
 
 type BookImportDataType = {
@@ -35,6 +35,8 @@ type BookImportDataType = {
   language: string;
   titleLong: string;
   edition: string;
+  isIncomplete?: boolean;
+  isDuplicate?: boolean;
 };
 
 export type { BookType, BookImportDataType };

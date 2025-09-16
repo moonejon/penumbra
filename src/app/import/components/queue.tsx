@@ -16,8 +16,17 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   };
 
   const handleSubmit = () => {
-    importBooks(books).then((value) => {
-      return value;
+    const cleanedBooks: BookImportDataType[] = books.map((book) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { isIncomplete, isDuplicate, ...bookData } = book;
+      return bookData;
+    });
+    importBooks(cleanedBooks).then((result) => {
+      if (result?.success) {
+        setBooks([]);
+      } else {
+        console.log("an error has occurred");
+      }
     });
   };
 
@@ -47,6 +56,7 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
                   <Item
                     title={book.title}
                     authors={book.authors}
+                    isIncomplete={book.isIncomplete || false}
                     key={i}
                     itemKey={i}
                     handleDelete={handleDelete}
@@ -58,7 +68,7 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
               size="medium"
               sx={{ width: "30%", alignSelf: "flex-end" }}
             >
-              Add to queue
+              Add to library
             </Button>
           </>
         ) : (

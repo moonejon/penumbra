@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   IconButton,
+  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -61,10 +62,14 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
                 width: "200px",
               }}
             >
-              <img
-                src={image}
-                style={{ maxHeight: "200px", objectFit: "fill" }}
-              />
+              {image ? (
+                <img
+                  src={image}
+                  style={{ maxHeight: "200px", objectFit: "fill" }}
+                />
+              ) : (
+                <Skeleton variant="rectangular" width={100} height={150} />
+              )}
               <span style={{ display: "inline-flex", margin: "0 auto" }}>
                 <Typography variant="caption" fontWeight="1000">
                   {binding} * {pageCount} pgs

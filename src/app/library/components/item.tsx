@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -11,21 +12,29 @@ import {
 type ItemProps = {
   book: BookType;
   key: number;
-  setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>
+  setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
 };
 
 const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
-  const { title, authors, image, publisher, datePublished, binding } =
-    book;
+  const {
+    title,
+    authors,
+    image = undefined,
+    publisher,
+    datePublished,
+    binding,
+  } = book;
 
   return (
     <Card
       key={key}
-      sx={{ maxHeight: "200px", width: "auto", cursor: 'pointer', 
-        '&:hover': {
-          boxShadow: '5px 5px grey'
-
-        }
+      sx={{
+        maxHeight: "200px",
+        width: "auto",
+        cursor: "pointer",
+        "&:hover": {
+          boxShadow: "5px 5px grey",
+        },
       }}
       onClick={() => setSelectedBook(book)}
     >
@@ -52,10 +61,14 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
                 width: "120px",
               }}
             >
-              <img
-                src={image}
-                style={{ maxHeight: "160px", objectFit: "fill" }}
-              />
+              {image ? (
+                <img
+                  src={image}
+                  style={{ maxHeight: "160px", objectFit: "fill" }}
+                />
+              ) : (
+                <Skeleton variant="rectangular" width={100} height={160} />
+              )}
             </Box>
             <Stack spacing={8}>
               <Stack>
@@ -66,23 +79,23 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
                   {authors.join(` * `)}
                 </Typography>
               </Stack>
-                <Stack>
-                  <div style={{ display: "inline-flex", gap: ".5em" }}>
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Publisher:
-                    </Typography>
-                    <Typography variant="subtitle2">
-                      {publisher}, {datePublished}
-                    </Typography>
-                  </div>
-                  <div style={{ display: "inline-flex", gap: ".5em" }}>
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Binding:
-                    </Typography>
-                    <Typography variant="subtitle2">{binding}</Typography>
-                  </div>
-                </Stack>
+              <Stack>
+                <div style={{ display: "inline-flex", gap: ".5em" }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Publisher:
+                  </Typography>
+                  <Typography variant="subtitle2">
+                    {publisher}, {datePublished}
+                  </Typography>
+                </div>
+                <div style={{ display: "inline-flex", gap: ".5em" }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Binding:
+                  </Typography>
+                  <Typography variant="subtitle2">{binding}</Typography>
+                </div>
               </Stack>
+            </Stack>
           </Stack>
         </Stack>
       </CardContent>
