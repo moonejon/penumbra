@@ -16,35 +16,73 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   };
 
   const handleSubmit = () => {
-    importBooks(books).then((value) => {
-      return value
-    })
-  }
+    const cleanedBooks: BookImportDataType[] = books.map((book) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { isIncomplete, isDuplicate, ...bookData } = book;
+      return bookData;
+    });
+    importBooks(cleanedBooks).then((result) => {
+      if (result?.success) {
+        setBooks([]);
+      } else {
+        console.log("an error has occurred");
+      }
+    });
+  };
 
   return (
-    <Card sx={{ minWidth: "500px", minHeight: "80vh", margin: "50px" }}>
-      <CardContent>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6">Queue</Typography>
-          <div style={{ padding: "25px" }}>
-            {books?.map((book, i) => (
-              <Item
-                title={book.title}
-                authors={book.authors}
-                key={i}
-                itemKey={i}
-                handleDelete={handleDelete}
-              />
-            ))}
-          </div>
-          <Button
-            onClick={handleSubmit}
-            size="medium"
-            sx={{ width: "30%", alignSelf: "flex-end" }}
-          >
-            Add to queue
-          </Button>
-        </div>
+    <Card
+      sx={{
+        display: "flex",
+        minWidth: "500px",
+        minHeight: "80vh",
+        margin: "50px",
+      }}
+    >
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          width: "100%",
+        }}
+      >
+        <Typography variant="h6">Queue</Typography>
+        {books?.length ? (
+          <>
+            <div style={{ padding: "25px" }}>
+              {books &&
+                books?.map((book, i) => (
+                  <Item
+                    title={book.title}
+                    authors={book.authors}
+                    isIncomplete={book.isIncomplete || false}
+                    key={i}
+                    itemKey={i}
+                    handleDelete={handleDelete}
+                  />
+                ))}
+            </div>
+            <Button
+              onClick={handleSubmit}
+              size="medium"
+              sx={{ width: "30%", alignSelf: "flex-end" }}
+            >
+              Add to library
+            </Button>
+          </>
+        ) : (
+          <div
+            style={{
+              border: "2px solid grey",
+              backgroundColor: "grey",
+              opacity: "5%",
+              margin: "10px",
+              borderRadius: "5%",
+              flex: 1,
+            }}
+          ></div>
+        )}
       </CardContent>
     </Card>
   );

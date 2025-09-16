@@ -34,7 +34,7 @@ model Book {
   image         String
   imageOriginal String
   publisher     String
-  edition       String
+  edition       String?
   pageCount     Int
   datePublished String
   subjects      String[]

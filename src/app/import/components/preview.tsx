@@ -1,11 +1,19 @@
 import { Dispatch, FC, SetStateAction } from "react";
-import { Button, Card, CardContent, Typography } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
 
 interface BookProps {
   book: BookImportDataType;
   setBookData: Dispatch<SetStateAction<BookImportDataType>>;
+  loading: boolean;
   importQueue: BookImportDataType[];
   setImportQueue: Dispatch<SetStateAction<BookImportDataType[]>>;
 }
@@ -13,6 +21,7 @@ interface BookProps {
 const Preview: FC<BookProps> = ({
   book,
   setBookData,
+  loading,
   importQueue,
   setImportQueue,
 }) => {
@@ -46,7 +55,9 @@ const Preview: FC<BookProps> = ({
       binding: book.binding,
       language: book.language,
       titleLong: book.titleLong,
-      edition: book.edition || initialBookImportData.edition
+      edition: book.edition || initialBookImportData.edition,
+      isIncomplete: book.isIncomplete,
+      isDuplicate: book.isDuplicate,
     });
 
     setImportQueue(newImportQueue);
@@ -58,24 +69,54 @@ const Preview: FC<BookProps> = ({
       <CardContent>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">Preview</Typography>
-          {(book !== initialBookImportData) && (
+          {book !== initialBookImportData && !loading && (
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-              <div style={{ display: "flex", flexDirection: "column", margin: "25px 10px 0"}}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  margin: "25px 10px 0",
+                }}
+              >
+                {book.isIncomplete && (
+                  <Alert
+                    variant="outlined"
+                    severity="warning"
+                    sx={{ marginBottom: "1em" }}
+                  >
+                    Incomplete data was returned. Consider using the ISBN number
+                    found on the title page for more specific details.
+                  </Alert>
+                )}
+                {book.isDuplicate && (
+                  <Alert
+                    variant="outlined"
+                    severity="warning"
+                    sx={{ marginBottom: "1em" }}
+                  >
+                    A copy of this book already exists in your library. This
+                    will create a duplicate copy. Is this intentional?
+                  </Alert>
+                )}
                 <div style={{ display: "inline-flex", gap: "15px" }}>
                   {book?.imageOriginal ? (
                     <img src={book?.imageOriginal} height="250px" />
                   ) : (
-                    <div style={{ height: "250px" }} />
+                    <Skeleton variant="rectangular" width={150} height={250} />
                   )}
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <Typography gutterBottom variant="h6" fontWeight={700}>
                       {title}
                     </Typography>
                     <Typography gutterBottom variant="subtitle2">
-                      {authors.join(', ')}
+                      {authors.join(", ")}
                     </Typography>
-                    <Typography gutterBottom sx={{ marginTop: "2em" }} variant="caption">
-                      {binding} ✧ {datePublished.toString().split('-')[0]}
+                    <Typography
+                      gutterBottom
+                      sx={{ marginTop: "2em" }}
+                      variant="caption"
+                    >
+                      {binding} ✧ {datePublished?.toString().split("-")[0]}
                     </Typography>
                   </div>
                 </div>

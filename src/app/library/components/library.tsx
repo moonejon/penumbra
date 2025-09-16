@@ -15,8 +15,14 @@ type LibraryProps = {
   page: number;
 };
 
-const Library: FC<LibraryProps> = ({ books, authors, subjects, pageCount, page }) => {
-  const [selectedBook, setSelectedBook] = useState<BookType | undefined>();
+const Library: FC<LibraryProps> = ({
+  books,
+  authors,
+  subjects,
+  pageCount,
+  page,
+}) => {
+  const [selectedBook, setSelectedBook] = useState<BookType>();
 
   return (
     <>

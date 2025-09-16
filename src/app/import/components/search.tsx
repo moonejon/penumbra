@@ -11,23 +11,58 @@ import {
 import { BookImportDataType } from "@/shared.types";
 import { fetchMetadata } from "../../../utils/actions/isbndb/fetchMetadata";
 import { initialBookImportData } from "./import";
+import { checkRecordExists } from "@/utils/actions/books";
 
 type SearchProps = {
   setBookData: Dispatch<SetStateAction<BookImportDataType>>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
 };
 
 type Inputs = {
   isbn: string;
 };
 
-const Search: FC<SearchProps> = ({ setBookData }) => {
+const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
   const { control, reset, handleSubmit, formState } = useForm<Inputs>({
     defaultValues: { isbn: "" },
   });
 
+  const checkForDuplicates = async (isbn13: string) => {
+    return await checkRecordExists(isbn13);
+  };
+
+  const requiredFields: string[] = [
+    "title",
+    "image",
+    "image_original",
+    "publisher",
+    "synopsis",
+    "pages",
+    "date_published",
+    "authors",
+    "subjects",
+    "isbn10",
+    "isbn13",
+    "binding",
+    "language",
+    "title_long",
+  ];
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    fetchMetadata(data.isbn).then((value) => {
+    setLoading(true);
+    fetchMetadata(data.isbn).then(async (value) => {
       const { book } = value;
+
+      const isIncomplete: boolean = requiredFields.some((field) => {
+        const value = book[field];
+
+        if (value == null || value === "") return true;
+
+        if (Array.isArray(value) && value.length === 0) return true;
+
+        return false;
+      });
+      const isDuplicate: boolean = await checkForDuplicates(book.isbn13);
 
       setBookData({
         title: book.title,
@@ -45,7 +80,10 @@ const Search: FC<SearchProps> = ({ setBookData }) => {
         language: book.language,
         titleLong: book.title_long,
         edition: book.edition || initialBookImportData.edition,
+        isIncomplete: isIncomplete,
+        isDuplicate: isDuplicate,
       });
+      setLoading(false);
     });
   };
 

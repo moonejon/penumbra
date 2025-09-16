@@ -5,12 +5,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import { FC } from "react";
 
 type GridProps = {
-    rows: BookType[];
+  rows: BookType[];
 };
 
-const Grid: FC<GridProps> = ({rows}) => {
-
-
+const Grid: FC<GridProps> = ({ rows }) => {
   const colNames = [
     "title",
     "authors",
@@ -18,6 +16,7 @@ const Grid: FC<GridProps> = ({rows}) => {
     "publisher",
     "pageCount",
     "datePublished",
+    "isbn13",
   ];
 
   const columns = colNames.map((colName) => {
@@ -27,4 +26,4 @@ const Grid: FC<GridProps> = ({rows}) => {
   return <DataGrid columns={columns} rows={rows} pagination />;
 };
 
-export default Grid
+export default Grid;
