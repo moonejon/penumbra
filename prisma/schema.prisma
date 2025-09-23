@@ -40,4 +40,6 @@ model Book {
   subjects      String[]
   authors       String[]
   binding       String
+  isPublic      Boolean  @default(true)
+  visibility    String   @default("public")
 }
