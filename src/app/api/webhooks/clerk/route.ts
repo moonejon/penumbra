@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     "svix-signature": headerPayload.get("svix-signature")!,
   }) as WebhookEvent;
 
-   if (event.type === "user.created") {
+  if (event.type === "user.created") {
     const { id, email_addresses, first_name, last_name } = event.data;
     await prisma.user.upsert({
       where: { clerkId: id },
@@ -29,6 +29,6 @@ export async function POST(req: Request) {
       },
     });
   }
-  
+
   return new Response("OK");
 }
