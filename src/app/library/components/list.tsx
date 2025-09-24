@@ -2,7 +2,7 @@
 
 import { BookType } from "@/shared.types";
 import { Dispatch, FC, SetStateAction } from "react";
-import { Pagination, Stack } from "@mui/material";
+import { Box, Pagination, Stack, useMediaQuery } from "@mui/material";
 import Item from "./item";
 import { useRouter, useSearchParams } from "next/navigation";
 import theme from "@/theme";
@@ -24,16 +24,18 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
     router.push(`library/?${params.toString()}`);
   };
 
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Stack spacing={1} sx={{ padding: "2em" }}>
       {/* <Search /> */}
       {rows?.map((book, i) => (
         <Item book={book} key={i} setSelectedBook={setSelectedBook} />
       ))}
-      <span style={{ width: "100%", alignContent: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
         <Pagination
           variant="outlined"
-          size="large"
+          size={isMobile ? "small" : "large"}
           shape="rounded"
           count={pageCount}
           page={page}
@@ -44,7 +46,7 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
           }}
           onChange={handlePageChange}
         />
-      </span>
+      </Box>
     </Stack>
   );
 };

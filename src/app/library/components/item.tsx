@@ -38,7 +38,11 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
       }}
       onClick={() => setSelectedBook(book)}
     >
-      <CardContent>
+      <CardContent
+        sx={{
+          paddingLeft: { xs: 1, md: 2 },
+        }}
+      >
         <Stack
           direction="row"
           spacing={2}
@@ -55,44 +59,65 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
           >
             <Box
               sx={{
-                display: "flex",
+                display: { xs: "none", sm: "flex" },
                 alignItems: "center",
                 justifyContent: "center",
                 width: "120px",
               }}
             >
               {image ? (
-                <img
+                <Box
+                  component="img"
                   src={image}
-                  style={{ maxHeight: "160px", objectFit: "fill" }}
+                  sx={{
+                    maxHeight: { xs: "80px", md: "160px" },
+                    objectFit: "fill",
+                  }}
                 />
               ) : (
                 <Skeleton variant="rectangular" width={100} height={160} />
               )}
             </Box>
-            <Stack spacing={8}>
+            <Stack
+              spacing={{ xs: 2, md: 7 }}
+              sx={{ marginLeft: { xs: "1em !important" } }}
+            >
               <Stack>
                 <Typography variant="h6" fontWeight={1000}>
                   {title}
                 </Typography>
                 <Typography variant="subtitle2">
-                  {authors.join(` * `)}
+                  {authors.join(`, `)}
                 </Typography>
               </Stack>
               <Stack>
                 <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
+                  <Typography variant="caption" fontWeight={700}>
                     Publisher:
                   </Typography>
-                  <Typography variant="subtitle2">
-                    {publisher}, {datePublished}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      maxWidth: "200px",
+                    }}
+                  >
+                    {publisher}
                   </Typography>
                 </div>
                 <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
+                  <Typography variant="caption" fontWeight={700}>
+                    Date Published:
+                  </Typography>
+                  <Typography variant="caption">{datePublished}</Typography>
+                </div>
+                <div style={{ display: "inline-flex", gap: ".5em" }}>
+                  <Typography variant="caption" fontWeight={700}>
                     Binding:
                   </Typography>
-                  <Typography variant="subtitle2">{binding}</Typography>
+                  <Typography variant="caption">{binding}</Typography>
                 </div>
               </Stack>
             </Stack>
