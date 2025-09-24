@@ -121,6 +121,7 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
                   <TextField
                     label="Enter ISBN number"
                     variant="outlined"
+                    type="number"
                     {...field}
                   />
                 )}
