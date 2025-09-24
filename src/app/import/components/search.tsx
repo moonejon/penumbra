@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   Container,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -97,11 +98,11 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
     <Card
       sx={{
         minWidth: "40%",
-        margin: "50px",
+        margin: { xs: "25px", md: "50px" },
       }}
     >
       <CardContent>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <Stack direction="column">
           <Typography variant="h6">Search</Typography>
           <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
             <Container
@@ -134,7 +135,7 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
               </Button>
             </Container>
           </form>
-        </div>
+        </Stack>
       </CardContent>
     </Card>
   );

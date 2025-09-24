@@ -34,9 +34,9 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
     <Card
       sx={{
         display: "flex",
-        minWidth: "500px",
-        minHeight: "80vh",
-        margin: "50px",
+        minWidth: "200px",
+        minHeight: "90vh",
+        margin: { xs: "25px", md: "50px" },
       }}
     >
       <CardContent
@@ -47,26 +47,27 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
           width: "100%",
         }}
       >
-        <Typography variant="h6">Queue</Typography>
+        <Typography variant="h6" sx={{ marginBottom: "1em" }}>
+          Queue
+        </Typography>
         {books?.length ? (
           <>
-            <div style={{ padding: "25px" }}>
-              {books &&
-                books?.map((book, i) => (
-                  <Item
-                    title={book.title}
-                    authors={book.authors}
-                    isIncomplete={book.isIncomplete || false}
-                    key={i}
-                    itemKey={i}
-                    handleDelete={handleDelete}
-                  />
-                ))}
-            </div>
+            {books &&
+              books?.map((book, i) => (
+                <Item
+                  title={book.title}
+                  authors={book.authors}
+                  isIncomplete={book.isIncomplete || false}
+                  key={i}
+                  itemKey={i}
+                  handleDelete={handleDelete}
+                />
+              ))}
             <Button
               onClick={handleSubmit}
               size="medium"
-              sx={{ width: "30%", alignSelf: "flex-end" }}
+              sx={{ width: "50%", alignSelf: "flex-end" }}
+              variant="contained"
             >
               Add to library
             </Button>

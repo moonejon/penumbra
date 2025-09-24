@@ -1,10 +1,11 @@
 "use client";
 import { FC, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, Stack, useMediaQuery } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import Preview from "./preview";
 import Queue from "./queue";
 import Search from "./search";
+import theme from "@/theme";
 
 type ImportProps = object;
 
@@ -34,15 +35,11 @@ const Import: FC<ImportProps> = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [importQueue, setImportQueue] = useState<Array<BookImportDataType>>([]);
 
+  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-      }}
-    >
-      <Box sx={{ width: "50%" }}>
+    <Stack direction={isMobile ? "column" : "row"}>
+      <Box sx={{ width: { xs: "100%", md: "50%" } }}>
         <Search setBookData={setBookData} setLoading={setLoading} />
         <Preview
           book={bookData}
@@ -52,10 +49,10 @@ const Import: FC<ImportProps> = ({}) => {
           setImportQueue={setImportQueue}
         />
       </Box>
-      <Box sx={{ width: "50%" }}>
+      <Box sx={{ width: { xs: "100%", md: "50%" } }}>
         <Queue books={importQueue} setBooks={setImportQueue} />
       </Box>
-    </div>
+    </Stack>
   );
 };
 

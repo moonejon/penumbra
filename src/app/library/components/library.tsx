@@ -28,10 +28,10 @@ const Library: FC<LibraryProps> = ({
     <>
       {!selectedBook ? (
         <Grid container spacing={2}>
-          <Grid size={4}>
+          <Grid size={{ xs: 12, md: 4 }} order={{ xs: 1, md: 1 }}>
             <Filters authors={authors} subjects={subjects} />
           </Grid>
-          <Grid size={8}>
+          <Grid size={{ xs: 12, md: 8 }} order={{ xs: 2, md: 2 }}>
             <List
               rows={books}
               setSelectedBook={setSelectedBook}

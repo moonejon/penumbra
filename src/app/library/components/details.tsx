@@ -7,10 +7,12 @@ import {
   Skeleton,
   Stack,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import parse from "html-react-parser";
 import { Dispatch, FC, SetStateAction } from "react";
+import theme from "@/theme";
 
 type BookProps = {
   book: BookType;
@@ -28,6 +30,10 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
     synopsis,
     pageCount,
   } = book;
+
+  const isMobilePortrait: boolean = useMediaQuery(
+    `${theme.breakpoints.down("sm")} and (orientation: portrait)`,
+  );
 
   return (
     <Card
@@ -56,7 +62,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
           >
             <Box
               sx={{
-                display: "flex",
+                display: isMobilePortrait ? "none" : "flex",
                 alignItems: "top",
                 flexDirection: "column",
                 width: "200px",
@@ -70,13 +76,23 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
               ) : (
                 <Skeleton variant="rectangular" width={100} height={150} />
               )}
-              <span style={{ display: "inline-flex", margin: "0 auto" }}>
-                <Typography variant="caption" fontWeight="1000">
-                  {binding} * {pageCount} pgs
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                  margin: "1em auto",
+                }}
+              >
+                <Typography variant="caption" fontWeight="600">
+                  {pageCount} pgs
                 </Typography>
-              </span>
+              </Box>
             </Box>
-            <Stack spacing={2}>
+            <Stack
+              spacing={{ xs: 1, sm: 2 }}
+              sx={{ marginLeft: { xs: "0 !important", sm: "2em !important" } }}
+            >
               <Stack>
                 <Typography variant="h6" fontWeight={1000}>
                   {title}

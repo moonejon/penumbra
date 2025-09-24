@@ -5,10 +5,13 @@ import {
   Card,
   CardContent,
   Skeleton,
+  Stack,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
+import theme from "@/theme";
 
 interface BookProps {
   book: BookImportDataType;
@@ -64,20 +67,16 @@ const Preview: FC<BookProps> = ({
     setBookData(initialBookImportData);
   };
 
+  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Card sx={{ margin: "50px" }}>
+    <Card sx={{ margin: { xs: "25px", md: "50px" } }}>
       <CardContent>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6">Preview</Typography>
+        <Stack direction="column" spacing={2}>
+          <Typography variant={"h6"}>Preview</Typography>
           {book !== initialBookImportData && !loading && (
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  margin: "25px 10px 0",
-                }}
-              >
+              <Stack direction="column" spacing={2}>
                 {book.isIncomplete && (
                   <Alert
                     variant="outlined"
@@ -93,44 +92,59 @@ const Preview: FC<BookProps> = ({
                     variant="outlined"
                     severity="warning"
                     sx={{ marginBottom: "1em" }}
+                    icon={false}
                   >
                     A copy of this book already exists in your library. This
                     will create a duplicate copy. Is this intentional?
                   </Alert>
                 )}
-                <div style={{ display: "inline-flex", gap: "15px" }}>
+                <Stack direction="row" spacing={2}>
                   {book?.imageOriginal ? (
-                    <img src={book?.imageOriginal} height="250px" />
+                    <img
+                      src={book?.imageOriginal}
+                      height={isMobile ? "100px" : "250px"}
+                    />
                   ) : (
                     <Skeleton variant="rectangular" width={150} height={250} />
                   )}
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography gutterBottom variant="h6" fontWeight={700}>
+                    <Typography
+                      gutterBottom
+                      variant={isMobile ? "subtitle2" : "h6"}
+                      fontWeight={700}
+                    >
                       {title}
                     </Typography>
-                    <Typography gutterBottom variant="subtitle2">
+                    <Typography
+                      gutterBottom
+                      variant={isMobile ? "caption" : "subtitle2"}
+                    >
                       {authors.join(", ")}
                     </Typography>
                     <Typography
                       gutterBottom
-                      sx={{ marginTop: "2em" }}
+                      sx={{ marginTop: "1em" }}
                       variant="caption"
                     >
                       {binding} ✧ {datePublished?.toString().split("-")[0]}
                     </Typography>
                   </div>
-                </div>
+                </Stack>
                 <Button
                   type="submit"
                   size="medium"
-                  sx={{ width: "30%", alignSelf: "flex-end" }}
+                  variant="contained"
+                  sx={{
+                    width: { xs: "100%", md: "40%" },
+                    alignSelf: "flex-end",
+                  }}
                 >
                   Add to queue
                 </Button>
-              </div>
+              </Stack>
             </form>
           )}
-        </div>
+        </Stack>
       </CardContent>
     </Card>
   );
