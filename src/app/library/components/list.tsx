@@ -24,7 +24,7 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
     router.push(`library/?${params.toString()}`);
   };
 
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Stack spacing={1} sx={{ padding: "2em" }}>
