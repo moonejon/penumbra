@@ -6,6 +6,7 @@ import {
   SignUpButton,
   SignedOut,
   SignedIn,
+  useUser,
 } from "@clerk/nextjs";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -30,6 +31,7 @@ export const Navbar = () => {
   const pages = ["Import", "Library"];
   const settings = ["Dashboard"];
 
+  const { isSignedIn, isLoaded } = useUser();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
@@ -167,17 +169,63 @@ export const Navbar = () => {
                 </MenuItem>
               ))}
             </Menu>
-            <SignedOut>
-              <SignInButton>
-                <Button variant="outlined">Sign In</Button>
-              </SignInButton>
-              <SignUpButton>
-                <Button variant="outlined">Sign Up</Button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
+            {!isLoaded ? (
+              // Loading state - show nothing while Clerk initializes
+              null
+            ) : isSignedIn ? (
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            ) : (
+              <SignedOut>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    alignItems: "center",
+                  }}
+                >
+                  <SignUpButton>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        px: 3,
+                        py: 1,
+                        fontWeight: 600,
+                        minWidth: "100px",
+                        textTransform: "none",
+                        "&:hover": {
+                          transform: "translateY(-1px)",
+                          boxShadow: 2,
+                        },
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      Sign Up
+                    </Button>
+                  </SignUpButton>
+                  <SignInButton>
+                    <Button
+                      variant="text"
+                      color="inherit"
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        textTransform: "none",
+                        opacity: 0.9,
+                        "&:hover": {
+                          opacity: 1,
+                          backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        },
+                      }}
+                    >
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                </Box>
+              </SignedOut>
+            )}
           </Box>
         </Toolbar>
       </Container>
