@@ -1,0 +1,59 @@
+{
+  "project": {
+    "name": "Penumbra",
+    "description": "Personal library management application with ISBN-based book importing and advanced filtering",
+    "type": "fullstack-web-app"
+  },
+  "techStack": {
+    "frontend": ["Next.js 15", "React 19", "TypeScript", "Material-UI v7"],
+    "backend": ["Next.js API Routes", "Prisma ORM", "PostgreSQL"],
+    "authentication": "Clerk",
+    "deployment": "Vercel"
+  },
+  "conventions": {
+    "componentStructure": "Feature-based organization in /src/app/[feature]/components/",
+    "serverActions": "Located in /src/utils/actions/",
+    "styling": "Material-UI with dark theme (src/theme.ts)",
+    "typeDefinitions": "shared.types.ts for cross-boundary types",
+    "serverComponents": "Use Server Components by default, Client Components only when needed"
+  },
+  "importantPaths": {
+    "schema": "prisma/schema.prisma",
+    "theme": "src/theme.ts",
+    "middleware": "src/middleware.ts",
+    "types": "src/shared.types.ts",
+    "actions": "src/utils/actions/",
+    "components": "src/app/*/components/"
+  },
+  "development": {
+    "packageManager": "npm",
+    "devServer": "npm run dev",
+    "build": "npm run build",
+    "databaseCommands": {
+      "migrate": "npx prisma migrate dev",
+      "studio": "npx prisma studio",
+      "generate": "npx prisma generate"
+    }
+  },
+  "codeStyle": {
+    "quotes": "single",
+    "semi": true,
+    "indentation": "2 spaces",
+    "typescript": "strict mode"
+  },
+  "bestPractices": [
+    "Always filter data by user ID for multi-tenant isolation",
+    "Use Prisma transactions for consistency when needed",
+    "Implement proper error handling in server actions",
+    "Follow Material-UI theming for consistent UI",
+    "Use TypeScript types for all props and function parameters",
+    "Validate user input on both client and server side",
+    "Keep components small and focused (single responsibility)",
+    "Use Server Components for data fetching, Client Components for interactivity"
+  ],
+  "subagents": {
+    "available": ["frontend-dev", "ux-designer", "fullstack-dev", "debugger"],
+    "description": "Specialized subagents for different development tasks - see subagents.json for details",
+    "usage": "Mention the subagent name in your request (e.g., 'Use the frontend-dev subagent to...')"
+  }
+}
