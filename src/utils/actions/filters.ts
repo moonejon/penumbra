@@ -13,7 +13,7 @@ export async function fetchFilters() {
     where: userId
       ? {
           OR: [
-            { isPublic: true },
+            { visibility: "PUBLIC" },
             {
               owner: {
                 clerkId: userId,
@@ -21,7 +21,7 @@ export async function fetchFilters() {
             },
           ],
         }
-      : { isPublic: true },
+      : { visibility: "PUBLIC" },
     select: {
       authors: true,
       subjects: true,

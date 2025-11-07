@@ -126,14 +126,14 @@ export async function fetchBooksPaginated({
     // Show public books OR user's own books if authenticated
     OR: userId
       ? [
-          { isPublic: true },
+          { visibility: "PUBLIC" },
           {
             owner: {
               clerkId: userId,
             },
           },
         ]
-      : [{ isPublic: true }],
+      : [{ visibility: "PUBLIC" }],
   };
 
   console.log(filters);
