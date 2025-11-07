@@ -103,19 +103,8 @@ export async function fetchBooksPaginated({
   authors?: string;
   subjects?: string;
 }) {
-  // const { userId } = await auth();
-
-  // if (!userId) {
-  //   throw new Error("User not authenticated");
-  // }
-
-  // const user = await prisma.user.findUnique({
-  //   where: { clerkId: userId },
-  // });
-
-  // if (!user) {
-  //   throw new Error("User not found in database");
-  // }
+  // Get current user (optional - library can be viewed without auth)
+  const { userId } = await auth();
 
   const filters = {
     ...(title && {
@@ -134,9 +123,17 @@ export async function fetchBooksPaginated({
         hasSome: subjects.split(","),
       },
     }),
-    isPublic: {
-      equals: true,
-    },
+    // Show public books OR user's own books if authenticated
+    OR: userId
+      ? [
+          { isPublic: true },
+          {
+            owner: {
+              clerkId: userId,
+            },
+          },
+        ]
+      : [{ isPublic: true }],
   };
 
   console.log(filters);
