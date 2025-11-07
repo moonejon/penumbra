@@ -13,6 +13,13 @@ datasource db {
   url      = env("DEWEY_DB_DATABASE_URL")
 }
 
+enum BookVisibility {
+  PRIVATE // Only owner can see
+  PUBLIC  // Anyone can see in public library
+  FRIENDS // Future: only friends can see
+  UNLISTED // Future: accessible via direct link only
+}
+
 model User {
   id      Int     @id @default(autoincrement())
   clerkId String  @unique
@@ -22,11 +29,11 @@ model User {
 }
 
 model Book {
-  id            Int      @id @default(autoincrement())
-  owner         User     @relation(fields: [ownerId], references: [id])
+  id            Int            @id @default(autoincrement())
+  owner         User           @relation(fields: [ownerId], references: [id])
   ownerId       Int
-  isbn10        String   @unique @db.VarChar(10)
-  isbn13        String   @unique @db.VarChar(13)
+  isbn10        String         @unique @db.VarChar(10)
+  isbn13        String         @unique @db.VarChar(13)
   title         String
   titleLong     String
   language      String
@@ -40,6 +47,5 @@ model Book {
   subjects      String[]
   authors       String[]
   binding       String
-  isPublic      Boolean  @default(true)
-  visibility    String   @default("public")
+  visibility    BookVisibility @default(PUBLIC)
 }

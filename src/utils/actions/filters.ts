@@ -1,24 +1,16 @@
 "use server";
 
-// import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getViewableBookFilter } from "@/utils/permissions";
 
 export async function fetchFilters() {
-  // const { userId } = await auth();
-
-  // if (!userId) {
-  //   throw new Error("User not authenticated");
-  // }
-
-  // const user = await prisma.user.findUnique({
-  //   where: { clerkId: userId },
-  // });
-
-  // if (!user) {
-  //   throw new Error("User not found in database");
-  // }
+  // Get viewable book filter (handles auth automatically)
+  // Only returns filters from public books OR user's own books if authenticated
+  // This prevents leaking private book metadata
+  const visibilityFilter = await getViewableBookFilter();
 
   return await prisma.book.findMany({
+    where: visibilityFilter,
     select: {
       authors: true,
       subjects: true,
