@@ -2,10 +2,9 @@
 
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
-import List from "./list";
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import Details from "./details";
-import Filters from "./filters";
+import Constellation from "./constellation";
 
 type LibraryProps = {
   books: BookType[];
@@ -17,29 +16,13 @@ type LibraryProps = {
 
 const Library: FC<LibraryProps> = ({
   books,
-  authors,
-  subjects,
-  pageCount,
-  page,
 }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
 
   return (
     <>
       {!selectedBook ? (
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 4 }} order={{ xs: 1, md: 1 }}>
-            <Filters authors={authors} subjects={subjects} />
-          </Grid>
-          <Grid size={{ xs: 12, md: 8 }} order={{ xs: 2, md: 2 }}>
-            <List
-              rows={books}
-              setSelectedBook={setSelectedBook}
-              page={page}
-              pageCount={pageCount}
-            />
-          </Grid>
-        </Grid>
+        <Constellation books={books} onBookSelect={setSelectedBook} />
       ) : (
         <Box
           display="flex"
@@ -48,6 +31,9 @@ const Library: FC<LibraryProps> = ({
           minHeight="100vh"
           minWidth="100vw"
           flexDirection="column"
+          sx={{
+            background: "#2d2d2d",
+          }}
         >
           <Details book={selectedBook} setSelectedBook={setSelectedBook} />
         </Box>
