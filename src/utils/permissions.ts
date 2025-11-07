@@ -81,6 +81,8 @@ export async function checkBookViewPermission(
     throw new Error("Book not found");
   }
 
+  // For unauthenticated users, userId will be null and isOwner will always be false
+  // This is intentional - only authenticated users who own the book can be owners
   const isOwner = userId === book.owner.clerkId;
 
   // Permission rules
@@ -90,8 +92,8 @@ export async function checkBookViewPermission(
     book.visibility === BookVisibility.UNLISTED; // Future: accessible via direct link
 
   return {
-    userId,
-    isOwner,
+    userId, // May be null for unauthenticated users
+    isOwner, // Always false when userId is null
     canView,
     canEdit: isOwner,
     canDelete: isOwner,
