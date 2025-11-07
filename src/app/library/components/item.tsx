@@ -32,9 +32,6 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
         maxHeight: "200px",
         width: "auto",
         cursor: "pointer",
-        "&:hover": {
-          boxShadow: "5px 5px grey",
-        },
       }}
       onClick={() => setSelectedBook(book)}
     >
