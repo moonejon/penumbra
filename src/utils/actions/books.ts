@@ -1,24 +1,12 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { BookImportDataType } from "@/shared.types";
+import { getCurrentUser, getViewableBookFilter } from "@/utils/permissions";
 
 export async function importBooks(importQueue: BookImportDataType[]) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
-
-  if (!user) {
-    throw new Error("User not found in database");
-  }
+  const user = await getCurrentUser();
 
   try {
     const result = await prisma.book.createMany({
@@ -44,19 +32,7 @@ export async function importBooks(importQueue: BookImportDataType[]) {
 }
 
 export async function checkRecordExists(isbn13: string): Promise<boolean> {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
-
-  if (!user) {
-    throw new Error("User not found in database");
-  }
+  const user = await getCurrentUser();
 
   return (
     (await prisma.book.count({
@@ -69,19 +45,7 @@ export async function checkRecordExists(isbn13: string): Promise<boolean> {
 }
 
 export async function fetchBooks() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
-
-  if (!user) {
-    throw new Error("User not found in database");
-  }
+  const user = await getCurrentUser();
 
   return await prisma.book.findMany({
     where: {
@@ -103,10 +67,11 @@ export async function fetchBooksPaginated({
   authors?: string;
   subjects?: string;
 }) {
-  // Get current user (optional - library can be viewed without auth)
-  const { userId } = await auth();
+  // Get viewable book filter (handles auth automatically)
+  const visibilityFilter = await getViewableBookFilter();
 
   const filters = {
+    ...visibilityFilter,
     ...(title && {
       title: {
         contains: title,
@@ -123,17 +88,6 @@ export async function fetchBooksPaginated({
         hasSome: subjects.split(","),
       },
     }),
-    // Show public books OR user's own books if authenticated
-    OR: userId
-      ? [
-          { visibility: "PUBLIC" },
-          {
-            owner: {
-              clerkId: userId,
-            },
-          },
-        ]
-      : [{ visibility: "PUBLIC" }],
   };
 
   console.log(filters);
