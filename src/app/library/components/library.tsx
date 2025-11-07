@@ -2,10 +2,10 @@
 
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import Details from "./details";
-import Filters from "./filters";
-import ShelfGrid from "./shelfGrid";
+import Sidebar from "./sidebar";
+import BookGrid from "./bookGrid";
 
 type LibraryProps = {
   books: BookType[];
@@ -15,29 +15,23 @@ type LibraryProps = {
   page: number;
 };
 
-const Library: FC<LibraryProps> = ({
-  books,
-  authors,
-  subjects,
-}) => {
+const Library: FC<LibraryProps> = ({ books, authors, subjects }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "#faf8f5",
-      }}
-    >
+    <div className="min-h-screen bg-cream">
       {!selectedBook ? (
-        <Grid container>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <Filters authors={authors} subjects={subjects} />
-          </Grid>
-          <Grid size={{ xs: 12, md: 9 }}>
-            <ShelfGrid books={books} setSelectedBook={setSelectedBook} />
-          </Grid>
-        </Grid>
+        <div className="flex flex-col lg:flex-row">
+          {/* Sidebar */}
+          <div className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <Sidebar authors={authors} subjects={subjects} />
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <BookGrid books={books} setSelectedBook={setSelectedBook} />
+          </div>
+        </div>
       ) : (
         <Box
           display="flex"
@@ -50,7 +44,7 @@ const Library: FC<LibraryProps> = ({
           <Details book={selectedBook} setSelectedBook={setSelectedBook} />
         </Box>
       )}
-    </Box>
+    </div>
   );
 };
 
