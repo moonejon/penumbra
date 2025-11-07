@@ -41,7 +41,22 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
           page={page}
           sx={{
             button: {
-              background: theme.palette.background.default,
+              background: "rgba(255, 255, 255, 0.05)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "rgba(255, 255, 255, 0.7)",
+              "&:hover": {
+                background: "rgba(255, 255, 255, 0.1)",
+                borderColor: "rgba(102, 126, 234, 0.5)",
+              },
+              "&.Mui-selected": {
+                background: "rgba(102, 126, 234, 0.2)",
+                borderColor: "#667eea",
+                color: "#fff",
+                "&:hover": {
+                  background: "rgba(102, 126, 234, 0.3)",
+                },
+              },
             },
           }}
           onChange={handlePageChange}
