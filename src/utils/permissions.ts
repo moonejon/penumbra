@@ -155,7 +155,7 @@ export async function updateBookVisibility(
   bookId: number,
   visibility: BookVisibility
 ) {
-  const { user } = await requireBookOwnership(bookId);
+  await requireBookOwnership(bookId);
 
   return await prisma.book.update({
     where: { id: bookId },
