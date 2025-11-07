@@ -2,10 +2,10 @@
 
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
-import List from "./list";
 import { Box, Grid } from "@mui/material";
 import Details from "./details";
 import Filters from "./filters";
+import ShelfGrid from "./shelfGrid";
 
 type LibraryProps = {
   books: BookType[];
@@ -19,25 +19,23 @@ const Library: FC<LibraryProps> = ({
   books,
   authors,
   subjects,
-  pageCount,
-  page,
 }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
 
   return (
-    <>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "#faf8f5",
+      }}
+    >
       {!selectedBook ? (
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 4 }} order={{ xs: 1, md: 1 }}>
+        <Grid container>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Filters authors={authors} subjects={subjects} />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }} order={{ xs: 2, md: 2 }}>
-            <List
-              rows={books}
-              setSelectedBook={setSelectedBook}
-              page={page}
-              pageCount={pageCount}
-            />
+          <Grid size={{ xs: 12, md: 9 }}>
+            <ShelfGrid books={books} setSelectedBook={setSelectedBook} />
           </Grid>
         </Grid>
       ) : (
@@ -52,7 +50,7 @@ const Library: FC<LibraryProps> = ({
           <Details book={selectedBook} setSelectedBook={setSelectedBook} />
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 
