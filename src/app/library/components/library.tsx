@@ -2,7 +2,6 @@
 
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
-import { Box } from "@mui/material";
 import Details from "./details";
 import Sidebar from "./sidebar";
 import BookGrid from "./bookGrid";
@@ -33,16 +32,9 @@ const Library: FC<LibraryProps> = ({ books, authors, subjects }) => {
           </div>
         </div>
       ) : (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-          minWidth="100vw"
-          flexDirection="column"
-        >
+        <div className="flex justify-center items-center min-h-screen w-full">
           <Details book={selectedBook} setSelectedBook={setSelectedBook} />
-        </Box>
+        </div>
       )}
     </div>
   );

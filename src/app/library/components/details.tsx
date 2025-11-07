@@ -1,18 +1,8 @@
+"use client";
+
 import { BookType } from "@/shared.types";
-import {
-  Box,
-  Card,
-  CardContent,
-  IconButton,
-  Skeleton,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import parse from "html-react-parser";
 import { Dispatch, FC, SetStateAction } from "react";
-import theme from "@/theme";
 
 type BookProps = {
   book: BookType;
@@ -31,104 +21,103 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
     pageCount,
   } = book;
 
-  const isMobilePortrait: boolean = useMediaQuery(
-    `${theme.breakpoints.down("sm")} and (orientation: portrait)`,
-  );
-
   return (
-    <Card
-      sx={{ flexGrow: 1, width: "80%", margin: "5%", position: "relative" }}
-    >
-      <IconButton
+    <div className="relative w-full max-w-4xl mx-auto my-8 px-4">
+      {/* Close button */}
+      <button
         onClick={() => setSelectedBook(undefined)}
-        sx={{ position: "absolute", top: 5, right: 5 }}
+        className="absolute -top-2 -right-2 sm:top-2 sm:right-2 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors border border-gray-200"
+        aria-label="Close"
       >
-        <CloseIcon />
-      </IconButton>
-      <CardContent>
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            justifyContent: "space-between",
-          }}
+        <svg
+          className="w-5 h-5 text-gray-600"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <Stack
-            direction="row"
-            spacing={4}
-            sx={{
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: isMobilePortrait ? "none" : "flex",
-                alignItems: "top",
-                flexDirection: "column",
-                width: "200px",
-              }}
-            >
+          <path d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Card */}
+      <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
+            {/* Book cover - hidden on mobile portrait */}
+            <div className="hidden sm:flex flex-col items-center flex-shrink-0 w-48">
               {image ? (
                 <img
                   src={image}
-                  style={{ maxHeight: "200px", objectFit: "fill" }}
+                  alt={title}
+                  className="w-full rounded-lg shadow-md"
+                  style={{ maxHeight: "280px", objectFit: "cover" }}
                 />
               ) : (
-                <Skeleton variant="rectangular" width={100} height={150} />
+                <div className="w-full h-72 bg-gray-200 rounded-lg animate-pulse" />
               )}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                  margin: "1em auto",
-                }}
-              >
-                <Typography variant="caption" fontWeight="600">
-                  {pageCount} pgs
-                </Typography>
-              </Box>
-            </Box>
-            <Stack
-              spacing={{ xs: 1, sm: 2 }}
-              sx={{ marginLeft: { xs: "0 !important", sm: "2em !important" } }}
-            >
-              <Stack>
-                <Typography variant="h6" fontWeight={1000}>
+              {pageCount && (
+                <div className="mt-4 text-center">
+                  <span className="text-sm font-semibold text-gray-600">
+                    {pageCount} pages
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 space-y-6">
+              {/* Title and Author */}
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                   {title}
-                </Typography>
-                <Typography variant="subtitle2">
-                  {authors.join(` * `)}
-                </Typography>
-              </Stack>
-              <Box sx={{ border: "" }}>
-                <Typography variant="caption">{parse(synopsis)}</Typography>
-              </Box>
-              <Stack>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Publisher:
-                  </Typography>
-                  <Typography variant="subtitle2">{publisher}</Typography>
+                </h2>
+                <p className="text-base text-gray-600">
+                  {authors.join(" • ")}
+                </p>
+              </div>
+
+              {/* Synopsis */}
+              {synopsis && (
+                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                  {parse(synopsis)}
                 </div>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Publication Date:
-                  </Typography>
-                  <Typography variant="subtitle2">{datePublished}</Typography>
-                </div>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Binding:
-                  </Typography>
-                  <Typography variant="subtitle2">{binding}</Typography>
-                </div>
-              </Stack>
-            </Stack>
-          </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
+              )}
+
+              {/* Publication details */}
+              <div className="space-y-2 pt-4 border-t border-gray-200">
+                {publisher && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-gray-900 min-w-[140px]">
+                      Publisher:
+                    </span>
+                    <span className="text-gray-700">{publisher}</span>
+                  </div>
+                )}
+                {datePublished && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-gray-900 min-w-[140px]">
+                      Publication Date:
+                    </span>
+                    <span className="text-gray-700">{datePublished}</span>
+                  </div>
+                )}
+                {binding && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-gray-900 min-w-[140px]">
+                      Binding:
+                    </span>
+                    <span className="text-gray-700">{binding}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

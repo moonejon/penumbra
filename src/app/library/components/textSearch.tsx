@@ -1,10 +1,8 @@
 "use client";
 
-import { TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, FC } from "react";
+import { ChangeEvent, FC, useCallback } from "react";
 import _ from "lodash";
-import theme from "@/theme";
 
 type TextSearchProps = {
   filterType: "title";
@@ -14,27 +12,44 @@ const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const params = new URLSearchParams(searchParams);
-    
-    params.set(filterType, e.target.value);
-    params.delete("page");
-    router.push(`library/?${params.toString()}`);
+  const handleSearchChange = useCallback(
+    _.debounce((value: string) => {
+      const params = new URLSearchParams(searchParams);
+
+      if (value) {
+        params.set(filterType, value);
+      } else {
+        params.delete(filterType);
+      }
+      params.delete("page");
+      router.push(`library/?${params.toString()}`);
+    }, 500),
+    [filterType, searchParams, router]
+  );
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    handleSearchChange(e.target.value);
   };
 
-  if (filterType == "title") {
+  if (filterType === "title") {
     return (
-      <TextField
-        id="outlined-basic"
-        variant="filled"
-        label="title"
-        sx={{ backgroundColor: theme.palette.background.default }}
-        onChange={_.debounce(handleSearchChange, 500)}
-      />
+      <div className="relative">
+        <label
+          htmlFor="title-search"
+          className="block text-xs font-medium text-gray-700 mb-1.5"
+        >
+          Search by Title
+        </label>
+        <input
+          id="title-search"
+          type="text"
+          placeholder="Enter book title..."
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-terracotta/50 focus:border-terracotta transition-colors bg-white placeholder-gray-400"
+          onChange={onChange}
+        />
+      </div>
     );
   }
-
-
 };
 
 export default TextSearch;
