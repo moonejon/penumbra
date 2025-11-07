@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Mono } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
@@ -7,27 +7,18 @@ import theme from "../theme";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Navbar } from "./components/navbar";
 
-// const roboto = Roboto({
-//   weight: ["300", "400", "500", "700"],
-//   subsets: ["latin"],
-//   display: "swap",
-//   variable: "--font-roboto",
-// });
+const inter = Inter({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
-
-const spaceMono = Space_Mono({
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
-  subsets: ["latin", "latin-ext"],
+const playfair = Playfair_Display({
+  weight: ["400", "600", "700"],
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -42,8 +33,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${spaceMono.variable} monospace`}>
-        <body className={`${spaceMono.variable} monospace antialiased`}>
+      <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+        <body className={`${inter.variable} ${playfair.variable} antialiased`}>
           <AppRouterCacheProvider>
             <ThemeProvider theme={theme}>
               <Navbar />

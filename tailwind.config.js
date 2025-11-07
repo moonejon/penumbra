@@ -13,6 +13,10 @@ module.exports = {
         'warm-amber': '#d4a574',
         'warm-brown': '#8b6f47',
       },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [],

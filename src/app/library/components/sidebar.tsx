@@ -12,20 +12,16 @@ type SidebarProps = {
 const Sidebar: FC<SidebarProps> = ({ authors, subjects }) => {
   return (
     <aside className="w-full lg:sticky lg:top-6 lg:h-fit">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mx-4 lg:mx-6 my-6">
-        <div className="mb-5 pb-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-terracotta mb-1">Search & Filter</h2>
-          <p className="text-xs text-gray-500">Refine your library view</p>
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-200/50 p-7 mx-4 lg:mx-6 my-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-serif font-semibold text-gray-900 mb-1">Discover</h2>
+          <p className="text-sm text-gray-500">Search and filter your collection</p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           <TextSearch filterType="title" />
-          <div className="pt-1">
-            <AutoCompleteSearch filterType="authors" values={authors} />
-          </div>
-          <div className="pt-1">
-            <AutoCompleteSearch filterType="subjects" values={subjects} />
-          </div>
+          <AutoCompleteSearch filterType="authors" values={authors} />
+          <AutoCompleteSearch filterType="subjects" values={subjects} />
         </div>
       </div>
     </aside>

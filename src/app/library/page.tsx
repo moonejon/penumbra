@@ -20,6 +20,7 @@ export default async function LibraryPage({
 
   const result = await fetchBooksPaginated({
     page: page,
+    pageSize: 100, // Show many more books at once
     title: title,
     authors: authors,
     subjects: subjects,

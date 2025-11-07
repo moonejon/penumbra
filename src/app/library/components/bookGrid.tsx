@@ -13,10 +13,12 @@ const BookGrid: FC<BookGridProps> = ({ books, setSelectedBook }) => {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Library</h1>
-        <p className="text-gray-600">
-          {books.length} {books.length === 1 ? "book" : "books"} found
+      <div className="mb-8">
+        <h1 className="text-4xl font-serif font-semibold text-gray-900 mb-2 tracking-tight">
+          Library
+        </h1>
+        <p className="text-sm text-gray-500 font-medium">
+          {books.length} {books.length === 1 ? "book" : "books"} in your collection
         </p>
       </div>
 
