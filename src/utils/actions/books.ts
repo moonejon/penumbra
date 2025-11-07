@@ -90,7 +90,6 @@ export async function fetchBooksPaginated({
     }),
   };
 
-  console.log(filters);
 
   const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({
