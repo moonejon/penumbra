@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getViewableBookFilter } from "@/utils/permissions";
-import { Prisma } from "@prisma/client";
 import { SearchSuggestion } from "@/shared.types";
 
 export async function GET(request: NextRequest) {
@@ -18,79 +17,105 @@ export async function GET(request: NextRequest) {
       } as SearchSuggestion);
     }
 
+    // Minimum query length to reduce noise from single-character searches
+    if (query.trim().length < 2) {
+      return NextResponse.json({
+        authors: [],
+        titles: [],
+        subjects: [],
+      } as SearchSuggestion);
+    }
+
     // Get viewable book filter (handles auth automatically)
     const visibilityFilter = await getViewableBookFilter();
 
     // FIX #1: Rewrite query strategy to support partial matches
-    // Fetch books that match by title (this works with contains)
-    const booksByTitle = await prisma.book.findMany({
-      where: {
-        ...visibilityFilter,
-        title: { contains: query, mode: Prisma.QueryMode.insensitive },
-      },
+    // Fetch all viewable books to enable comprehensive author/subject search
+    // We'll filter everything in JavaScript to support partial matching on array fields
+    // Note: For large libraries (1000+ books), consider using PostgreSQL full-text search
+    const allBooks = await prisma.book.findMany({
+      where: visibilityFilter,
       select: { id: true, title: true, authors: true, subjects: true },
-      take: 50,
     });
 
-    // Also fetch books by author/subject if they have exact name matches
-    // to expand results beyond just title matches
-    const booksByAuthorOrSubject = await prisma.book.findMany({
-      where: {
-        ...visibilityFilter,
-        OR: [
-          { authors: { hasSome: [query] } },  // Exact match for now
-          { subjects: { hasSome: [query] } },
-        ],
-      },
-      select: { id: true, title: true, authors: true, subjects: true },
-      take: 50,
-    });
-
-    // Combine and deduplicate
-    const allBooks = [...booksByTitle, ...booksByAuthorOrSubject];
-    const uniqueBooks = Array.from(
-      new Map(allBooks.map(book => [book.id, book])).values()
-    );
-
-    // Extract and filter authors/subjects with JavaScript for partial matches
-    const authorsSet = new Set<string>();
-    const subjectsSet = new Set<string>();
-    const titlesMap = new Map<number, string>();
+    // Extract and filter all matching items with ranking
     const queryLower = query.toLowerCase();
 
-    uniqueBooks.forEach((book) => {
-      // Add title if it matches
-      if (book.title.toLowerCase().includes(queryLower)) {
-        titlesMap.set(book.id, book.title);
+    // Use Maps to track items with their ranking scores
+    const titlesMap = new Map<number, { title: string; score: number }>();
+    const authorsMap = new Map<string, number>();
+    const subjectsMap = new Map<string, number>();
+
+    // Helper function to calculate match score (higher is better)
+    const getMatchScore = (text: string, query: string): number => {
+      const textLower = text.toLowerCase();
+      if (textLower === query) return 1000; // Exact match
+      if (textLower.startsWith(query)) return 100; // Prefix match
+
+      // Word boundary match (query starts a word in the text)
+      const words = textLower.split(/\s+/);
+      for (const word of words) {
+        if (word.startsWith(query)) return 50;
       }
 
-      // Filter authors for partial matches
+      return 1; // Contains match (lowest priority)
+    };
+
+    allBooks.forEach((book) => {
+      // Check title match
+      const titleLower = book.title.toLowerCase();
+      if (titleLower.includes(queryLower)) {
+        const score = getMatchScore(book.title, queryLower);
+        titlesMap.set(book.id, { title: book.title, score });
+      }
+
+      // Check author matches
       book.authors.forEach((author) => {
-        if (author.toLowerCase().includes(queryLower)) {
-          authorsSet.add(author);
+        const authorLower = author.toLowerCase();
+        if (authorLower.includes(queryLower)) {
+          const score = getMatchScore(author, queryLower);
+          // Keep highest score if author appears in multiple books
+          authorsMap.set(author, Math.max(authorsMap.get(author) || 0, score));
         }
       });
 
-      // Filter subjects for partial matches
+      // Check subject matches
       book.subjects.forEach((subject) => {
-        if (subject.toLowerCase().includes(queryLower)) {
-          subjectsSet.add(subject);
+        const subjectLower = subject.toLowerCase();
+        if (subjectLower.includes(queryLower)) {
+          const score = getMatchScore(subject, queryLower);
+          // Keep highest score if subject appears in multiple books
+          subjectsMap.set(subject, Math.max(subjectsMap.get(subject) || 0, score));
         }
       });
     });
 
-    // Limit results to 5 per category and sort
-    const authors = Array.from(authorsSet)
-      .sort((a, b) => a.localeCompare(b))
+    // Sort by score (highest first), then alphabetically, and limit to 5 per category
+    const authors = Array.from(authorsMap.entries())
+      .sort((a, b) => {
+        // Sort by score descending, then alphabetically
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([author]) => author)
       .slice(0, 5);
 
     const titles = Array.from(titlesMap.entries())
-      .map(([id, title]) => ({ id, title }))
-      .sort((a, b) => a.title.localeCompare(b.title))
+      .sort((a, b) => {
+        // Sort by score descending, then alphabetically
+        if (b[1].score !== a[1].score) return b[1].score - a[1].score;
+        return a[1].title.localeCompare(b[1].title);
+      })
+      .map(([id, { title }]) => ({ id, title }))
       .slice(0, 5);
 
-    const subjects = Array.from(subjectsSet)
-      .sort((a, b) => a.localeCompare(b))
+    const subjects = Array.from(subjectsMap.entries())
+      .sort((a, b) => {
+        // Sort by score descending, then alphabetically
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([subject]) => subject)
       .slice(0, 5);
 
     return NextResponse.json({
