@@ -15,8 +15,11 @@ import {
   IconButton,
   Chip,
   Stack,
+  Alert,
+  Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useRouter, useSearchParams } from "next/navigation";
 import theme from "@/theme";
 import { SearchSuggestion } from "@/shared.types";
@@ -36,6 +39,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [totalItems, setTotalItems] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -64,6 +68,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
 
     debounceTimerRef.current = setTimeout(async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch(
           `/api/library/search-suggestions?q=${encodeURIComponent(query)}`
@@ -72,9 +77,10 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         // FIX #2: Add response validation to prevent crashes
         if (!response.ok) {
           console.error("Search suggestions API error:", response.status);
+          setError("Failed to load suggestions. Please try again.");
           setSuggestions({ authors: [], titles: [], subjects: [] });
           setTotalItems(0);
-          setIsOpen(false);
+          setIsOpen(true);
           return;
         }
 
@@ -83,9 +89,10 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         // Validate response structure
         if (!data || typeof data !== "object") {
           console.error("Invalid response structure:", data);
+          setError("Invalid response received. Please try again.");
           setSuggestions({ authors: [], titles: [], subjects: [] });
           setTotalItems(0);
-          setIsOpen(false);
+          setIsOpen(true);
           return;
         }
 
@@ -106,9 +113,10 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         setSelectedIndex(-1);
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
+        setError("Network error. Please check your connection and try again.");
         setSuggestions({ authors: [], titles: [], subjects: [] });
         setTotalItems(0);
-        setIsOpen(false);
+        setIsOpen(true);
       } finally {
         setIsLoading(false);
       }
@@ -253,6 +261,15 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     router.push(`/library/?${params.toString()}`);
     setIsOpen(false);
     onClose?.();
+  };
+
+  // Handle retry of failed search
+  const handleRetry = () => {
+    setError(null);
+    // Trigger the search again by modifying query slightly and back
+    const currentQuery = query;
+    setQuery("");
+    setTimeout(() => setQuery(currentQuery), 0);
   };
 
   // Handle clear all filters
@@ -401,7 +418,25 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               backgroundColor: theme.palette.background.paper,
             }}
           >
-            {hasResults ? (
+            {error ? (
+              <Box sx={{ p: 2 }}>
+                <Alert
+                  severity="error"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={handleRetry}
+                      startIcon={<RefreshIcon />}
+                    >
+                      Retry
+                    </Button>
+                  }
+                >
+                  {error}
+                </Alert>
+              </Box>
+            ) : hasResults ? (
               <List disablePadding>
                 <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
                   <Typography variant="caption" color="text.secondary">

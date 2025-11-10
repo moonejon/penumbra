@@ -10,14 +10,18 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import ImageIcon from "@mui/icons-material/Image";
 import parse from "html-react-parser";
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
 import theme from "@/theme";
 
 type BookProps = {
   book: BookType;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
 };
+
+// Client-side image cache to prevent unnecessary re-fetches
+const imageCache = new Map<string, boolean>();
 
 const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
   const {
@@ -30,6 +34,22 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
     synopsis,
     pageCount,
   } = book;
+
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  // Reset image state when book changes to prevent showing old image
+  useEffect(() => {
+    // If image is in cache, load immediately
+    if (image && imageCache.has(image)) {
+      setImageLoading(false);
+      setImageError(false);
+    } else {
+      // Reset to loading state for new book
+      setImageLoading(true);
+      setImageError(false);
+    }
+  }, [book.id, image]);
 
   const isMobilePortrait: boolean = useMediaQuery(
     `${theme.breakpoints.down("sm")} and (orientation: portrait)`,
@@ -68,14 +88,54 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
                 width: "200px",
               }}
             >
-              {image ? (
-                <img
-                  src={image}
-                  style={{ maxHeight: "200px", objectFit: "fill" }}
-                />
-              ) : (
-                <Skeleton variant="rectangular" width={100} height={150} />
-              )}
+              <Box sx={{ position: "relative", width: "200px", minHeight: "200px" }}>
+                {image && !imageError ? (
+                  <>
+                    {imageLoading && (
+                      <Skeleton
+                        variant="rectangular"
+                        width={200}
+                        height={200}
+                        sx={{ position: "absolute" }}
+                      />
+                    )}
+                    <img
+                      src={image}
+                      alt={`Cover of ${title}`}
+                      onLoad={() => {
+                        if (image) {
+                          imageCache.set(image, true);
+                        }
+                        setImageLoading(false);
+                      }}
+                      onError={() => {
+                        setImageLoading(false);
+                        setImageError(true);
+                      }}
+                      style={{
+                        maxHeight: "200px",
+                        objectFit: "fill",
+                        opacity: imageLoading ? 0 : 1,
+                        transition: "opacity 0.3s ease-in-out",
+                      }}
+                    />
+                  </>
+                ) : (
+                  <Box
+                    sx={{
+                      width: 200,
+                      height: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "action.hover",
+                      borderRadius: 1,
+                    }}
+                  >
+                    <ImageIcon sx={{ fontSize: 64, color: "text.secondary", opacity: 0.3 }} />
+                  </Box>
+                )}
+              </Box>
               <Box
                 sx={{
                   display: "flex",
