@@ -27,12 +27,11 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount }) => {
   const isMobile: boolean = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Stack spacing={1} sx={{ padding: "2em" }}>
-      {/* <Search /> */}
+    <Stack spacing={2}>
       {rows?.map((book, i) => (
         <Item book={book} key={i} setSelectedBook={setSelectedBook} />
       ))}
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", py: 2 }}>
         <Pagination
           variant="outlined"
           size={isMobile ? "small" : "large"}
