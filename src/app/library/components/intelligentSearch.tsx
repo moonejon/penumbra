@@ -403,6 +403,11 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           >
             {hasResults ? (
               <List disablePadding>
+                <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Press Enter to search titles for &quot;{query}&quot;
+                  </Typography>
+                </Box>
                 {renderSection(
                   "Authors",
                   suggestions.authors.map((a) => ({ value: a })),
@@ -424,11 +429,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                   "subject",
                   suggestions.authors.length + suggestions.titles.length
                 )}
-                <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Press Enter to search titles for &quot;{query}&quot;
-                  </Typography>
-                </Box>
               </List>
             ) : (
               !isLoading && (
