@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --no-engine"
+    "postinstall": "prisma generate --no-engine",
+    "sync-prod-data": "tsx scripts/sync-prod-data-enhanced.ts",
+    "sync-prod-data:dry-run": "tsx scripts/sync-prod-data-enhanced.ts --dry-run",
+    "sync-prod-data:original": "tsx scripts/sync-prod-data.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.19.5",

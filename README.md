@@ -20,6 +20,27 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Development Database Setup
+
+### Syncing Production Data to Development
+
+To populate your local development database with production book data:
+
+```bash
+# Preview what will be synced (recommended first)
+npm run sync-prod-data -- --dry-run --user-id=1
+
+# Sync production data to development
+npm run sync-prod-data -- --user-id=1
+```
+
+This script will:
+- Export all books from the production database
+- Transform the owner IDs to match your development user
+- Replace all books in your local database with production data
+
+See [scripts/README.md](scripts/README.md) for detailed documentation and all available options.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
