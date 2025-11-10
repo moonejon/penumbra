@@ -1,6 +1,6 @@
 # Claude Code Progress Log - Penumbra Project
 
-**Last Updated:** November 10, 2025
+**Last Updated:** November 10, 2025 (Evening Session 2)
 **Project:** Penumbra - Personal Library Management System
 
 ---
@@ -116,6 +116,43 @@ Exports book data from production, transforms user IDs, and imports into develop
 - `src/app/api/library/search-suggestions/route.ts`
 - `src/app/library/components/searchHeader.tsx`
 - `INTELLIGENT_SEARCH_IMPLEMENTATION.md`
+
+### 3. Loading and Error States (PR #25)
+
+**Status:** ✅ Merged to main
+**Branch:** `feature/loading-error-states`
+**Agent:** frontend-dev
+
+**What It Does:**
+Comprehensive loading and error states across the application for improved perceived performance and user feedback.
+
+**Key Features:**
+- Skeleton loaders for book lists and images
+- Loading spinners on action buttons
+- Empty states with helpful CTAs (empty library, no search results)
+- Error handling with retry functionality
+- Success feedback via Snackbar
+- Client-side image caching to prevent re-fetching
+- Smooth image transitions without "blip" effect
+
+**Implementation Highlights:**
+- **Image Caching:** JavaScript Map-based cache stores loaded images per session
+- **State Management:** Proper reset when book changes to prevent old image display
+- **Material-UI v7:** Uses Skeleton, CircularProgress, Alert, Snackbar components
+- **Performance:** Reduced network requests, instant display for cached images
+
+**Files Modified:**
+- `src/app/library/components/list.tsx` - Skeleton loaders for book cards
+- `src/app/library/components/library.tsx` - Empty states
+- `src/app/import/components/queue.tsx` - Button loading states
+- `src/app/library/components/intelligentSearch.tsx` - Error handling with retry
+- `src/app/library/components/item.tsx` - Image caching and loading
+- `src/app/library/components/details.tsx` - Image caching and loading
+
+**Documentation Added:**
+- `LOADING_ERROR_STATES_DESIGN_SPEC.md`
+- `LOADING_ERROR_STATES_QUICK_REFERENCE.md`
+- `LOADING_ERROR_STATES_VISUAL_GUIDE.md`
 
 ---
 
@@ -255,6 +292,13 @@ User Request
 - Shorter transactions reduce lock contention
 - Retry logic essential for network operations
 
+### Frontend Performance & UX
+- Client-side caching (JavaScript Map) provides instant repeat loads
+- Proper state reset prevents visual glitches (image blips)
+- Skeleton screens improve perceived performance
+- Empty states with CTAs guide users to next action
+- Material-UI components provide consistent, accessible patterns
+
 ---
 
 ## 📂 Project Structure
@@ -368,6 +412,17 @@ npm run sync-prod-data -- --user-id=1 --yes    # Sync
 - ✅ Pulled latest from main
 - ✅ Created this progress file for future context
 
+**Evening (Session 2):**
+- ✅ Loaded context from CLAUDE_PROGRESS.md
+- ✅ Tasked frontend-dev to implement loading/error states
+- ✅ Created branch `feature/loading-error-states`
+- ✅ Implemented skeleton loaders, empty states, error handling
+- ✅ Fixed image blipping issue (state reset on book change)
+- ✅ Implemented client-side image caching (Map-based)
+- ✅ Tested all improvements (9 files changed, 4,384+ lines)
+- ✅ Created PR #25 with comprehensive description
+- ✅ PR #25 merged to main
+
 ---
 
 ## 🎯 Next Steps / Open Items
@@ -401,5 +456,6 @@ npm run sync-prod-data -- --user-id=1 --yes    # Sync
 ---
 
 *Last session by: Claude (Sonnet 4.5)*
-*Session focus: Production data sync implementation and build error resolution*
-*Agents utilized: fullstack-dev, backend-dev, debugger*
+*Session 1 focus: Production data sync implementation and build error resolution*
+*Session 2 focus: Loading/error states and image caching for improved UX*
+*Agents utilized: fullstack-dev, backend-dev, debugger, frontend-dev*
