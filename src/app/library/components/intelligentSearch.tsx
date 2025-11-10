@@ -12,7 +12,11 @@ import {
   CircularProgress,
   Box,
   Divider,
+  IconButton,
+  Chip,
+  Stack,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useRouter, useSearchParams } from "next/navigation";
 import theme from "@/theme";
 import { SearchSuggestion } from "@/shared.types";
@@ -38,6 +42,12 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track active filters from URL params
+  const activeTitle = searchParams.get("title");
+  const activeAuthors = searchParams.get("authors");
+  const activeSubjects = searchParams.get("subjects");
+  const hasActiveFilters = !!(activeTitle || activeAuthors || activeSubjects);
 
   // Fetch suggestions with debouncing
   useEffect(() => {
@@ -245,6 +255,22 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     onClose?.();
   };
 
+  // Handle clear all filters
+  const handleClearAll = () => {
+    router.push("/library");
+    setQuery("");
+    setIsOpen(false);
+    onClose?.();
+  };
+
+  // Handle removing individual filter
+  const handleRemoveFilter = (filterType: "title" | "authors" | "subjects") => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(filterType);
+    params.delete("page");
+    router.push(`/library/?${params.toString()}`);
+  };
+
   // Render suggestion sections
   const renderSection = (
     title: string,
@@ -309,96 +335,180 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const hasResults = totalItems > 0;
 
   return (
-    <Box sx={{ position: "relative", width: "100%" }}>
-      <TextField
-        inputRef={inputRef}
-        fullWidth
-        placeholder="Search by title, author, or subject..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (query.trim() && hasResults) {
-            setIsOpen(true);
-          }
-        }}
-        variant="outlined"
-        size="small"
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          "& .MuiOutlinedInput-root": {
-            "& fieldset": {
-              borderColor: theme.palette.divider,
-            },
-            "&:hover fieldset": {
-              borderColor: theme.palette.primary.main,
-            },
-          },
-        }}
-        InputProps={{
-          endAdornment: isLoading ? (
-            <CircularProgress size={20} />
-          ) : null,
-        }}
-      />
-
-      {isOpen && (query.trim().length > 0) && (
-        <Paper
-          ref={dropdownRef}
-          elevation={8}
+    <Box sx={{ width: "100%" }}>
+      <Box sx={{ position: "relative", width: "100%" }}>
+        <TextField
+          inputRef={inputRef}
+          fullWidth
+          placeholder="Search by title, author, or subject..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            if (query.trim() && hasResults) {
+              setIsOpen(true);
+            }
+          }}
+          variant="outlined"
+          size="small"
           sx={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            right: 0,
-            maxHeight: "400px",
-            overflowY: "auto",
-            zIndex: 1300,
             backgroundColor: theme.palette.background.paper,
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: theme.palette.divider,
+              },
+              "&:hover fieldset": {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+          }}
+          InputProps={{
+            endAdornment: (
+              <>
+                {isLoading && <CircularProgress size={20} sx={{ mr: 1 }} />}
+                {hasActiveFilters && !isLoading && (
+                  <IconButton
+                    size="small"
+                    onClick={handleClearAll}
+                    sx={{
+                      mr: -0.5,
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    }}
+                    aria-label="Clear all filters"
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </>
+            ),
+          }}
+        />
+
+        {isOpen && (query.trim().length > 0) && (
+          <Paper
+            ref={dropdownRef}
+            elevation={8}
+            sx={{
+              position: "absolute",
+              top: "calc(100% + 4px)",
+              left: 0,
+              right: 0,
+              maxHeight: "400px",
+              overflowY: "auto",
+              zIndex: 1300,
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
+            {hasResults ? (
+              <List disablePadding>
+                {renderSection(
+                  "Authors",
+                  suggestions.authors.map((a) => ({ value: a })),
+                  "author",
+                  0
+                )}
+                {renderSection(
+                  "Titles",
+                  suggestions.titles.map((t) => ({
+                    value: t.title,
+                    id: t.id,
+                  })),
+                  "title",
+                  suggestions.authors.length
+                )}
+                {renderSection(
+                  "Subjects",
+                  suggestions.subjects.map((s) => ({ value: s })),
+                  "subject",
+                  suggestions.authors.length + suggestions.titles.length
+                )}
+                <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Press Enter to search titles for &quot;{query}&quot;
+                  </Typography>
+                </Box>
+              </List>
+            ) : (
+              !isLoading && (
+                <Box sx={{ px: 2, py: 3, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No suggestions found
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Press Enter to search for &quot;{query}&quot;
+                  </Typography>
+                </Box>
+              )
+            )}
+          </Paper>
+        )}
+      </Box>
+
+      {/* Active filter pills */}
+      {hasActiveFilters && (
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            mt: 1,
+            flexWrap: "wrap",
+            gap: 1,
           }}
         >
-          {hasResults ? (
-            <List disablePadding>
-              {renderSection(
-                "Authors",
-                suggestions.authors.map((a) => ({ value: a })),
-                "author",
-                0
-              )}
-              {renderSection(
-                "Titles",
-                suggestions.titles.map((t) => ({
-                  value: t.title,
-                  id: t.id,
-                })),
-                "title",
-                suggestions.authors.length
-              )}
-              {renderSection(
-                "Subjects",
-                suggestions.subjects.map((s) => ({ value: s })),
-                "subject",
-                suggestions.authors.length + suggestions.titles.length
-              )}
-              <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
-                <Typography variant="caption" color="text.secondary">
-                  Press Enter to search titles for &quot;{query}&quot;
-                </Typography>
-              </Box>
-            </List>
-          ) : (
-            !isLoading && (
-              <Box sx={{ px: 2, py: 3, textAlign: "center" }}>
-                <Typography variant="body2" color="text.secondary">
-                  No suggestions found
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Press Enter to search for &quot;{query}&quot;
-                </Typography>
-              </Box>
-            )
+          {activeTitle && (
+            <Chip
+              label={`Title: ${activeTitle}`}
+              size="small"
+              onDelete={() => handleRemoveFilter("title")}
+              sx={{
+                backgroundColor: theme.palette.primary.dark,
+                color: theme.palette.primary.contrastText,
+                "& .MuiChip-deleteIcon": {
+                  color: theme.palette.primary.contrastText,
+                  "&:hover": {
+                    color: theme.palette.primary.light,
+                  },
+                },
+              }}
+            />
           )}
-        </Paper>
+          {activeAuthors && (
+            <Chip
+              label={`Author: ${activeAuthors}`}
+              size="small"
+              onDelete={() => handleRemoveFilter("authors")}
+              sx={{
+                backgroundColor: theme.palette.secondary.dark,
+                color: theme.palette.secondary.contrastText,
+                "& .MuiChip-deleteIcon": {
+                  color: theme.palette.secondary.contrastText,
+                  "&:hover": {
+                    color: theme.palette.secondary.light,
+                  },
+                },
+              }}
+            />
+          )}
+          {activeSubjects && (
+            <Chip
+              label={`Subject: ${activeSubjects}`}
+              size="small"
+              onDelete={() => handleRemoveFilter("subjects")}
+              sx={{
+                backgroundColor: theme.palette.info.dark,
+                color: theme.palette.info.contrastText,
+                "& .MuiChip-deleteIcon": {
+                  color: theme.palette.info.contrastText,
+                  "&:hover": {
+                    color: theme.palette.info.light,
+                  },
+                },
+              }}
+            />
+          )}
+        </Stack>
       )}
     </Box>
   );
