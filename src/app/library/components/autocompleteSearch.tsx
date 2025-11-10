@@ -6,39 +6,53 @@ import { FC, SyntheticEvent } from "react";
 
 type AutoCompleteSearchProps = {
     filterType: 'authors' | 'subjects',
-    values: string[]
+    values: string[],
+    selectedValues?: string[],
+    onChange?: (values: string[]) => void,
+    inDropdown?: boolean
 }
 
-const AutoCompleteSearch: FC<AutoCompleteSearchProps> = ({ filterType, values }) => {
+const AutoCompleteSearch: FC<AutoCompleteSearchProps> = ({
+  filterType,
+  values,
+  selectedValues,
+  onChange,
+  inDropdown = false
+}) => {
 
     const router = useRouter();
       const searchParams = useSearchParams();
-    
+
       const handleSearchChange = (event: SyntheticEvent, value: string[]) => {
-        const params = new URLSearchParams(searchParams);
-        params.set(filterType, value.toString())
-        params.delete("page");
-        router.push(`library/?${params.toString()}`);
+        if (inDropdown && onChange) {
+          // When used in dropdown, just update local state
+          onChange(value);
+        } else {
+          // Original behavior - immediately update URL
+          const params = new URLSearchParams(searchParams);
+          params.set(filterType, value.toString())
+          params.delete("page");
+          router.push(`library/?${params.toString()}`);
+        }
       };
 
     return (
       <Autocomplete
         multiple
-        id="tags-outlined"
+        id={`${filterType}-autocomplete`}
         options={values}
-        // getOptionLabel={(option) => option.title}
         filterSelectedOptions
-        defaultValue={[]}
+        value={selectedValues || []}
         renderInput={(params) => (
           <TextField
             {...params}
             fullWidth
-            // label={filterType}
             placeholder={filterType}
+            size="small"
             />
         )}
-        onChange={_.debounce(handleSearchChange, 500)}
-        sx={{ backgroundColor: theme.palette.background.default }}
+        onChange={inDropdown ? handleSearchChange : _.debounce(handleSearchChange, 500)}
+        sx={{ backgroundColor: inDropdown ? theme.palette.background.paper : theme.palette.background.default }}
       />
     );
   }

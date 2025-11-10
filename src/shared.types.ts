@@ -39,4 +39,10 @@ type BookImportDataType = {
   isDuplicate?: boolean;
 };
 
-export type { BookType, BookImportDataType };
+type SearchSuggestion = {
+  authors: string[];
+  titles: { id: number; title: string }[];
+  subjects: string[];
+};
+
+export type { BookType, BookImportDataType, SearchSuggestion };
