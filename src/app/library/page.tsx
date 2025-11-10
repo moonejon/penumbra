@@ -1,7 +1,5 @@
 import { fetchBooksPaginated } from "@/utils/actions/books";
 import Library from "./components/library";
-import { fetchFilters } from "@/utils/actions/filters";
-import _ from "lodash";
 
 export default async function LibraryPage({
   searchParams,
@@ -25,18 +23,11 @@ export default async function LibraryPage({
     subjects: subjects,
   });
 
-  const filterData = await fetchFilters();
-
-  const sortedAuthors = _.uniq(filterData.flatMap((el) => el.authors).sort());
-  const sortedSubjects = _.uniq(filterData.flatMap((el) => el.subjects).sort());
-
   const { books, pageCount } = result;
 
   return (
     <Library
       books={books}
-      authors={sortedAuthors}
-      subjects={sortedSubjects}
       page={page}
       pageCount={pageCount}
     />

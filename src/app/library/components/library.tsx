@@ -9,16 +9,12 @@ import SearchHeader from "./searchHeader";
 
 type LibraryProps = {
   books: BookType[];
-  authors: string[];
-  subjects: string[];
   pageCount: number;
   page: number;
 };
 
 const Library: FC<LibraryProps> = ({
   books,
-  authors,
-  subjects,
   pageCount,
   page,
 }) => {
@@ -28,7 +24,7 @@ const Library: FC<LibraryProps> = ({
     <>
       {!selectedBook ? (
         <>
-          <SearchHeader authors={authors} subjects={subjects} />
+          <SearchHeader />
           <Container maxWidth="xl" sx={{ mt: { xs: 2, sm: 3 } }}>
             <List
               rows={books}
