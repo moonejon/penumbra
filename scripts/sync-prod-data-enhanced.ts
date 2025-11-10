@@ -32,7 +32,7 @@
  *   - Development database must have at least one user
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, BookVisibility } from '@prisma/client';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -78,7 +78,7 @@ interface BookData {
   subjects: string[];
   authors: string[];
   binding: string;
-  visibility: string;
+  visibility: BookVisibility;
   ownerId: number;
 }
 
