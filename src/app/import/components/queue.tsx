@@ -348,7 +348,7 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
               </div>
             </div>
           ) : (
-            <div className="flex-1 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-900/30 m-2 flex items-center justify-center">
+            <div className="flex-1 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-900/30 m-2 flex items-center justify-center py-16">
               <p className="text-zinc-500 text-sm">Queue is empty</p>
             </div>
           )}
