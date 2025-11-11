@@ -4,14 +4,13 @@ import { ImageIcon } from "lucide-react";
 
 type ItemProps = {
   book: BookType;
-  key: number;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
 };
 
 // Client-side image cache to prevent unnecessary re-fetches
 const imageCache = new Map<string, boolean>();
 
-const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
+const Item: FC<ItemProps> = ({ book, setSelectedBook }) => {
   const {
     title,
     authors,
@@ -39,7 +38,6 @@ const Item: FC<ItemProps> = ({ book, key, setSelectedBook }) => {
 
   return (
     <div
-      key={key}
       className="border border-zinc-800 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:bg-zinc-900/50 hover:border-zinc-700"
       onClick={() => setSelectedBook(book)}
     >

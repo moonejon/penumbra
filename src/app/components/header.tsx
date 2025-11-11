@@ -21,14 +21,14 @@ export function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-200 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
           scrolled
-            ? 'bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800'
+            ? 'bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800/50'
             : 'bg-transparent'
         }`}
       >
         <div className="max-w-screen-sm mx-auto px-4">
-          <nav className="flex items-center justify-between h-16">
+          <nav className="flex items-center justify-between h-14">
             {/* Brand */}
             <Link
               href="/"

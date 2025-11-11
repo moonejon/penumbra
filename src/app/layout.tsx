@@ -24,7 +24,7 @@ export default function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable}`}
         suppressHydrationWarning
       >
-        <body className="font-sans antialiased flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+        <body className="font-sans antialiased tracking-tight flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -32,7 +32,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="relative mx-auto w-full max-w-screen-sm flex-1 px-4 pt-20">{children}</main>
             <Footer />
           </ThemeProvider>
         </body>

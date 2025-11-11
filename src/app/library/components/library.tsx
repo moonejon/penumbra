@@ -84,7 +84,7 @@ const Library: FC<LibraryProps> = ({
       {!selectedBook ? (
         <>
           <SearchHeader />
-          <div className="max-w-screen-sm mx-auto px-4 mt-6">
+          <div className="mt-6">
             {showEmptyState ? (
               hasActiveFilters ? (
                 <EmptySearchState />
