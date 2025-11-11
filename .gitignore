@@ -45,3 +45,5 @@ next-env.d.ts
 
 # docker
 docker-compose.yml
+# clerk configuration (can include secrets)
+/.clerk/

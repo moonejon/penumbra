@@ -1,6 +1,6 @@
 "use client";
 
-import { TextField } from "@mui/material";
+import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, FC } from "react";
 import _ from "lodash";
@@ -15,7 +15,7 @@ const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const params = new URLSearchParams(searchParams);
-    
+
     params.set(filterType, e.target.value);
     params.delete("page");
     router.push(`library/?${params.toString()}`);
@@ -23,12 +23,15 @@ const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
 
   if (filterType == "title") {
     return (
-      <TextField
-        id="outlined-basic"
-        variant="filled"
-        label="title"
-        onChange={_.debounce(handleSearchChange, 500)}
-      />
+      <div className="w-full">
+        <Input
+          id="title-search"
+          type="text"
+          placeholder="Search by title..."
+          onChange={_.debounce(handleSearchChange, 500)}
+          className="w-full"
+        />
+      </div>
     );
   }
 
