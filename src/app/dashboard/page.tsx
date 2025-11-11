@@ -1,6 +1,5 @@
 "use server";
 
-import { Container, Typography } from "@mui/material";
 import { fetchBooks } from "@/utils/actions/books";
 import Grid from "./components/grid";
 type DashboardPageProps = object;
@@ -10,11 +9,11 @@ export default async function DashboardPage({}: DashboardPageProps) {
   const books = await fetchBooks();
 
   return (
-    <Container sx={{ padding: "25px" }}>
-      <Typography gutterBottom variant="h3">
+    <div className="w-full max-w-5xl mx-auto p-6">
+      <h1 className="text-3xl font-semibold mb-6 text-zinc-100">
         Dashboard
-      </Typography>
+      </h1>
       <Grid rows={books} />
-    </Container>
+    </div>
   );
 }
