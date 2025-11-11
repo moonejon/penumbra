@@ -3,8 +3,11 @@ import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ImageIcon, Copy, Info, AlertCircle, RefreshCw } from "lucide-react";
+import { ImageIcon, Copy, Info, AlertCircle, RefreshCw, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Modal from "@/components/ui/modal";
+import BookForm from "@/components/forms/BookForm";
+import ImageManager from "@/components/forms/ImageManager";
 
 interface BookProps {
   book: BookImportDataType;
@@ -28,6 +31,8 @@ const Preview: FC<BookProps> = ({
   const { authors, binding, datePublished } = book;
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reset image loading states when book changes
   useEffect(() => {
@@ -68,6 +73,17 @@ const Preview: FC<BookProps> = ({
 
     setImportQueue(newImportQueue);
     setBookData(initialBookImportData);
+  };
+
+  const handleEditSubmit = async (editedData: BookImportDataType) => {
+    setIsSubmitting(true);
+    try {
+      // Update the book data with edited information
+      setBookData(editedData);
+      setIsEditModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isMobile: boolean = useMediaQuery("(max-width: 600px)");
@@ -223,12 +239,22 @@ const Preview: FC<BookProps> = ({
                 {book.isIncomplete && (
                   <Alert className="border-amber-500/40 bg-amber-950/40 text-amber-200 shadow-sm">
                     <Info className="h-4 w-4 text-amber-400" />
-                    <AlertTitle className="text-amber-300 font-medium mb-1">
-                      Incomplete Data
-                    </AlertTitle>
-                    <AlertDescription className="text-amber-200/90 text-sm leading-relaxed">
-                      Some book information is missing. Consider using the ISBN from the title page for more detailed results.
-                    </AlertDescription>
+                    <div className="flex-1">
+                      <AlertTitle className="text-amber-300 font-medium mb-1">
+                        Incomplete Data
+                      </AlertTitle>
+                      <AlertDescription className="text-amber-200/90 text-sm leading-relaxed">
+                        Some book information is missing. You can edit the details before adding to queue.
+                      </AlertDescription>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="px-3 py-1.5 bg-amber-900/50 text-amber-100 rounded text-xs hover:bg-amber-900/70 transition-colors flex items-center gap-1 ml-auto"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </button>
                   </Alert>
                 )}
 
@@ -367,6 +393,39 @@ const Preview: FC<BookProps> = ({
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Book Details"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Image Manager */}
+          <div>
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Cover Image</h4>
+            <ImageManager
+              currentImage={book.imageOriginal}
+              isbn={book.isbn13}
+              title={book.title}
+              author={book.authors[0]}
+              onImageSelect={(url) => {
+                setBookData({ ...book, image: url, imageOriginal: url });
+              }}
+            />
+          </div>
+
+          {/* Book Form */}
+          <BookForm
+            mode="queue-edit"
+            initialData={book}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setIsEditModalOpen(false)}
+            isSubmitting={isSubmitting}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

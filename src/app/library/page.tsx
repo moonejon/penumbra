@@ -1,4 +1,6 @@
 import { fetchBooksPaginated } from "@/utils/actions/books";
+import { getCurrentUserId } from "@/utils/permissions";
+import prisma from "@/lib/prisma";
 import Library from "./components/library";
 
 export default async function LibraryPage({
@@ -28,12 +30,25 @@ export default async function LibraryPage({
 
   const { books, pageCount } = result;
 
+  // Get current user's database ID for ownership checks
+  let currentUserId: number | null = null;
+  const clerkUserId = await getCurrentUserId();
+
+  if (clerkUserId) {
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+    currentUserId = user?.id ?? null;
+  }
+
   return (
     <Library
       books={books}
       page={page}
       pageCount={pageCount}
       pageSize={pageSize}
+      currentUserId={currentUserId}
     />
   );
 }

@@ -1,15 +1,19 @@
 "use client";
 
-import { BookType } from "@/shared.types";
+import { BookType, BookImportDataType } from "@/shared.types";
 import { FC, useState, useEffect } from "react";
 import List from "./list";
 import GridView from "./gridView";
 import Details from "./details";
 import SearchHeader, { ViewMode } from "./searchHeader";
-import { LibraryBig, SearchX } from "lucide-react";
+import { LibraryBig, SearchX, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PageSizeOption } from "./pageSizeSelector";
+import Modal from "@/components/ui/modal";
+import BookForm from "@/components/forms/BookForm";
+import ImageManager from "@/components/forms/ImageManager";
+import { createManualBook } from "@/utils/actions/books";
 
 type LibraryProps = {
   books: BookType[];
@@ -17,6 +21,7 @@ type LibraryProps = {
   page: number;
   pageSize: number;
   isLoading?: boolean;
+  currentUserId: number | null;
 };
 
 const STORAGE_KEY = "library-view-mode";
@@ -49,10 +54,15 @@ const Library: FC<LibraryProps> = ({
   page,
   pageSize: initialPageSize,
   isLoading = false,
+  currentUserId,
 }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -80,6 +90,11 @@ const Library: FC<LibraryProps> = ({
       setPageSize(defaultPageSize);
     }
   }, [viewMode]);
+
+  // Track when any modal is open to hide the toolbar
+  useEffect(() => {
+    setIsAnyModalOpen(isManualEntryOpen || isEditModalOpen);
+  }, [isManualEntryOpen, isEditModalOpen]);
 
   // Handle view mode change and persist to localStorage
   const handleViewModeChange = (mode: ViewMode) => {
@@ -116,6 +131,25 @@ const Library: FC<LibraryProps> = ({
     router.push("/import");
   };
 
+  const handleManualEntrySubmit = async (bookData: BookImportDataType) => {
+    setIsSubmitting(true);
+    try {
+      const result = await createManualBook(bookData);
+
+      if (result.success) {
+        setIsManualEntryOpen(false);
+        // Refresh the page to show new book
+        router.refresh();
+      } else {
+        alert(result.error || "Failed to create book");
+      }
+    } catch {
+      alert("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Empty state for no search results
   const EmptySearchState = () => (
     <div className="text-center py-16 px-4">
@@ -143,14 +177,23 @@ const Library: FC<LibraryProps> = ({
         No books yet
       </h2>
       <p className="text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
-        Start building your library by importing your first book.
+        Start building your library by importing or adding a book.
       </p>
-      <button
-        onClick={handleImportBooks}
-        className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium"
-      >
-        Add Your First Book
-      </button>
+      <div className="flex gap-3 justify-center">
+        <button
+          onClick={handleImportBooks}
+          className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium"
+        >
+          Import Book
+        </button>
+        <button
+          onClick={() => setIsManualEntryOpen(true)}
+          className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Add Custom Book
+        </button>
+      </div>
     </div>
   );
 
@@ -167,6 +210,7 @@ const Library: FC<LibraryProps> = ({
         pageSize={pageSize}
         pageSizeOptions={currentPageSizeOptions}
         onPageSizeChange={handlePageSizeChange}
+        isHidden={isAnyModalOpen}
       />
 
       <div className="mt-6">
@@ -211,6 +255,8 @@ const Library: FC<LibraryProps> = ({
                   book={selectedBook}
                   setSelectedBook={setSelectedBook}
                   isSidePanel={false}
+                  currentUserId={currentUserId}
+                  onModalStateChange={setIsEditModalOpen}
                 />
               </div>
             )}
@@ -253,6 +299,8 @@ const Library: FC<LibraryProps> = ({
                       book={selectedBook}
                       setSelectedBook={setSelectedBook}
                       isSidePanel={true}
+                      currentUserId={currentUserId}
+                      onModalStateChange={setIsEditModalOpen}
                     />
                   </div>
                 )}
@@ -261,6 +309,35 @@ const Library: FC<LibraryProps> = ({
           </>
         )}
       </div>
+
+      {/* Manual Entry Modal */}
+      <Modal
+        isOpen={isManualEntryOpen}
+        onClose={() => setIsManualEntryOpen(false)}
+        title="Add Custom Book"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Image Manager */}
+          <div>
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Cover Image</h4>
+            <ImageManager
+              currentImage=""
+              onImageSelect={() => {
+                // Image will be set when form is submitted
+              }}
+            />
+          </div>
+
+          {/* Book Form */}
+          <BookForm
+            mode="create"
+            onSubmit={handleManualEntrySubmit}
+            onCancel={() => setIsManualEntryOpen(false)}
+            isSubmitting={isSubmitting}
+          />
+        </div>
+      </Modal>
     </>
   );
 };
