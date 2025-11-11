@@ -64,59 +64,57 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
       <div className={`p-6 overflow-y-auto hide-scrollbar ${
         isSidePanel ? 'max-h-[calc(100vh-8rem)]' : 'h-full'
       }`}>
-        <div className={`flex ${isSidePanel ? 'flex-col' : 'gap-8'}`}>
+        <div className={`flex ${isSidePanel ? 'flex-col' : isMobilePortrait ? 'flex-col' : 'gap-8'}`}>
           {/* Book Cover */}
-          {!isMobilePortrait && (
-            <div className={`flex flex-col items-start ${
-              isSidePanel ? 'w-full mb-6' : 'w-[200px]'
-            }`}>
-              <div className={`relative ${
-                isSidePanel ? 'w-full flex justify-center' : 'w-[200px]'
-              } min-h-[200px]`}>
-                {image && !imageError ? (
-                  <>
-                    {imageLoading && (
-                      <div className={`absolute inset-0 ${
-                        isSidePanel ? 'w-[180px] h-[280px]' : 'w-[200px] h-[200px]'
-                      } bg-zinc-800 animate-pulse rounded`} />
-                    )}
-                    <img
-                      src={image}
-                      alt={`Cover of ${title}`}
-                      onLoad={() => {
-                        if (image) {
-                          imageCache.set(image, true);
-                        }
-                        setImageLoading(false);
-                      }}
-                      onError={() => {
-                        setImageLoading(false);
-                        setImageError(true);
-                      }}
-                      className={`${
-                        isSidePanel ? 'max-h-[280px]' : 'max-h-[200px]'
-                      } object-fill transition-opacity duration-300 rounded shadow-lg ${
-                        imageLoading ? 'opacity-0' : 'opacity-100'
-                      }`}
-                    />
-                  </>
-                ) : (
-                  <div className={`${
-                    isSidePanel ? 'w-[180px] h-[280px]' : 'w-[200px] h-[200px]'
-                  } flex items-center justify-center bg-zinc-800/50 rounded`}>
-                    <ImageIcon className="w-16 h-16 text-zinc-600 opacity-30" />
-                  </div>
-                )}
-              </div>
-              <div className={`flex justify-center w-full mt-4 ${
-                isSidePanel ? 'border-b border-zinc-800 pb-4' : ''
-              }`}>
-                <span className="text-sm font-semibold text-zinc-400 tracking-tight">
-                  {pageCount} pages
-                </span>
-              </div>
+          <div className={`flex flex-col items-start ${
+            isSidePanel ? 'w-full mb-6' : isMobilePortrait ? 'w-full mb-6' : 'w-[200px]'
+          }`}>
+            <div className={`relative ${
+              isSidePanel ? 'w-full flex justify-center' : isMobilePortrait ? 'w-full flex justify-center' : 'w-[200px]'
+            } min-h-[200px]`}>
+              {image && !imageError ? (
+                <>
+                  {imageLoading && (
+                    <div className={`absolute inset-0 ${
+                      isSidePanel ? 'w-[180px] h-[280px]' : isMobilePortrait ? 'w-[150px] h-[240px]' : 'w-[200px] h-[200px]'
+                    } bg-zinc-800 animate-pulse rounded`} />
+                  )}
+                  <img
+                    src={image}
+                    alt={`Cover of ${title}`}
+                    onLoad={() => {
+                      if (image) {
+                        imageCache.set(image, true);
+                      }
+                      setImageLoading(false);
+                    }}
+                    onError={() => {
+                      setImageLoading(false);
+                      setImageError(true);
+                    }}
+                    className={`${
+                      isSidePanel ? 'max-h-[280px]' : isMobilePortrait ? 'max-h-[240px]' : 'max-h-[200px]'
+                    } object-fill transition-opacity duration-300 rounded shadow-lg ${
+                      imageLoading ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  />
+                </>
+              ) : (
+                <div className={`${
+                  isSidePanel ? 'w-[180px] h-[280px]' : isMobilePortrait ? 'w-[150px] h-[240px]' : 'w-[200px] h-[200px]'
+                } flex items-center justify-center bg-zinc-800/50 rounded`}>
+                  <ImageIcon className="w-16 h-16 text-zinc-600 opacity-30" />
+                </div>
+              )}
             </div>
-          )}
+            <div className={`flex justify-center w-full mt-4 ${
+              isSidePanel || isMobilePortrait ? 'border-b border-zinc-800 pb-4' : ''
+            }`}>
+              <span className="text-sm font-semibold text-zinc-400 tracking-tight">
+                {pageCount} pages
+              </span>
+            </div>
+          </div>
 
           {/* Book Metadata */}
           <div className={`flex flex-col gap-5 flex-1 ${
