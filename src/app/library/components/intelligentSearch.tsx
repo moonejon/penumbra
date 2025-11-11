@@ -1,25 +1,7 @@
 "use client";
 
 import { FC, useState, useEffect, useRef, KeyboardEvent } from "react";
-import {
-  TextField,
-  Paper,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  CircularProgress,
-  Box,
-  Divider,
-  IconButton,
-  Chip,
-  Stack,
-  Alert,
-  Button,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { X, Loader2, RotateCw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchSuggestion } from "@/shared.types";
 
@@ -73,7 +55,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           `/api/library/search-suggestions?q=${encodeURIComponent(query)}`
         );
 
-        // FIX #2: Add response validation to prevent crashes
         if (!response.ok) {
           console.error("Search suggestions API error:", response.status);
           setError("Failed to load suggestions. Please try again.");
@@ -229,7 +210,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         break;
       case "title":
         // Filter library by exact title match
-        // This will show just that one book, and user can click to see details
         params.set("title", value);
         params.delete("authors");
         params.delete("subjects");
@@ -297,143 +277,102 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     if (items.length === 0) return null;
 
     return (
-      <Box key={type}>
-        <Typography
-          variant="caption"
-          sx={{
-            px: 2,
-            py: 1,
-            display: "block",
-            fontWeight: 600,
-            textTransform: "uppercase",
-            fontSize: "0.7rem",
-          }}
-        >
+      <div key={type}>
+        <div className="px-3 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
           {title}
-        </Typography>
+        </div>
         {items.map((item, index) => {
           const absoluteIndex = startIndex + index;
+          const isSelected = selectedIndex === absoluteIndex;
           return (
-            <ListItem key={`${type}-${index}`} disablePadding>
-              <ListItemButton
-                selected={selectedIndex === absoluteIndex}
-                onClick={() => handleSelection(type, item.value)}
-                sx={{
-                  py: 1,
-                  "&.Mui-selected": {
-                  },
-                  "&.Mui-selected:hover": {
-                  },
-                }}
-              >
-                <ListItemText
-                  primary={item.value}
-                  primaryTypographyProps={{
-                    sx: {
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
+            <button
+              key={`${type}-${index}`}
+              onClick={() => handleSelection(type, item.value)}
+              className={`w-full px-3 py-2 text-left text-sm transition-colors duration-150 ${
+                isSelected
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-300 hover:bg-zinc-900/50"
+              }`}
+            >
+              <div className="truncate">{item.value}</div>
+            </button>
           );
         })}
-        <Divider />
-      </Box>
+        <div className="border-b border-zinc-800" />
+      </div>
     );
   };
 
   const hasResults = totalItems > 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Box sx={{ position: "relative", width: "100%" }}>
-        <TextField
-          inputRef={inputRef}
-          fullWidth
-          placeholder="Search by title, author, or subject..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (query.trim() && hasResults) {
-              setIsOpen(true);
-            }
-          }}
-          variant="outlined"
-          size="small"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-              },
-              "&:hover fieldset": {
-              },
-            },
-          }}
-          InputProps={{
-            endAdornment: (
-              <>
-                {isLoading && <CircularProgress size={20} sx={{ mr: 1 }} />}
-                {hasActiveFilters && !isLoading && (
-                  <IconButton
-                    size="small"
-                    onClick={handleClearAll}
-                    sx={{
-                      mr: -0.5,
-                      "&:hover": {
-                      },
-                    }}
-                    aria-label="Clear all filters"
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </>
-            ),
-          }}
-        />
-
-        {isOpen && (query.trim().length > 0) && (
-          <Paper
-            ref={dropdownRef}
-            elevation={8}
-            sx={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
-              left: 0,
-              right: 0,
-              maxHeight: "400px",
-              overflowY: "auto",
-              zIndex: 1300,
+    <div className="w-full">
+      <div className="relative w-full">
+        {/* Search Input */}
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search by title, author, or subject..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (query.trim() && hasResults) {
+                setIsOpen(true);
+              }
             }}
+            className="w-full px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
+          />
+
+          {/* Loading spinner or clear button */}
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {isLoading && (
+              <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+            )}
+            {hasActiveFilters && !isLoading && (
+              <button
+                onClick={handleClearAll}
+                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
+                aria-label="Clear all filters"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Dropdown Suggestions */}
+        {isOpen && query.trim().length > 0 && (
+          <div
+            ref={dropdownRef}
+            className="absolute top-[calc(100%+4px)] left-0 right-0 max-h-[400px] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl z-50"
           >
             {error ? (
-              <Box sx={{ p: 2 }}>
-                <Alert
-                  severity="error"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
+              <div className="p-4">
+                <div className="bg-red-950/50 border border-red-900/50 rounded-lg p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm text-red-300 font-medium mb-1">Error</p>
+                      <p className="text-xs text-red-400">{error}</p>
+                    </div>
+                    <button
                       onClick={handleRetry}
-                      startIcon={<RefreshIcon />}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-300 hover:text-red-200 bg-red-950/50 hover:bg-red-950 border border-red-900/50 hover:border-red-800 rounded transition-all duration-150"
                     >
+                      <RotateCw className="w-3 h-3" />
                       Retry
-                    </Button>
-                  }
-                >
-                  {error}
-                </Alert>
-              </Box>
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : hasResults ? (
-              <List disablePadding>
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
+              <div>
+                <div className="px-3 py-2 border-b border-zinc-800">
+                  <p className="text-xs text-zinc-500">
                     Press Enter to search titles for &quot;{query}&quot;
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
                 {renderSection(
                   "Authors",
                   suggestions.authors.map((a) => ({ value: a })),
@@ -455,76 +394,68 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                   "subject",
                   suggestions.authors.length + suggestions.titles.length
                 )}
-              </List>
+              </div>
             ) : (
               !isLoading && (
-                <Box sx={{ px: 2, py: 3, textAlign: "center" }}>
-                  <Typography variant="body2" color="text.secondary">
+                <div className="px-4 py-6 text-center">
+                  <p className="text-sm text-zinc-400 mb-1">
                     No suggestions found
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  </p>
+                  <p className="text-xs text-zinc-500">
                     Press Enter to search for &quot;{query}&quot;
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
               )
             )}
-          </Paper>
+          </div>
         )}
-      </Box>
+      </div>
 
-      {/* Active filter pills */}
+      {/* Active Filter Pills */}
       {hasActiveFilters && (
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            mt: 1,
-            flexWrap: "wrap",
-            gap: 1,
-          }}
-        >
+        <div className="flex flex-wrap gap-2 mt-3">
           {activeTitle && (
-            <Chip
-              label={`Title: ${activeTitle}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("title")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
+              <span className="font-medium">Title:</span>
+              <span className="text-zinc-400 truncate max-w-[200px]">{activeTitle}</span>
+              <button
+                onClick={() => handleRemoveFilter("title")}
+                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
+                aria-label="Remove title filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           )}
           {activeAuthors && (
-            <Chip
-              label={`Author: ${activeAuthors}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("authors")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
+              <span className="font-medium">Author:</span>
+              <span className="text-zinc-400 truncate max-w-[200px]">{activeAuthors}</span>
+              <button
+                onClick={() => handleRemoveFilter("authors")}
+                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
+                aria-label="Remove author filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           )}
           {activeSubjects && (
-            <Chip
-              label={`Subject: ${activeSubjects}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("subjects")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
+              <span className="font-medium">Subject:</span>
+              <span className="text-zinc-400 truncate max-w-[200px]">{activeSubjects}</span>
+              <button
+                onClick={() => handleRemoveFilter("subjects")}
+                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
+                aria-label="Remove subject filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           )}
-        </Stack>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
