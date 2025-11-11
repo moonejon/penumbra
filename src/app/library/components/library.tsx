@@ -7,6 +7,7 @@ import Details from "./details";
 import SearchHeader from "./searchHeader";
 import { LibraryBig, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type LibraryProps = {
   books: BookType[];
@@ -24,6 +25,7 @@ const Library: FC<LibraryProps> = ({
   const [selectedBook, setSelectedBook] = useState<BookType>();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const hasActiveFilters = !!(
     searchParams.get("title") ||
@@ -43,15 +45,15 @@ const Library: FC<LibraryProps> = ({
   const EmptySearchState = () => (
     <div className="text-center py-16 px-4">
       <SearchX className="w-20 h-20 text-zinc-600 mx-auto mb-4 opacity-50" />
-      <h2 className="text-2xl font-semibold text-zinc-100 mb-2">
+      <h2 className="text-2xl font-semibold text-zinc-100 mb-2 tracking-tight">
         No books match your search
       </h2>
-      <p className="text-zinc-400 mb-6 max-w-md mx-auto">
+      <p className="text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
         Try adjusting your search terms or clear your filters to see all books in your library.
       </p>
       <button
         onClick={handleClearFilters}
-        className="px-6 py-2 border border-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        className="px-6 py-2.5 border border-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600 transition-all duration-200"
       >
         Clear Filters
       </button>
@@ -62,15 +64,15 @@ const Library: FC<LibraryProps> = ({
   const EmptyLibraryState = () => (
     <div className="text-center py-16 px-4">
       <LibraryBig className="w-20 h-20 text-zinc-600 mx-auto mb-4 opacity-50" />
-      <h2 className="text-2xl font-semibold text-zinc-100 mb-2">
+      <h2 className="text-2xl font-semibold text-zinc-100 mb-2 tracking-tight">
         No books yet
       </h2>
-      <p className="text-zinc-400 mb-6 max-w-md mx-auto">
+      <p className="text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
         Start building your library by importing your first book.
       </p>
       <button
         onClick={handleImportBooks}
-        className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-colors font-medium"
+        className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium"
       >
         Add Your First Book
       </button>
@@ -81,32 +83,73 @@ const Library: FC<LibraryProps> = ({
 
   return (
     <>
-      {!selectedBook ? (
-        <>
-          <SearchHeader />
-          <div className="mt-6">
-            {showEmptyState ? (
-              hasActiveFilters ? (
-                <EmptySearchState />
-              ) : (
-                <EmptyLibraryState />
-              )
-            ) : (
+      <SearchHeader />
+
+      <div className="mt-6">
+        {showEmptyState ? (
+          hasActiveFilters ? (
+            <EmptySearchState />
+          ) : (
+            <EmptyLibraryState />
+          )
+        ) : (
+          <>
+            {/* Mobile: Full-screen toggle between list and details */}
+            {!isDesktop && !selectedBook && (
               <List
                 rows={books}
                 setSelectedBook={setSelectedBook}
                 page={page}
                 pageCount={pageCount}
                 isLoading={isLoading}
+                selectedBook={selectedBook}
               />
             )}
-          </div>
-        </>
-      ) : (
-        <div className="flex justify-center items-center min-h-screen flex-col">
-          <Details book={selectedBook} setSelectedBook={setSelectedBook} />
-        </div>
-      )}
+
+            {!isDesktop && selectedBook && (
+              <div className="fixed inset-0 z-50 bg-zinc-950 overflow-y-auto">
+                <Details
+                  book={selectedBook}
+                  setSelectedBook={setSelectedBook}
+                  isSidePanel={false}
+                />
+              </div>
+            )}
+
+            {/* Desktop: Side-by-side layout */}
+            {isDesktop && (
+              <div className="flex gap-6">
+                {/* Book List - 40% width */}
+                <div className={`transition-all duration-300 ${
+                  selectedBook ? 'w-[40%]' : 'w-full'
+                }`}>
+                  <List
+                    rows={books}
+                    setSelectedBook={setSelectedBook}
+                    page={page}
+                    pageCount={pageCount}
+                    isLoading={isLoading}
+                    selectedBook={selectedBook}
+                  />
+                </div>
+
+                {/* Details Panel - 60% width */}
+                {selectedBook && (
+                  <div className="w-[60%] sticky top-6 self-start">
+                    <div className="animate-in slide-in-from-right duration-300">
+                      <Details
+                        book={selectedBook}
+                        setSelectedBook={setSelectedBook}
+                        isSidePanel={true}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 };

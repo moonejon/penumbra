@@ -12,30 +12,31 @@ type ListProps = {
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
   pageCount: number;
   isLoading?: boolean;
+  selectedBook?: BookType;
 };
 
 const SkeletonBookCard: FC = () => {
   return (
-    <div className="border border-zinc-800 rounded-lg p-4">
-      <div className="flex gap-4">
+    <div className="border border-zinc-800 rounded-lg p-5">
+      <div className="flex gap-5">
         {/* Book Cover Skeleton - Hidden on mobile */}
         <div className="hidden sm:flex items-center justify-center min-w-[120px]">
           <div className="w-[100px] h-[160px] bg-zinc-800 animate-pulse rounded" />
         </div>
 
         {/* Metadata Skeleton */}
-        <div className="flex flex-col gap-4 md:gap-7 flex-1">
+        <div className="flex flex-col gap-4 flex-1">
           {/* Title and Authors */}
           <div className="space-y-2">
-            <div className="h-7 bg-zinc-800 animate-pulse rounded w-3/5" />
+            <div className="h-6 bg-zinc-800 animate-pulse rounded w-3/5" />
             <div className="h-5 bg-zinc-800 animate-pulse rounded w-2/5" />
           </div>
 
           {/* Publication Details */}
-          <div className="space-y-1">
-            <div className="h-4 bg-zinc-800 animate-pulse rounded w-1/2" />
-            <div className="h-4 bg-zinc-800 animate-pulse rounded w-1/3" />
-            <div className="h-4 bg-zinc-800 animate-pulse rounded w-1/4" />
+          <div className="space-y-2">
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/2" />
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/3" />
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/4" />
           </div>
         </div>
       </div>
@@ -84,16 +85,16 @@ const Pagination: FC<{
   const pages = totalPages > 1 ? getPageNumbers() : [];
 
   return (
-    <div className="flex justify-center items-center gap-1 py-4">
+    <div className="flex justify-center items-center gap-2 py-6 mt-2">
       {/* Previous Button */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={disabled || currentPage === 1}
-        className={`px-3 py-2 rounded border ${
+        className={`px-4 py-2 rounded-lg border font-medium ${
           disabled || currentPage === 1
             ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
-            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-        } transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
+            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
+        } transition-all duration-200 ${isMobile ? 'text-xs' : 'text-sm'}`}
         aria-label="Previous page"
       >
         Previous
@@ -114,13 +115,13 @@ const Pagination: FC<{
             onClick={() => onPageChange(page as number)}
             disabled={disabled}
             className={`${
-              isMobile ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
-            } rounded border transition-colors ${
+              isMobile ? 'w-9 h-9 text-xs' : 'w-10 h-10 text-sm'
+            } rounded-lg border transition-all duration-200 font-medium ${
               currentPage === page
-                ? 'border-zinc-600 bg-zinc-800 text-zinc-100 font-semibold'
+                ? 'border-zinc-600 bg-zinc-800 text-zinc-100 shadow-md ring-1 ring-zinc-700/50'
                 : disabled
                 ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
-                : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
             }`}
           >
             {page}
@@ -132,11 +133,11 @@ const Pagination: FC<{
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={disabled || currentPage === totalPages}
-        className={`px-3 py-2 rounded border ${
+        className={`px-4 py-2 rounded-lg border font-medium ${
           disabled || currentPage === totalPages
             ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
-            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-        } transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
+            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
+        } transition-all duration-200 ${isMobile ? 'text-xs' : 'text-sm'}`}
         aria-label="Next page"
       >
         Next
@@ -145,7 +146,14 @@ const Pagination: FC<{
   );
 };
 
-const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading = false }) => {
+const List: FC<ListProps> = ({
+  rows,
+  page,
+  setSelectedBook,
+  pageCount,
+  isLoading = false,
+  selectedBook
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -167,7 +175,12 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading
         </>
       ) : (
         rows?.map((book, i) => (
-          <Item book={book} key={i} setSelectedBook={setSelectedBook} />
+          <Item
+            book={book}
+            key={i}
+            setSelectedBook={setSelectedBook}
+            isSelected={selectedBook?.id === book.id}
+          />
         ))
       )}
 

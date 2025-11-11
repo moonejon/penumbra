@@ -5,12 +5,13 @@ import { ImageIcon } from "lucide-react";
 type ItemProps = {
   book: BookType;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
+  isSelected?: boolean;
 };
 
 // Client-side image cache to prevent unnecessary re-fetches
 const imageCache = new Map<string, boolean>();
 
-const Item: FC<ItemProps> = ({ book, setSelectedBook }) => {
+const Item: FC<ItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
   const {
     title,
     authors,
@@ -38,10 +39,23 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook }) => {
 
   return (
     <div
-      className="border border-zinc-800 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:bg-zinc-900/50 hover:border-zinc-700"
+      className={`border rounded-lg p-5 cursor-pointer transition-all duration-200 ${
+        isSelected
+          ? 'border-zinc-600 bg-zinc-900/70 shadow-lg ring-1 ring-zinc-700/50'
+          : 'border-zinc-800 hover:bg-zinc-900/50 hover:border-zinc-700'
+      }`}
       onClick={() => setSelectedBook(book)}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setSelectedBook(book);
+        }
+      }}
     >
-      <div className="flex gap-4">
+      <div className="flex gap-5">
         {/* Book Cover - Hidden on mobile */}
         <div className="hidden sm:flex items-center justify-center min-w-[120px]">
           {image && !imageError ? (
@@ -64,7 +78,7 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook }) => {
                   setImageLoading(false);
                   setImageError(true);
                 }}
-                className={`max-h-[160px] object-fill transition-opacity duration-300 ${
+                className={`max-h-[160px] object-fill transition-opacity duration-300 rounded shadow-md ${
                   imageLoading ? 'opacity-0' : 'opacity-100'
                 }`}
               />
@@ -77,31 +91,31 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook }) => {
         </div>
 
         {/* Book Metadata */}
-        <div className="flex flex-col gap-4 md:gap-7 flex-1 min-w-0">
+        <div className="flex flex-col gap-4 flex-1 min-w-0">
           {/* Title and Authors */}
           <div>
-            <h3 className="text-lg font-bold text-zinc-100 mb-1">
+            <h3 className="text-lg font-bold text-zinc-100 mb-1.5 tracking-tight leading-tight">
               {title}
             </h3>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-zinc-400 tracking-tight">
               {authors.join(', ')}
             </p>
           </div>
 
           {/* Publication Details */}
-          <div className="flex flex-col gap-1 text-xs">
-            <div className="flex gap-2">
-              <span className="font-bold text-zinc-300">Publisher:</span>
-              <span className="text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis max-w-[200px]">
+          <div className="flex flex-col gap-2 text-xs">
+            <div className="flex gap-3">
+              <span className="font-semibold text-zinc-400 min-w-[100px]">Publisher</span>
+              <span className="text-zinc-500 overflow-hidden whitespace-nowrap text-ellipsis flex-1">
                 {publisher}
               </span>
             </div>
-            <div className="flex gap-2">
-              <span className="font-bold text-zinc-300">Date Published:</span>
+            <div className="flex gap-3">
+              <span className="font-semibold text-zinc-400 min-w-[100px]">Published</span>
               <span className="text-zinc-500">{datePublished}</span>
             </div>
-            <div className="flex gap-2">
-              <span className="font-bold text-zinc-300">Binding:</span>
+            <div className="flex gap-3">
+              <span className="font-semibold text-zinc-400 min-w-[100px]">Binding</span>
               <span className="text-zinc-500">{binding}</span>
             </div>
           </div>

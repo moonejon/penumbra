@@ -7,12 +7,13 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 type BookProps = {
   book: BookType;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
+  isSidePanel?: boolean;
 };
 
 // Client-side image cache to prevent unnecessary re-fetches
 const imageCache = new Map<string, boolean>();
 
-const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
+const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) => {
   const {
     title,
     authors,
@@ -44,27 +45,38 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
     "(max-width:600px) and (orientation: portrait)",
   );
 
+  // Side panel styling (desktop)
+  const sidePanelClasses = isSidePanel
+    ? "w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl"
+    : "flex-1 w-4/5 max-w-4xl m-8 border border-zinc-800 rounded-lg bg-zinc-900/50";
+
   return (
-    <div className="flex-1 w-4/5 max-w-4xl m-8 border border-zinc-800 rounded-lg bg-zinc-900/50 relative">
+    <div className={`${sidePanelClasses} relative`}>
       {/* Close Button */}
       <button
         onClick={() => setSelectedBook(undefined)}
-        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors"
+        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 z-10"
         aria-label="Close details"
       >
         <X className="w-5 h-5" />
       </button>
 
-      <div className="p-6">
-        <div className="flex gap-8">
-          {/* Book Cover - Hidden on mobile portrait */}
+      <div className="p-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
+        <div className={`flex ${isSidePanel ? 'flex-col' : 'gap-8'}`}>
+          {/* Book Cover */}
           {!isMobilePortrait && (
-            <div className="flex flex-col items-start w-[200px]">
-              <div className="relative w-[200px] min-h-[200px]">
+            <div className={`flex flex-col items-start ${
+              isSidePanel ? 'w-full mb-6' : 'w-[200px]'
+            }`}>
+              <div className={`relative ${
+                isSidePanel ? 'w-full flex justify-center' : 'w-[200px]'
+              } min-h-[200px]`}>
                 {image && !imageError ? (
                   <>
                     {imageLoading && (
-                      <div className="absolute inset-0 w-[200px] h-[200px] bg-zinc-800 animate-pulse rounded" />
+                      <div className={`absolute inset-0 ${
+                        isSidePanel ? 'w-[180px] h-[280px]' : 'w-[200px] h-[200px]'
+                      } bg-zinc-800 animate-pulse rounded`} />
                     )}
                     <img
                       src={image}
@@ -79,55 +91,71 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
                         setImageLoading(false);
                         setImageError(true);
                       }}
-                      className={`max-h-[200px] object-fill transition-opacity duration-300 ${
+                      className={`${
+                        isSidePanel ? 'max-h-[280px]' : 'max-h-[200px]'
+                      } object-fill transition-opacity duration-300 rounded shadow-lg ${
                         imageLoading ? 'opacity-0' : 'opacity-100'
                       }`}
                     />
                   </>
                 ) : (
-                  <div className="w-[200px] h-[200px] flex items-center justify-center bg-zinc-800/50 rounded">
+                  <div className={`${
+                    isSidePanel ? 'w-[180px] h-[280px]' : 'w-[200px] h-[200px]'
+                  } flex items-center justify-center bg-zinc-800/50 rounded`}>
                     <ImageIcon className="w-16 h-16 text-zinc-600 opacity-30" />
                   </div>
                 )}
               </div>
-              <div className="flex justify-center w-full mt-4">
-                <span className="text-xs font-semibold text-zinc-400">
-                  {pageCount} pgs
+              <div className={`flex justify-center w-full mt-4 ${
+                isSidePanel ? 'border-b border-zinc-800 pb-4' : ''
+              }`}>
+                <span className="text-sm font-semibold text-zinc-400 tracking-tight">
+                  {pageCount} pages
                 </span>
               </div>
             </div>
           )}
 
           {/* Book Metadata */}
-          <div className="flex flex-col gap-4 sm:gap-6 flex-1 sm:ml-8">
+          <div className={`flex flex-col gap-5 flex-1 ${
+            !isSidePanel && !isMobilePortrait ? 'sm:ml-8' : ''
+          }`}>
             {/* Title and Authors */}
-            <div>
-              <h2 className="text-2xl font-bold text-zinc-100 mb-2">
+            <div className="pb-4 border-b border-zinc-800">
+              <h2 className="text-2xl font-bold text-zinc-100 mb-2 tracking-tight leading-tight">
                 {title}
               </h2>
-              <p className="text-base text-zinc-400">
+              <p className="text-base text-zinc-400 tracking-tight">
                 {authors.join(' • ')}
               </p>
             </div>
 
             {/* Synopsis */}
-            <div className="text-xs text-zinc-400 leading-relaxed">
-              {parse(synopsis)}
-            </div>
+            {synopsis && (
+              <div className="pb-4 border-b border-zinc-800">
+                <h3 className="text-sm font-bold text-zinc-300 mb-3 tracking-tight">Synopsis</h3>
+                <div className="text-sm text-zinc-400 leading-relaxed space-y-2">
+                  {parse(synopsis)}
+                </div>
+              </div>
+            )}
 
             {/* Publication Details */}
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <span className="text-sm font-bold text-zinc-300">Publisher:</span>
-                <span className="text-sm text-zinc-500">{publisher}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-sm font-bold text-zinc-300">Publication Date:</span>
-                <span className="text-sm text-zinc-500">{datePublished}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-sm font-bold text-zinc-300">Binding:</span>
-                <span className="text-sm text-zinc-500">{binding}</span>
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-bold text-zinc-300 tracking-tight">Publication Details</h3>
+              <div className="space-y-2.5">
+                <div className="flex gap-3">
+                  <span className="text-sm font-semibold text-zinc-400 min-w-[120px]">Publisher</span>
+                  <span className="text-sm text-zinc-500">{publisher}</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-sm font-semibold text-zinc-400 min-w-[120px]">Publication Date</span>
+                  <span className="text-sm text-zinc-500">{datePublished}</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-sm font-semibold text-zinc-400 min-w-[120px]">Binding</span>
+                  <span className="text-sm text-zinc-500">{binding}</span>
+                </div>
               </div>
             </div>
           </div>
