@@ -75,7 +75,6 @@ const BookForm: FC<BookFormProps> = ({
     handleChange,
     handleBlur,
     validateForm,
-    resetForm,
   } = useBookForm(initialData, mode);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -113,17 +112,6 @@ const BookForm: FC<BookFormProps> = ({
   const errorCount = Object.keys(formState.errors).filter(
     (key) => formState.touched[key as keyof BookImportDataType]
   ).length;
-
-  const getModeTitle = () => {
-    switch (mode) {
-      case "create":
-        return "Add Custom Book";
-      case "edit":
-        return "Edit Book";
-      case "queue-edit":
-        return "Edit Book Details";
-    }
-  };
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6">

@@ -143,7 +143,7 @@ const Library: FC<LibraryProps> = ({
       } else {
         alert(result.error || "Failed to create book");
       }
-    } catch (error) {
+    } catch {
       alert("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
@@ -323,7 +323,7 @@ const Library: FC<LibraryProps> = ({
             <h4 className="text-sm font-medium text-zinc-300 mb-3">Cover Image</h4>
             <ImageManager
               currentImage=""
-              onImageSelect={(url) => {
+              onImageSelect={() => {
                 // Image will be set when form is submitted
               }}
             />

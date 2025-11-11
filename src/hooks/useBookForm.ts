@@ -54,6 +54,7 @@ export function useBookForm(
    * Validate a single field
    */
   const validateField = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (field: keyof BookImportDataType, value: any): string | null => {
       switch (field) {
         case "title":

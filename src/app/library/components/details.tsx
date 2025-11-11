@@ -93,7 +93,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
       } else {
         setErrorMessage(result.error || "Failed to update book");
       }
-    } catch (error) {
+    } catch {
       setErrorMessage("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
@@ -117,7 +117,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
       } else {
         setErrorMessage(result.error || "Failed to refresh book data");
       }
-    } catch (error) {
+    } catch {
       setErrorMessage("An unexpected error occurred");
     } finally {
       setIsRefetching(false);
@@ -291,7 +291,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
               isbn={book.isbn13}
               title={book.title}
               author={book.authors[0]}
-              onImageSelect={(url) => {
+              onImageSelect={() => {
                 // Image will be updated when form is submitted
               }}
             />

@@ -10,7 +10,7 @@ interface ImageUploadProps {
   currentImage?: string;
 }
 
-const ImageUpload: FC<ImageUploadProps> = ({ onUpload, currentImage }) => {
+const ImageUpload: FC<ImageUploadProps> = ({ onUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);

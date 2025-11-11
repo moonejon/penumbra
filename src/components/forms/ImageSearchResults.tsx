@@ -163,7 +163,7 @@ const ImageSearchResults: FC<ImageSearchResultsProps> = ({
         <div className="text-center py-8">
           <Search className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
           <p className="text-sm text-zinc-500">
-            Search for cover images using the book's ISBN or title
+            Search for cover images using the book&apos;s ISBN or title
           </p>
         </div>
       )}
