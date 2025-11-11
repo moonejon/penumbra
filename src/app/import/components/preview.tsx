@@ -1,16 +1,10 @@
 import { Dispatch, FC, SetStateAction } from "react";
-import {
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  Skeleton,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle, ImageIcon } from "lucide-react";
 
 interface BookProps {
   book: BookImportDataType;
@@ -66,86 +60,77 @@ const Preview: FC<BookProps> = ({
     setBookData(initialBookImportData);
   };
 
-  const isMobile: boolean = useMediaQuery("(max-width:600px)");
+  const isMobile: boolean = useMediaQuery("(max-width: 600px)");
 
   return (
-    <Card sx={{ margin: { xs: "25px", md: "50px" } }}>
-      <CardContent>
-        <Stack direction="column" spacing={2}>
-          <Typography variant={"h6"}>Preview</Typography>
-          {book !== initialBookImportData && !loading && (
-            <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-              <Stack direction="column" spacing={2}>
-                {book.isIncomplete && (
-                  <Alert
-                    variant="outlined"
-                    severity="warning"
-                    sx={{ marginBottom: "1em" }}
-                  >
+    <div className="mx-6 my-6 sm:mx-12 sm:my-12 bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-zinc-100 tracking-tight">
+          Preview
+        </h2>
+        {book !== initialBookImportData && !loading && (
+          <form noValidate autoComplete="off" onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-4">
+              {book.isIncomplete && (
+                <Alert className="border-amber-500/50 bg-amber-950/50 text-amber-400">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
                     Incomplete data was returned. Consider using the ISBN number
                     found on the title page for more specific details.
-                  </Alert>
-                )}
-                {book.isDuplicate && (
-                  <Alert
-                    variant="outlined"
-                    severity="warning"
-                    sx={{ marginBottom: "1em" }}
-                    icon={false}
-                  >
+                  </AlertDescription>
+                </Alert>
+              )}
+              {book.isDuplicate && (
+                <Alert className="border-amber-500/50 bg-amber-950/50 text-amber-400">
+                  <AlertDescription>
                     A copy of this book already exists in your library. This
                     will create a duplicate copy. Is this intentional?
-                  </Alert>
-                )}
-                <Stack direction="row" spacing={2}>
-                  {book?.imageOriginal ? (
-                    <img
-                      src={book?.imageOriginal}
-                      height={isMobile ? "100px" : "250px"}
-                    />
-                  ) : (
-                    <Skeleton variant="rectangular" width={150} height={250} />
-                  )}
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Typography
-                      gutterBottom
-                      variant={isMobile ? "subtitle2" : "h6"}
-                      fontWeight={700}
-                    >
-                      {title}
-                    </Typography>
-                    <Typography
-                      gutterBottom
-                      variant={isMobile ? "caption" : "subtitle2"}
-                    >
-                      {authors.join(", ")}
-                    </Typography>
-                    <Typography
-                      gutterBottom
-                      sx={{ marginTop: "1em" }}
-                      variant="caption"
-                    >
-                      {binding} ✧ {datePublished?.toString().split("-")[0]}
-                    </Typography>
+                  </AlertDescription>
+                </Alert>
+              )}
+              <div className="flex flex-row gap-4">
+                {book?.imageOriginal ? (
+                  <img
+                    src={book?.imageOriginal}
+                    alt={title}
+                    className={`rounded ${isMobile ? "h-[100px]" : "h-[250px]"} object-cover`}
+                  />
+                ) : (
+                  <div className="w-[150px] h-[250px] bg-zinc-800 rounded animate-pulse flex items-center justify-center">
+                    <ImageIcon className="w-12 h-12 text-zinc-600" />
                   </div>
-                </Stack>
-                <Button
-                  type="submit"
-                  size="medium"
-                  variant="contained"
-                  sx={{
-                    width: { xs: "100%", md: "40%" },
-                    alignSelf: "flex-end",
-                  }}
-                >
-                  Add to queue
-                </Button>
-              </Stack>
-            </form>
-          )}
-        </Stack>
-      </CardContent>
-    </Card>
+                )}
+                <div className="flex flex-col">
+                  <h3
+                    className={`font-bold text-zinc-100 tracking-tight ${
+                      isMobile ? "text-sm" : "text-lg"
+                    }`}
+                  >
+                    {title}
+                  </h3>
+                  <p
+                    className={`text-zinc-400 mt-1 ${
+                      isMobile ? "text-xs" : "text-sm"
+                    }`}
+                  >
+                    {authors.join(", ")}
+                  </p>
+                  <p className="text-zinc-500 text-xs mt-4">
+                    {binding} ✧ {datePublished?.toString().split("-")[0]}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="w-full md:w-[40%] self-end"
+              >
+                Add to queue
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   );
 };
 
