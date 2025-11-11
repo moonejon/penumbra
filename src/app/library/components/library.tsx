@@ -3,11 +3,9 @@
 import { BookType } from "@/shared.types";
 import { FC, useState } from "react";
 import List from "./list";
-import { Box, Container, Typography, Button } from "@mui/material";
 import Details from "./details";
 import SearchHeader from "./searchHeader";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-import SearchOffIcon from "@mui/icons-material/SearchOff";
+import { LibraryBig, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type LibraryProps = {
@@ -43,68 +41,40 @@ const Library: FC<LibraryProps> = ({
 
   // Empty state for no search results
   const EmptySearchState = () => (
-    <Box
-      sx={{
-        textAlign: "center",
-        py: 8,
-        px: 2,
-      }}
-    >
-      <SearchOffIcon
-        sx={{
-          fontSize: 80,
-          color: "text.secondary",
-          mb: 2,
-          opacity: 0.5,
-        }}
-      />
-      <Typography variant="h5" gutterBottom fontWeight={600}>
+    <div className="text-center py-16 px-4">
+      <SearchX className="w-20 h-20 text-zinc-600 mx-auto mb-4 opacity-50" />
+      <h2 className="text-2xl font-semibold text-zinc-100 mb-2">
         No books match your search
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: "auto" }}>
+      </h2>
+      <p className="text-zinc-400 mb-6 max-w-md mx-auto">
         Try adjusting your search terms or clear your filters to see all books in your library.
-      </Typography>
-      <Button
-        variant="outlined"
+      </p>
+      <button
         onClick={handleClearFilters}
-        size="large"
+        className="px-6 py-2 border border-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
       >
         Clear Filters
-      </Button>
-    </Box>
+      </button>
+    </div>
   );
 
   // Empty state for no books in library
   const EmptyLibraryState = () => (
-    <Box
-      sx={{
-        textAlign: "center",
-        py: 8,
-        px: 2,
-      }}
-    >
-      <LibraryBooksIcon
-        sx={{
-          fontSize: 80,
-          color: "text.secondary",
-          mb: 2,
-          opacity: 0.5,
-        }}
-      />
-      <Typography variant="h5" gutterBottom fontWeight={600}>
+    <div className="text-center py-16 px-4">
+      <LibraryBig className="w-20 h-20 text-zinc-600 mx-auto mb-4 opacity-50" />
+      <h2 className="text-2xl font-semibold text-zinc-100 mb-2">
         No books yet
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: "auto" }}>
+      </h2>
+      <p className="text-zinc-400 mb-6 max-w-md mx-auto">
         Start building your library by importing your first book.
-      </Typography>
-      <Button
-        variant="contained"
+      </p>
+      <button
         onClick={handleImportBooks}
-        size="large"
+        className="px-6 py-3 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-colors font-medium"
       >
         Add Your First Book
-      </Button>
-    </Box>
+      </button>
+    </div>
   );
 
   const showEmptyState = !isLoading && books.length === 0;
@@ -114,7 +84,7 @@ const Library: FC<LibraryProps> = ({
       {!selectedBook ? (
         <>
           <SearchHeader />
-          <Container maxWidth="xl" sx={{ mt: { xs: 2, sm: 3 } }}>
+          <div className="max-w-screen-sm mx-auto px-4 mt-6">
             {showEmptyState ? (
               hasActiveFilters ? (
                 <EmptySearchState />
@@ -130,19 +100,12 @@ const Library: FC<LibraryProps> = ({
                 isLoading={isLoading}
               />
             )}
-          </Container>
+          </div>
         </>
       ) : (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-          minWidth="100vw"
-          flexDirection="column"
-        >
+        <div className="flex justify-center items-center min-h-screen flex-col">
           <Details book={selectedBook} setSelectedBook={setSelectedBook} />
-        </Box>
+        </div>
       )}
     </>
   );
