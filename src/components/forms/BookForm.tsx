@@ -169,7 +169,7 @@ const BookForm: FC<BookFormProps> = ({
           helpText="Press Enter or comma to add multiple authors"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="ISBN-13"
             name="isbn13"
@@ -228,7 +228,7 @@ const BookForm: FC<BookFormProps> = ({
           maxLength={500}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="Publication Date"
             name="datePublished"
@@ -267,7 +267,7 @@ const BookForm: FC<BookFormProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="Edition"
             name="edition"

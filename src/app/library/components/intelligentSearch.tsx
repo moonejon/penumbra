@@ -366,7 +366,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
             autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"
-            placeholder="Search by title, author, or subject..."
+            placeholder="Search books..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -390,7 +390,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         {isOpen && query.trim().length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute top-[calc(100%+4px)] left-0 right-0 max-h-[400px] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl z-50"
+            className="absolute top-[calc(100%+4px)] left-0 right-0 max-h-[60vh] sm:max-h-[400px] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl z-50"
           >
             {error ? (
               <div className="p-4">
