@@ -18,10 +18,10 @@ type ListProps = {
 const SkeletonBookCard: FC = () => {
   return (
     <div className="border border-zinc-800 rounded-lg p-5">
-      <div className="flex gap-5">
-        {/* Book Cover Skeleton - Hidden on mobile */}
-        <div className="hidden sm:flex items-center justify-center min-w-[120px]">
-          <div className="w-[100px] h-[160px] bg-zinc-800 animate-pulse rounded" />
+      <div className="flex gap-3 sm:gap-5">
+        {/* Book Cover Skeleton */}
+        <div className="flex items-center justify-center min-w-[70px] sm:min-w-[120px]">
+          <div className="w-[60px] h-[90px] sm:w-[100px] sm:h-[160px] bg-zinc-800 animate-pulse rounded" />
         </div>
 
         {/* Metadata Skeleton */}

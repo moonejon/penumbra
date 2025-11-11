@@ -107,7 +107,7 @@ const Library: FC<LibraryProps> = ({
             )}
 
             {!isDesktop && selectedBook && (
-              <div className="fixed inset-0 z-50 bg-zinc-950 overflow-y-auto">
+              <div className="fixed inset-0 z-50 bg-zinc-950">
                 <Details
                   book={selectedBook}
                   setSelectedBook={setSelectedBook}

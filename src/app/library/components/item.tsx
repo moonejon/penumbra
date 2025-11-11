@@ -55,15 +55,13 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
         }
       }}
     >
-      <div className="flex gap-5">
-        {/* Book Cover - Hidden on mobile */}
-        <div className="hidden sm:flex items-center justify-center min-w-[120px]">
+      <div className="flex gap-3 sm:gap-5">
+        {/* Book Cover */}
+        <div className="flex items-center justify-center min-w-[70px] sm:min-w-[120px]">
           {image && !imageError ? (
-            <div className="relative w-[100px]">
+            <div className="relative w-[60px] sm:w-[100px]">
               {imageLoading && (
-                <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded"
-                     style={{ width: '100px', height: '160px' }}
-                />
+                <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded w-[60px] h-[90px] sm:w-[100px] sm:h-[160px]" />
               )}
               <img
                 src={image}
@@ -78,14 +76,14 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
                   setImageLoading(false);
                   setImageError(true);
                 }}
-                className={`max-h-[160px] object-fill transition-opacity duration-300 rounded shadow-md ${
+                className={`max-h-[90px] sm:max-h-[160px] object-fill transition-opacity duration-300 rounded shadow-md ${
                   imageLoading ? 'opacity-0' : 'opacity-100'
                 }`}
               />
             </div>
           ) : (
-            <div className="w-[100px] h-[160px] flex items-center justify-center bg-zinc-800/50 rounded">
-              <ImageIcon className="w-12 h-12 text-zinc-600 opacity-30" />
+            <div className="w-[60px] h-[90px] sm:w-[100px] sm:h-[160px] flex items-center justify-center bg-zinc-800/50 rounded">
+              <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-zinc-600 opacity-30" />
             </div>
           )}
         </div>

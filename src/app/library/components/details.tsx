@@ -45,10 +45,10 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
     "(max-width:600px) and (orientation: portrait)",
   );
 
-  // Side panel styling (desktop)
+  // Side panel styling (desktop) vs full-screen (mobile)
   const sidePanelClasses = isSidePanel
     ? "w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl"
-    : "flex-1 w-4/5 max-w-4xl m-8 border border-zinc-800 rounded-lg bg-zinc-900/50";
+    : "w-full h-full bg-zinc-950 border-t border-zinc-800";
 
   return (
     <div className={`${sidePanelClasses} relative`}>
@@ -61,7 +61,9 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
         <X className="w-5 h-5" />
       </button>
 
-      <div className="p-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
+      <div className={`p-6 overflow-y-auto hide-scrollbar ${
+        isSidePanel ? 'max-h-[calc(100vh-8rem)]' : 'h-full'
+      }`}>
         <div className={`flex ${isSidePanel ? 'flex-col' : 'gap-8'}`}>
           {/* Book Cover */}
           {!isMobilePortrait && (
