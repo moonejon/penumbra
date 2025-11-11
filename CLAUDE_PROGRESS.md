@@ -1,6 +1,6 @@
 # Claude Code Progress Log - Penumbra Project
 
-**Last Updated:** November 11, 2025 (Evening Session 5)
+**Last Updated:** November 11, 2025 (Evening Session 6 - Phase 4 Complete!)
 **Project:** Penumbra - Personal Library Management System
 
 ---
@@ -8,10 +8,11 @@
 ## 📋 Quick Reference
 
 ### Current State
-- **Main Branch:** Up to date with all merged PRs
-- **Active Features:** Production data sync, Intelligent search
+- **Main Branch:** Up to date with all merged PRs (Phase 4 complete!)
+- **Active Features:** Production data sync, Intelligent search, Full Tailwind CSS migration
 - **Development Database:** 357 production books synced for testing
 - **Dev Server:** Running on http://localhost:3000
+- **UI Framework:** 100% Tailwind CSS v4 (Material-UI fully removed)
 
 ### Key Commands
 ```bash
@@ -30,7 +31,7 @@ npm run build                                    # Production build
 ## 🎯 Project Overview
 
 **Tech Stack:**
-- **Frontend:** Next.js 15, React 19, TypeScript, Material-UI v7
+- **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS v4
 - **Backend:** Next.js Server Actions, API Routes
 - **Database:** PostgreSQL with Prisma ORM + Prisma Accelerate
 - **Auth:** Clerk
@@ -277,6 +278,75 @@ Migrates Penumbra from Material-UI to Tailwind CSS + Motion Primitives, matching
 **Tech Stack Changes:**
 - Before: MUI v7 + Emotion + Space Mono
 - After: Tailwind v4 + Motion Primitives + Geist fonts
+
+### 5. Book Editing Features (In Progress)
+
+**Status:** ✅ Implementation Complete, Ready for PR
+**Branch:** `book-edit-features`
+**Agents:** frontend-dev, fullstack-dev, ux-designer, debugger
+
+**What It Does:**
+Comprehensive book editing system allowing users to edit book metadata, manage cover images, and add custom books not found in ISBNDB.
+
+**Key Features:**
+1. **Pre-Import Editing** - Edit incomplete data before adding to import queue or via edit button on queue items
+2. **Library Item Editing** - Edit existing books with database sync + re-fetch from ISBNDB
+3. **Cover Image Management** - Upload custom images (Vercel Blob) + search multiple APIs (Google Books, Open Library)
+4. **Manual Book Entry** - Add custom books not in ISBNDB with optional ISBN
+5. **Field Validation** - Comprehensive validation including ISBN-10/13 checksum validation
+
+**Implementation Highlights:**
+- **DRY Architecture** - Single `BookForm` component reused across all edit scenarios (create, edit, queue-edit)
+- **Reusable Components** - TextField, TextArea, ArrayField, NumberField, Modal
+- **Custom Hook** - `useBookForm` for centralized form state and validation
+- **Image Management** - Tabbed interface (Current, Search, Upload) with drag-and-drop
+- **Server Actions** - `updateBook`, `refetchBookMetadata`, `createManualBook` with ownership verification
+- **Security** - Proper ownership checks, authenticated API routes, file type/size validation
+- **Accessibility** - WCAG 2.1 AA compliance, focus traps, ARIA labels, keyboard navigation
+
+**Files Created (18):**
+- `/src/components/ui/modal.tsx` - Reusable modal with accessibility
+- `/src/components/forms/BookForm.tsx` - Main form component (3 modes)
+- `/src/components/forms/ImageManager.tsx` - Tabbed image interface
+- `/src/components/forms/ImageUpload.tsx` - Drag-and-drop upload
+- `/src/components/forms/ImageSearchResults.tsx` - Grid display of search results
+- `/src/components/forms/fields/TextField.tsx` - Text input with validation
+- `/src/components/forms/fields/TextArea.tsx` - Multiline text input
+- `/src/components/forms/fields/ArrayField.tsx` - Tag-based array input
+- `/src/components/forms/fields/NumberField.tsx` - Numeric input
+- `/src/hooks/useBookForm.ts` - Form state management hook
+- `/src/utils/validation.ts` - ISBN checksum and field validation
+- `/src/app/api/upload/cover-image/route.ts` - Vercel Blob upload
+- `/src/app/api/search/cover-images/route.ts` - Multi-source image search
+- `/src/app/sign-in/[[...sign-in]]/page.tsx` - Clerk sign-in page
+- `/src/app/sign-up/[[...sign-up]]/page.tsx` - Clerk sign-up page
+
+**Files Modified (5):**
+- `/src/app/import/components/preview.tsx` - Added edit modal
+- `/src/app/import/components/item.tsx` - Added edit button
+- `/src/app/import/components/queue.tsx` - Added edit modal
+- `/src/app/library/components/details.tsx` - Added Edit + Re-fetch buttons, modal state callback
+- `/src/app/library/components/library.tsx` - Added manual entry modal, modal state tracking
+- `/src/app/library/components/searchHeader.tsx` - Added `isHidden` prop
+- `/src/utils/actions/books.ts` - Added updateBook, refetchBookMetadata, createManualBook, fixed filter logic
+- `/src/shared.types.ts` - Added `ownerId` to BookType
+- `/src/app/library/page.tsx` - Added currentUserId prop passing
+
+**Bug Fixes:**
+- Fixed Prisma Accelerate URL validation (regenerated client)
+- Fixed authentication error for unauthenticated users (debugger agent)
+- Fixed edit buttons showing for non-owners (debugger agent)
+- Fixed toolbar appearing over modal (frontend-dev agent - visibility-based approach)
+- Fixed Prisma filter construction with explicit AND clauses
+
+**Integration:**
+- Merged main branch (Phase 4 MUI removal) successfully
+- Resolved package.json conflicts (@vercel/blob preserved)
+- TypeScript compilation passing
+- All features tested and functional
+
+**Dependencies Added:**
+- `@vercel/blob` - Vercel Blob Storage for image uploads
 
 ---
 
@@ -578,28 +648,66 @@ npm run sync-prod-data -- --user-id=1 --yes    # Sync
 - ✅ All Phase 2 work now live on production (penumbra.jonathanmooney.me)
 - ✅ Updated CLAUDE_PROGRESS.md with comprehensive Phase 2 documentation
 - ✅ Created new branch `feature/phase-3-import-flow` for Import page migration
-- 🚀 Starting Phase 3: Import Flow migration with frontend-dev + ux-designer planning
+- 🚀 Phase 3: Import Flow migration completed (see PR #30)
+
+**Evening (Session 6 - Phase 4: MUI Cleanup & Completion):**
+- ✅ Tasked UX Designer agent to audit remaining MUI usage
+- ✅ Created comprehensive Phase 4 documentation (4 docs: audit, summary, checklist, visual guide)
+- ✅ Tasked Frontend Developer agent to remove all MUI dependencies
+- ✅ Migrated 5 remaining components to Tailwind CSS:
+  - textSearch.tsx (MUI TextField → Tailwind Input)
+  - filters.tsx (MUI Container/Stack → Tailwind flex)
+  - page.tsx/home (MUI Grid → Tailwind grid)
+  - dashboard/page.tsx (MUI Container/Typography → semantic HTML)
+  - dashboard/components/grid.tsx (MUI DataGrid → custom Tailwind table)
+- ✅ Removed 7 MUI/Emotion packages (~1000 lines from package-lock.json)
+- ✅ Fixed permission filtering for unauthenticated users (debugger agent)
+- ✅ Updated .gitignore to exclude .clerk/ directory
+- ✅ Created PR #31: "Phase 4: Remove MUI Dependencies & Complete Tailwind Migration"
+- ✅ Merged PR #31 to main (squash merge)
+- ✅ Updated local main branch with merged changes
+- 🎉 **Portfolio Styling Migration COMPLETE** - All 4 phases done!
+- ✅ 100% Tailwind CSS, zero Material-UI dependencies remaining
+
+**Evening (Session 7 - Book Editing Features):**
+- ✅ Created comprehensive plan for book editing features (frontend-dev, fullstack-dev, ux-designer)
+- ✅ Implemented 6 phases of book editing functionality:
+  - Phase 1: Modal and field components (foundation)
+  - Phase 2: BookForm component (reusable form across all edit scenarios)
+  - Phase 3: Image management (upload API, search API, UI components)
+  - Phase 4: Import flow integration (preview and queue editing)
+  - Phase 5: Library Details editing with ISBNDB re-fetch
+  - Phase 6: Manual book entry (custom books not in ISBNDB)
+- ✅ Created 18 new files (components, hooks, utilities, API routes)
+- ✅ Modified 5 existing files
+- ✅ Made 7 atomic commits following DRY principles
+- ✅ Configured Vercel Blob Storage for image uploads
+- ✅ Merged main branch (Phase 4 MUI removal) into surat worktree
+- ✅ Fixed authentication errors for unauthenticated library access (debugger agent)
+- ✅ Implemented ownership checks - edit buttons only show for book owners (debugger agent)
+- ✅ Created custom Clerk sign-in/sign-up pages with Tailwind styling
+- ✅ Fixed toolbar overlay issue - toolbar now hides when modals are open (frontend-dev)
+- ✅ Branch: `book-edit-features` ready for PR
+- 🎉 **All editing features fully functional and tested**
 
 ---
 
 ## 🎯 Next Steps / Open Items
 
 ### Immediate
-- [ ] Phase 3: Import Flow Migration (4 PRs, 2-3 days estimated)
-  - [ ] Create detailed implementation plan (frontend-dev + ux-designer)
-  - [ ] PR #1: Import page layout and container
-  - [ ] PR #2: Search component
-  - [ ] PR #3: Preview and queue components
-  - [ ] PR #4: Queue item component
+- [x] Phase 3: Import Flow Migration ✅ COMPLETE (PR #30 merged)
+- [x] Phase 4: Remove MUI Dependencies ✅ COMPLETE (PR #31 merged)
+- [ ] Optional: Phase 5: Animations & Polish (if desired)
 
 ### Portfolio Migration Progress
-- ✅ Phase 1: Foundation (3/3 PRs complete)
-- ✅ Phase 2: Core UI (10/10 PRs complete, merged to main, deployed)
-- 🚀 Phase 3: Import Flow (0/4 PRs, planning stage)
-- ⏳ Phase 4: Cleanup (0/1 PR)
-- ⏳ Phase 5: Animations & Polish (0/4 PRs)
+- ✅ Phase 1: Foundation (3/3 PRs complete, merged)
+- ✅ Phase 2: Core UI (10/10 PRs complete, merged, deployed)
+- ✅ Phase 3: Import Flow (PR #30 merged)
+- ✅ Phase 4: MUI Cleanup (PR #31 merged) ← **JUST COMPLETED!**
+- ⏳ Phase 5: Animations & Polish (optional enhancement)
 
-**Current Branch:** `feature/phase-3-import-flow`
+**Migration Status:** ✨ **COMPLETE** ✨
+**Current Tech Stack:** 100% Tailwind CSS v4, zero MUI dependencies
 **Documentation:** `docs/migration/portfolio-styling/`
 
 ### Future Enhancements
@@ -632,4 +740,7 @@ npm run sync-prod-data -- --user-id=1 --yes    # Sync
 *Session 2 focus: Loading/error states and image caching for improved UX*
 *Session 3 focus: Adding qa-expert agent for comprehensive quality assurance*
 *Session 4 focus: Portfolio styling migration Phase 1 - Foundation setup*
+*Session 5 focus: Portfolio styling migration Phase 2 - Core UI completion*
+*Session 6 focus: Portfolio styling migration Phase 4 - Complete MUI removal* ✨ **MIGRATION COMPLETE** ✨
+*Session 7 focus: Book editing features - Full CRUD operations with image management* 🎯 **EDIT FEATURES COMPLETE** 🎯
 *Agents utilized: fullstack-dev, backend-dev, debugger, frontend-dev, qa-expert, ux-designer*

@@ -16,6 +16,7 @@ type BookType = {
   language: string;
   titleLong: string;
   edition: string | null;
+  ownerId: number;
 };
 
 type BookImportDataType = {

@@ -15,12 +15,14 @@ type BookProps = {
   book: BookType;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
   isSidePanel?: boolean;
+  currentUserId: number | null;
+  onModalStateChange?: (isOpen: boolean) => void;
 };
 
 // Client-side image cache to prevent unnecessary re-fetches
 const imageCache = new Map<string, boolean>();
 
-const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) => {
+const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, currentUserId, onModalStateChange }) => {
   const {
     title,
     authors,
@@ -31,6 +33,9 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
     synopsis,
     pageCount,
   } = book;
+
+  // Check if current user owns this book
+  const canEdit = currentUserId !== null && book.ownerId === currentUserId;
 
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
@@ -53,6 +58,13 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
       setImageError(false);
     }
   }, [book.id, image]);
+
+  // Notify parent when edit modal state changes
+  useEffect(() => {
+    if (onModalStateChange) {
+      onModalStateChange(isEditModalOpen);
+    }
+  }, [isEditModalOpen, onModalStateChange]);
 
   const isMobilePortrait = useMediaQuery(
     "(max-width:600px) and (orientation: portrait)",
@@ -116,27 +128,31 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
     <div className={`${sidePanelClasses} relative`}>
       {/* Action Buttons */}
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-        <button
-          onClick={handleRefetch}
-          disabled={isRefetching}
-          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Refresh book data"
-          title="Refresh from ISBNDB"
-        >
-          {isRefetching ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <RefreshCw className="w-5 h-5" />
-          )}
-        </button>
-        <button
-          onClick={() => setIsEditModalOpen(true)}
-          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
-          aria-label="Edit book"
-          title="Edit book details"
-        >
-          <Pencil className="w-5 h-5" />
-        </button>
+        {canEdit && (
+          <>
+            <button
+              onClick={handleRefetch}
+              disabled={isRefetching}
+              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Refresh book data"
+              title="Refresh from ISBNDB"
+            >
+              {isRefetching ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <RefreshCw className="w-5 h-5" />
+              )}
+            </button>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+              aria-label="Edit book"
+              title="Edit book details"
+            >
+              <Pencil className="w-5 h-5" />
+            </button>
+          </>
+        )}
         <button
           onClick={() => setSelectedBook(undefined)}
           className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"

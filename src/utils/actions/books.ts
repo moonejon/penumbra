@@ -70,26 +70,45 @@ export async function fetchBooksPaginated({
   // Get viewable book filter (handles auth automatically)
   const visibilityFilter = await getViewableBookFilter();
 
-  const filters = {
-    ...visibilityFilter,
-    ...(title && {
+  // Build search filters
+  const searchFilters: Prisma.BookWhereInput[] = [];
+
+  if (title) {
+    searchFilters.push({
       title: {
         contains: title,
         mode: Prisma.QueryMode.insensitive,
       },
-    }),
-    ...(authors && {
+    });
+  }
+
+  if (authors) {
+    searchFilters.push({
       authors: {
         hasSome: authors.split(","),
       },
-    }),
-    ...(subjects && {
+    });
+  }
+
+  if (subjects) {
+    searchFilters.push({
       subjects: {
         hasSome: subjects.split(","),
       },
-    }),
-  };
+    });
+  }
 
+  // Combine visibility filter with search filters
+  // Use AND to properly combine visibility rules with search criteria
+  const filters: Prisma.BookWhereInput =
+    searchFilters.length > 0
+      ? {
+          AND: [
+            visibilityFilter,
+            ...searchFilters,
+          ],
+        }
+      : visibilityFilter;
 
   const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({
@@ -98,6 +117,25 @@ export async function fetchBooksPaginated({
       where: filters,
       orderBy: {
         id: "asc",
+      },
+      select: {
+        id: true,
+        title: true,
+        image: true,
+        imageOriginal: true,
+        publisher: true,
+        synopsis: true,
+        pageCount: true,
+        datePublished: true,
+        authors: true,
+        subjects: true,
+        isbn10: true,
+        isbn13: true,
+        binding: true,
+        language: true,
+        titleLong: true,
+        edition: true,
+        ownerId: true,
       },
     }),
     prisma.book.count({

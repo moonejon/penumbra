@@ -21,6 +21,7 @@ type LibraryProps = {
   page: number;
   pageSize: number;
   isLoading?: boolean;
+  currentUserId: number | null;
 };
 
 const STORAGE_KEY = "library-view-mode";
@@ -53,12 +54,15 @@ const Library: FC<LibraryProps> = ({
   page,
   pageSize: initialPageSize,
   isLoading = false,
+  currentUserId,
 }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -86,6 +90,11 @@ const Library: FC<LibraryProps> = ({
       setPageSize(defaultPageSize);
     }
   }, [viewMode]);
+
+  // Track when any modal is open to hide the toolbar
+  useEffect(() => {
+    setIsAnyModalOpen(isManualEntryOpen || isEditModalOpen);
+  }, [isManualEntryOpen, isEditModalOpen]);
 
   // Handle view mode change and persist to localStorage
   const handleViewModeChange = (mode: ViewMode) => {
@@ -201,6 +210,7 @@ const Library: FC<LibraryProps> = ({
         pageSize={pageSize}
         pageSizeOptions={currentPageSizeOptions}
         onPageSizeChange={handlePageSizeChange}
+        isHidden={isAnyModalOpen}
       />
 
       <div className="mt-6">
@@ -245,6 +255,8 @@ const Library: FC<LibraryProps> = ({
                   book={selectedBook}
                   setSelectedBook={setSelectedBook}
                   isSidePanel={false}
+                  currentUserId={currentUserId}
+                  onModalStateChange={setIsEditModalOpen}
                 />
               </div>
             )}
@@ -287,6 +299,8 @@ const Library: FC<LibraryProps> = ({
                       book={selectedBook}
                       setSelectedBook={setSelectedBook}
                       isSidePanel={true}
+                      currentUserId={currentUserId}
+                      onModalStateChange={setIsEditModalOpen}
                     />
                   </div>
                 )}

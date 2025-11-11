@@ -13,6 +13,7 @@ type SearchHeaderProps = {
   pageSize?: number;
   pageSizeOptions?: PageSizeOption[];
   onPageSizeChange?: (pageSize: number) => void;
+  isHidden?: boolean;
 };
 
 const SearchHeader: FC<SearchHeaderProps> = ({
@@ -21,7 +22,10 @@ const SearchHeader: FC<SearchHeaderProps> = ({
   pageSize,
   pageSizeOptions = [],
   onPageSizeChange,
+  isHidden = false,
 }) => {
+  if (isHidden) return null;
+
   return (
     <div className="w-full sticky top-14 z-40 py-3 sm:py-4 bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800/50">
       <div className="flex gap-2 sm:gap-4">
