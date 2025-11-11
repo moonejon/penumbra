@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
 
 /**
@@ -69,12 +69,11 @@ export default function Error({
 
         {/* Retry button */}
         <Button
-          variant="contained"
-          color="primary"
+          variant="default"
           onClick={reset}
-          startIcon={<RefreshCw size={18} />}
           className="w-full"
         >
+          <RefreshCw size={18} className="mr-2" />
           Try Again
         </Button>
 
