@@ -15,9 +15,24 @@ datasource db {
 
 enum BookVisibility {
   PRIVATE // Only owner can see
-  PUBLIC  // Anyone can see in public library
+  PUBLIC // Anyone can see in public library
   FRIENDS // Future: only friends can see
   UNLISTED // Future: accessible via direct link only
+}
+
+// Visibility enum for reading lists - using same pattern as BookVisibility
+enum ReadingListVisibility {
+  PRIVATE // Only owner can see
+  PUBLIC // Anyone can see in public library
+  FRIENDS // Future: only friends can see
+  UNLISTED // Future: accessible via direct link only
+}
+
+// Special types of reading lists for favorites
+enum ReadingListType {
+  STANDARD // Regular user-created reading list
+  FAVORITES_YEAR // Favorite books of a specific year (max 5-6 books)
+  FAVORITES_ALL // Favorite books of all time (max 5-6 books)
 }
 
 model User {
@@ -25,12 +40,21 @@ model User {
   clerkId String  @unique
   email   String  @unique
   name    String?
-  books   Book[]
+
+  // Profile image storage (URL to uploaded image or default placeholder)
+  // Recommended: Vercel Blob for simple, integrated file storage
+  // Format: https://[vercel-blob-url]/[user-id]/profile.[ext]
+  profileImageUrl String? @db.Text
+
+  books        Book[]
+  readingLists ReadingList[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Book {
   id            Int            @id @default(autoincrement())
-  owner         User           @relation(fields: [ownerId], references: [id])
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId       Int
   isbn10        String         @unique @db.VarChar(10)
   isbn13        String         @unique @db.VarChar(13)
@@ -48,4 +72,84 @@ model Book {
   authors       String[]
   binding       String
   visibility    BookVisibility @default(PUBLIC)
+
+  // Read date tracking - when the user read this book (NOT publication date)
+  // Used for filtering favorites by year: "Favorite Books I Read in 2024"
+  // Nullable because user may not have set it yet
+  readDate DateTime?
+
+  readingListEntries BookInReadingList[] // Many-to-many relationship with reading lists
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // Indexes for common queries
+  @@index([ownerId])
+  @@index([visibility])
+  @@index([title])
+  @@index([readDate]) // For filtering by read date
+  @@index([ownerId, readDate]) // For user's books by read date
+}
+
+// Reading List model - represents a collection of books organized by the user
+model ReadingList {
+  id          Int                   @id @default(autoincrement())
+  owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     Int
+  title       String
+  description String?               @db.Text
+  visibility  ReadingListVisibility @default(PRIVATE)
+
+  // Type determines if this is a standard list or a special favorites list
+  type ReadingListType @default(STANDARD)
+
+  // For FAVORITES_YEAR type, stores the year (e.g., "2024")
+  // For other types, can be null or used for custom categorization
+  year String?
+
+  // Books in this reading list via join table
+  books BookInReadingList[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Constraint: Only one FAVORITES_ALL per user
+  // Constraint: Only one FAVORITES_YEAR per user per year
+  // These are enforced at application level due to Prisma limitations
+
+  // Indexes for performance
+  @@index([ownerId])
+  @@index([visibility])
+  @@index([type])
+  @@index([type, year]) // For favorites queries
+}
+
+// Junction table for many-to-many relationship between Books and ReadingLists
+// This allows:
+// - One book to be in multiple reading lists
+// - One reading list to have multiple books
+// - Ordering of books within a list
+// - Optional notes/annotations per book in each list
+model BookInReadingList {
+  id            Int         @id @default(autoincrement())
+  book          Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId        Int
+  readingList   ReadingList @relation(fields: [readingListId], references: [id], onDelete: Cascade)
+  readingListId Int
+
+  // Order of the book within the reading list (lower numbers appear first)
+  // This allows users to arrange books in their preferred order
+  position Int @default(0)
+
+  // Optional notes or annotations for this specific book in this specific list
+  // Example: "Read this first", "Gift from Mom", "Reread in summer"
+  notes String? @db.Text
+
+  // When this book was added to the reading list
+  addedAt DateTime @default(now())
+
+  // Composite unique constraint: a book can only appear once in a reading list
+  @@unique([bookId, readingListId])
+  // Indexes for performance
+  @@index([readingListId, position]) // For fetching books in order
+  @@index([bookId]) // For finding all lists containing a book
 }

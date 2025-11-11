@@ -882,3 +882,46 @@ export async function fetchFavorites(year?: string) {
     };
   }
 }
+
+/**
+ * Fetch all available years that have favorites lists
+ * Returns an array of years sorted in descending order (newest first)
+ */
+export async function fetchAvailableFavoriteYears() {
+  try {
+    const user = await getCurrentUser();
+
+    // Find all FAVORITES_YEAR lists for this user
+    const favoritesYearLists = await prisma.readingList.findMany({
+      where: {
+        ownerId: user.id,
+        type: "FAVORITES_YEAR",
+        year: {
+          not: null,
+        },
+      },
+      select: {
+        year: true,
+      },
+      orderBy: {
+        year: "desc",
+      },
+    });
+
+    // Extract years and convert to numbers
+    const years = favoritesYearLists
+      .map((list) => list.year)
+      .filter((year): year is string => year !== null)
+      .map((year) => parseInt(year, 10))
+      .filter((year) => !isNaN(year));
+
+    return { success: true, years };
+  } catch (error) {
+    console.error("Fetch available favorite years error:", error);
+    return {
+      success: false,
+      error: "Failed to fetch available years",
+      years: [],
+    };
+  }
+}

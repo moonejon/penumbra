@@ -104,6 +104,7 @@ export async function uploadProfileImage(formData: FormData) {
 export async function updateUserBio(bio: string) {
   try {
     // 1. Authenticate user
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const user = await getCurrentUser();
 
     // 2. Validate bio length
@@ -117,14 +118,16 @@ export async function updateUserBio(bio: string) {
     // 3. Update user bio in database
     // Note: This assumes the 'bio' field exists in the User model schema
     // If the field doesn't exist yet, this will fail until the migration is run
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { bio },
-    });
+    // TODO: Uncomment after bio migration is run
+    // await prisma.user.update({
+    //   where: { id: user.id },
+    //   data: { bio },
+    // });
 
-    // 4. Return success
+    // 4. Return success (temporary error until bio field migration is run)
     return {
-      success: true,
+      success: false,
+      error: "Bio field not yet available - migration pending",
     };
   } catch (error) {
     console.error("Update bio error:", error);
@@ -153,6 +156,7 @@ export async function getUserProfile() {
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bio: (user as any).bio || null, // Type assertion for bio field until schema is updated
     };
 
