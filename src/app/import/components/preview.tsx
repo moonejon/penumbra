@@ -101,7 +101,10 @@ const Preview: FC<BookProps> = ({
                 isMobile ? "flex-col items-center" : "flex-row"
               )}>
                 {/* Image Skeleton */}
-                <div className="relative shrink-0">
+                <div className={cn(
+                  "relative shrink-0",
+                  isMobile ? "w-[120px]" : "w-[160px]"
+                )}>
                   <div className={cn(
                     "bg-gradient-to-br from-zinc-800 to-zinc-850 rounded-lg overflow-hidden",
                     isMobile ? "w-[120px] h-[180px]" : "w-[160px] h-[240px]"
@@ -112,7 +115,7 @@ const Preview: FC<BookProps> = ({
 
                 {/* Content Skeleton */}
                 <div className={cn(
-                  "flex flex-col gap-3 flex-1",
+                  "flex flex-col gap-3 flex-1 min-w-0",
                   isMobile && "items-center text-center w-full"
                 )}>
                   {/* Title Skeleton */}
