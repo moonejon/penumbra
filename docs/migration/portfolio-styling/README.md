@@ -27,7 +27,7 @@ This migration transforms Penumbra into a public-first book library that seamles
 ### UX Changes
 - **Public-First:** Library browseable by anyone, editable only by owner
 - **Minimal Navigation:** Replace MUI AppBar with simple header
-- **Hidden Admin:** Import and Dashboard behind Settings dropdown
+- **Hidden Admin:** Import page behind Settings dropdown (Dashboard out of scope)
 - **Simplified Auth:** Less prominent Sign In/Sign Up buttons
 - **Future-Ready:** Layout designed for "cover view" grid option
 
@@ -64,10 +64,10 @@ This migration transforms Penumbra into a public-first book library that seamles
 - Refactor search, preview, queue components
 - Preserve all business logic
 
-### Phase 4: Dashboard & Cleanup (1-2 days, 2 PRs)
-- Rewrite dashboard grid (custom table or TanStack)
+### Phase 4: Cleanup (1 day, 1 PR)
 - Remove all MUI dependencies
 - Final verification build
+- Clean up unused imports
 
 ### Phase 5: Animations & Polish (2-3 days, 4 PRs)
 - Create animation component library
@@ -75,7 +75,9 @@ This migration transforms Penumbra into a public-first book library that seamles
 - Add animations to import flow
 - Final polish, accessibility, performance audit
 
-**Total:** 19 PRs, 9-14 days estimated
+**Total:** 18 PRs, 8-12 days estimated
+
+**Note:** Dashboard migration is out of scope for this phase. The dashboard will remain with MUI components until future work.
 
 ## Key Design Decisions
 
@@ -119,27 +121,28 @@ This migration transforms Penumbra into a public-first book library that seamles
 ### High-Risk Changes
 - **Phase 1, PR #3:** Root layout changes (temporarily breaks UI)
 - **Intelligent Search:** Complex keyboard navigation must be preserved
-- **Dashboard Grid:** Custom table might miss MUI DataGrid features
 
 ### Mitigation Strategies
 - Complete Phase 2 within 1-2 days of Phase 1 PR #3
 - Extensive testing for keyboard navigation
-- Consider TanStack Table library for dashboard
 - Each PR independently revertible
 - No database changes (UI-only migration)
+- Dashboard will keep MUI dependencies (out of scope)
 
 ## Success Criteria
 
-- [ ] All MUI dependencies removed
+- [ ] MUI dependencies removed from library and import flows
 - [ ] Tailwind CSS v4 fully integrated
 - [ ] Motion Primitives animations working
-- [ ] All existing functionality preserved
+- [ ] All library and import functionality preserved
 - [ ] Public-first UX with hidden admin features
 - [ ] Accessibility maintained (WCAG 2.1 AA)
 - [ ] Performance equal or better (Lighthouse scores)
-- [ ] Visual consistency with portfolio
+- [ ] Visual consistency with portfolio (library pages)
 - [ ] No TypeScript errors
 - [ ] All tests passing
+
+**Note:** Dashboard page will retain MUI components temporarily.
 
 ## Related Documentation
 
