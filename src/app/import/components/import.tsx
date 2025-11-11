@@ -1,7 +1,7 @@
 "use client";
 import { FC, useState } from "react";
-import { Box, Stack, useMediaQuery } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Preview from "./preview";
 import Queue from "./queue";
 import Search from "./search";
@@ -34,11 +34,11 @@ const Import: FC<ImportProps> = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [importQueue, setImportQueue] = useState<Array<BookImportDataType>>([]);
 
-  const isMobile: boolean = useMediaQuery("(max-width:900px)");
+  const isMobile: boolean = useMediaQuery("(max-width: 768px)");
 
   return (
-    <Stack direction={isMobile ? "column" : "row"}>
-      <Box sx={{ width: { xs: "100%", md: "50%" } }}>
+    <div className={`flex ${isMobile ? "flex-col" : "flex-row"}`}>
+      <div className="w-full md:w-1/2">
         <Search setBookData={setBookData} setLoading={setLoading} />
         <Preview
           book={bookData}
@@ -47,11 +47,11 @@ const Import: FC<ImportProps> = ({}) => {
           importQueue={importQueue}
           setImportQueue={setImportQueue}
         />
-      </Box>
-      <Box sx={{ width: { xs: "100%", md: "50%" } }}>
+      </div>
+      <div className="w-full md:w-1/2">
         <Queue books={importQueue} setBooks={setImportQueue} />
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 };
 
