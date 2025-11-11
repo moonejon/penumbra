@@ -1,18 +1,8 @@
 import { BookType } from "@/shared.types";
-import {
-  Box,
-  Card,
-  CardContent,
-  IconButton,
-  Skeleton,
-  Stack,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ImageIcon from "@mui/icons-material/Image";
+import { X, ImageIcon } from "lucide-react";
 import parse from "html-react-parser";
 import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type BookProps = {
   book: BookType;
@@ -50,53 +40,31 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
     }
   }, [book.id, image]);
 
-  const isMobilePortrait: boolean = useMediaQuery(
+  const isMobilePortrait = useMediaQuery(
     "(max-width:600px) and (orientation: portrait)",
   );
 
   return (
-    <Card
-      sx={{ flexGrow: 1, width: "80%", margin: "5%", position: "relative" }}
-    >
-      <IconButton
+    <div className="flex-1 w-4/5 max-w-4xl m-8 border border-zinc-800 rounded-lg bg-zinc-900/50 relative">
+      {/* Close Button */}
+      <button
         onClick={() => setSelectedBook(undefined)}
-        sx={{ position: "absolute", top: 5, right: 5 }}
+        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors"
+        aria-label="Close details"
       >
-        <CloseIcon />
-      </IconButton>
-      <CardContent>
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            justifyContent: "space-between",
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={4}
-            sx={{
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: isMobilePortrait ? "none" : "flex",
-                alignItems: "top",
-                flexDirection: "column",
-                width: "200px",
-              }}
-            >
-              <Box sx={{ position: "relative", width: "200px", minHeight: "200px" }}>
+        <X className="w-5 h-5" />
+      </button>
+
+      <div className="p-6">
+        <div className="flex gap-8">
+          {/* Book Cover - Hidden on mobile portrait */}
+          {!isMobilePortrait && (
+            <div className="flex flex-col items-start w-[200px]">
+              <div className="relative w-[200px] min-h-[200px]">
                 {image && !imageError ? (
                   <>
                     {imageLoading && (
-                      <Skeleton
-                        variant="rectangular"
-                        width={200}
-                        height={200}
-                        sx={{ position: "absolute" }}
-                      />
+                      <div className="absolute inset-0 w-[200px] h-[200px] bg-zinc-800 animate-pulse rounded" />
                     )}
                     <img
                       src={image}
@@ -111,83 +79,61 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
                         setImageLoading(false);
                         setImageError(true);
                       }}
-                      style={{
-                        maxHeight: "200px",
-                        objectFit: "fill",
-                        opacity: imageLoading ? 0 : 1,
-                        transition: "opacity 0.3s ease-in-out",
-                      }}
+                      className={`max-h-[200px] object-fill transition-opacity duration-300 ${
+                        imageLoading ? 'opacity-0' : 'opacity-100'
+                      }`}
                     />
                   </>
                 ) : (
-                  <Box
-                    sx={{
-                      width: 200,
-                      height: 200,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "action.hover",
-                      borderRadius: 1,
-                    }}
-                  >
-                    <ImageIcon sx={{ fontSize: 64, color: "text.secondary", opacity: 0.3 }} />
-                  </Box>
+                  <div className="w-[200px] h-[200px] flex items-center justify-center bg-zinc-800/50 rounded">
+                    <ImageIcon className="w-16 h-16 text-zinc-600 opacity-30" />
+                  </div>
                 )}
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                  margin: "1em auto",
-                }}
-              >
-                <Typography variant="caption" fontWeight="600">
+              </div>
+              <div className="flex justify-center w-full mt-4">
+                <span className="text-xs font-semibold text-zinc-400">
                   {pageCount} pgs
-                </Typography>
-              </Box>
-            </Box>
-            <Stack
-              spacing={{ xs: 1, sm: 2 }}
-              sx={{ marginLeft: { xs: "0 !important", sm: "2em !important" } }}
-            >
-              <Stack>
-                <Typography variant="h6" fontWeight={1000}>
-                  {title}
-                </Typography>
-                <Typography variant="subtitle2">
-                  {authors.join(` * `)}
-                </Typography>
-              </Stack>
-              <Box sx={{ border: "" }}>
-                <Typography variant="caption">{parse(synopsis)}</Typography>
-              </Box>
-              <Stack>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Publisher:
-                  </Typography>
-                  <Typography variant="subtitle2">{publisher}</Typography>
-                </div>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Publication Date:
-                  </Typography>
-                  <Typography variant="subtitle2">{datePublished}</Typography>
-                </div>
-                <div style={{ display: "inline-flex", gap: ".5em" }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    Binding:
-                  </Typography>
-                  <Typography variant="subtitle2">{binding}</Typography>
-                </div>
-              </Stack>
-            </Stack>
-          </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Book Metadata */}
+          <div className="flex flex-col gap-4 sm:gap-6 flex-1 sm:ml-8">
+            {/* Title and Authors */}
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-100 mb-2">
+                {title}
+              </h2>
+              <p className="text-base text-zinc-400">
+                {authors.join(' • ')}
+              </p>
+            </div>
+
+            {/* Synopsis */}
+            <div className="text-xs text-zinc-400 leading-relaxed">
+              {parse(synopsis)}
+            </div>
+
+            {/* Publication Details */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <span className="text-sm font-bold text-zinc-300">Publisher:</span>
+                <span className="text-sm text-zinc-500">{publisher}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-sm font-bold text-zinc-300">Publication Date:</span>
+                <span className="text-sm text-zinc-500">{datePublished}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-sm font-bold text-zinc-300">Binding:</span>
+                <span className="text-sm text-zinc-500">{binding}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
