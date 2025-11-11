@@ -27,15 +27,25 @@ export function Header() {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-screen-sm mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           <nav className="flex items-center justify-between h-14">
             {/* Brand */}
-            <Link
-              href="/"
-              className="text-xl font-semibold text-zinc-100 hover:text-zinc-400 transition-colors"
-            >
-              Penumbra
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="text-xl font-semibold text-zinc-100 hover:text-zinc-400 transition-colors"
+              >
+                Penumbra
+              </Link>
+              <a
+                href="https://jonathanmooney.me"
+                className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ← portfolio
+              </a>
+            </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">

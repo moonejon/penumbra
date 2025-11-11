@@ -32,7 +32,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Header />
-            <main className="relative mx-auto w-full max-w-screen-sm flex-1 px-4 pt-20">{children}</main>
+            <main className="relative mx-auto w-full max-w-5xl flex-1 px-4 pt-20">{children}</main>
             <Footer />
           </ThemeProvider>
         </body>
