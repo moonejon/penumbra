@@ -114,6 +114,10 @@ const Modal: FC<ModalProps> = ({
       {/* Modal content */}
       <div
         ref={modalRef}
+        style={{
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y'
+        }}
         className={cn(
           "relative bg-zinc-900 border-t md:border border-zinc-800 rounded-t-2xl md:rounded-lg shadow-2xl",
           "w-full max-h-[92vh] md:max-h-[90vh] flex flex-col pb-safe",
@@ -121,11 +125,6 @@ const Modal: FC<ModalProps> = ({
           sizeClasses[size]
         )}
       >
-        {/* Drag indicator for mobile */}
-        <div className="flex justify-center pt-2 pb-1 md:hidden">
-          <div className="w-12 h-1 bg-zinc-700 rounded-full" />
-        </div>
-
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-zinc-800">
           <h2
