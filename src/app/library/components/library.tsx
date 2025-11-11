@@ -41,7 +41,7 @@ const GRID_PAGE_SIZE_OPTIONS: PageSizeOption[] = [
 
 // Default page sizes
 const DEFAULT_LIST_PAGE_SIZE = 25;
-const DEFAULT_GRID_PAGE_SIZE = 25;
+const DEFAULT_GRID_PAGE_SIZE = 50;
 
 const Library: FC<LibraryProps> = ({
   books,
@@ -241,20 +241,19 @@ const Library: FC<LibraryProps> = ({
                       isLoading={isLoading}
                       selectedBook={selectedBook}
                       pageSize={pageSize}
+                      isSidePanelOpen={!!selectedBook}
                     />
                   )}
                 </div>
 
                 {/* Details Panel - 60% width */}
                 {selectedBook && (
-                  <div className="w-[60%] sticky top-6 self-start">
-                    <div className="animate-in slide-in-from-right duration-300">
-                      <Details
-                        book={selectedBook}
-                        setSelectedBook={setSelectedBook}
-                        isSidePanel={true}
-                      />
-                    </div>
+                  <div className="w-[60%] sticky top-20 self-start">
+                    <Details
+                      book={selectedBook}
+                      setSelectedBook={setSelectedBook}
+                      isSidePanel={true}
+                    />
                   </div>
                 )}
               </div>

@@ -14,6 +14,7 @@ type GridViewProps = {
   isLoading?: boolean;
   selectedBook?: BookType;
   pageSize: number;
+  isSidePanelOpen?: boolean;
 };
 
 const SkeletonGridCard: FC = () => {
@@ -133,7 +134,8 @@ const GridView: FC<GridViewProps> = ({
   pageCount,
   isLoading = false,
   selectedBook,
-  pageSize
+  pageSize,
+  isSidePanelOpen = false
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -147,8 +149,12 @@ const GridView: FC<GridViewProps> = ({
 
   return (
     <div>
-      {/* Grid Container with responsive columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+      {/* Grid Container with responsive columns - fewer columns when side panel is open */}
+      <div className={`grid gap-3 sm:gap-4 md:gap-5 ${
+        isSidePanelOpen
+          ? 'grid-cols-2 md:grid-cols-3'
+          : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+      }`}>
         {isLoading ? (
           // Show skeleton cards based on pageSize
           <>
