@@ -412,52 +412,52 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               Clear All
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto pb-2 -mx-3 px-3 md:mx-0 md:px-0 hide-scrollbar">
             {activeTitles.map((title) => (
               <div
                 key={`title-${title}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-xs"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-xs flex-shrink-0"
               >
                 <span className="font-semibold text-zinc-300">Title:</span>
-                <span className="text-zinc-100 truncate max-w-[200px]">{title}</span>
+                <span className="text-zinc-100 truncate max-w-[100px] sm:max-w-[200px]">{title}</span>
                 <button
                   onClick={() => handleRemoveFilter("title", title)}
-                  className="ml-1 p-0.5 text-zinc-400 hover:text-zinc-100 transition-colors duration-150 rounded hover:bg-zinc-600/30"
+                  className="ml-1 p-1.5 sm:p-1 min-w-[28px] min-h-[28px] text-zinc-400 hover:text-zinc-100 transition-colors duration-150 rounded hover:bg-zinc-600/30"
                   aria-label={`Remove title filter: ${title}`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </button>
               </div>
             ))}
             {activeAuthorsList.map((author) => (
               <div
                 key={`author-${author}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900/50 border border-blue-800/50 rounded-lg text-xs"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900/50 border border-blue-800/50 rounded-lg text-xs flex-shrink-0"
               >
                 <span className="font-semibold text-blue-200">Author:</span>
-                <span className="text-blue-100 truncate max-w-[200px]">{author}</span>
+                <span className="text-blue-100 truncate max-w-[100px] sm:max-w-[200px]">{author}</span>
                 <button
                   onClick={() => handleRemoveFilter("authors", author)}
-                  className="ml-1 p-0.5 text-blue-300 hover:text-blue-100 transition-colors duration-150 rounded hover:bg-blue-800/30"
+                  className="ml-1 p-1.5 sm:p-1 min-w-[28px] min-h-[28px] text-blue-300 hover:text-blue-100 transition-colors duration-150 rounded hover:bg-blue-800/30"
                   aria-label={`Remove author filter: ${author}`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </button>
               </div>
             ))}
             {activeSubjectsList.map((subject) => (
               <div
                 key={`subject-${subject}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-900/50 border border-purple-800/50 rounded-lg text-xs"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-900/50 border border-purple-800/50 rounded-lg text-xs flex-shrink-0"
               >
                 <span className="font-semibold text-purple-200">Subject:</span>
-                <span className="text-purple-100 truncate max-w-[200px]">{subject}</span>
+                <span className="text-purple-100 truncate max-w-[100px] sm:max-w-[200px]">{subject}</span>
                 <button
                   onClick={() => handleRemoveFilter("subjects", subject)}
-                  className="ml-1 p-0.5 text-purple-300 hover:text-purple-100 transition-colors duration-150 rounded hover:bg-purple-800/30"
+                  className="ml-1 p-1.5 sm:p-1 min-w-[28px] min-h-[28px] text-purple-300 hover:text-purple-100 transition-colors duration-150 rounded hover:bg-purple-800/30"
                   aria-label={`Remove subject filter: ${subject}`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </button>
               </div>
             ))}
@@ -470,7 +470,11 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
         <div className="relative">
           <input
             ref={inputRef}
-            type="text"
+            type="search"
+            inputMode="search"
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
             placeholder="Search by title, author, or subject..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -480,7 +484,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                 setIsOpen(true);
               }
             }}
-            className="w-full h-[42px] px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
+            className="w-full h-[42px] px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-base sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
           />
 
           {/* Loading spinner */}

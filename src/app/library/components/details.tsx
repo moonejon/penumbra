@@ -133,7 +133,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
             <button
               onClick={handleRefetch}
               disabled={isRefetching}
-              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Refresh book data"
               title="Refresh from ISBNDB"
             >
@@ -145,7 +145,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
             </button>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+              className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
               aria-label="Edit book"
               title="Edit book details"
             >
@@ -155,7 +155,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
         )}
         <button
           onClick={() => setSelectedBook(undefined)}
-          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+          className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
           aria-label="Close details"
         >
           <X className="w-5 h-5" />

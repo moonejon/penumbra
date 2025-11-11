@@ -50,6 +50,10 @@ const TextField: FC<TextFieldProps> = ({
         id={name}
         name={name}
         type={type}
+        inputMode={type === "email" ? "email" : type === "url" ? "url" : "text"}
+        autoComplete={type === "email" ? "email" : type === "url" ? "url" : "off"}
+        autoCapitalize={type === "email" || type === "url" ? "none" : undefined}
+        autoCorrect={type === "email" || type === "url" ? "off" : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
@@ -63,7 +67,8 @@ const TextField: FC<TextFieldProps> = ({
           hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
         }
         className={cn(
-          "px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100",
+          "px-3 py-2 min-h-[44px] w-full bg-zinc-900 border rounded-lg",
+          "text-base sm:text-sm text-zinc-100",
           "placeholder:text-zinc-600",
           "focus:outline-none focus:ring-2 focus:border-transparent",
           "disabled:opacity-50 disabled:cursor-not-allowed",

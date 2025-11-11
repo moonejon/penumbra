@@ -87,10 +87,10 @@ const ArrayField: FC<ArrayFieldProps> = ({
                 <button
                   type="button"
                   onClick={() => removeValue(index)}
-                  className="text-zinc-400 hover:text-zinc-100 transition-colors"
+                  className="p-1 min-w-[24px] min-h-[24px] text-zinc-400 hover:text-zinc-100 transition-colors"
                   aria-label={`Remove ${value}`}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </span>
@@ -116,7 +116,7 @@ const ArrayField: FC<ArrayFieldProps> = ({
             aria-describedby={
               hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
             }
-            className="flex-1 min-w-[120px] bg-transparent border-none text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+            className="flex-1 min-w-[80px] sm:min-w-[120px] bg-transparent border-none text-base sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
           />
         </div>
       </div>

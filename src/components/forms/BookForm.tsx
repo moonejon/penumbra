@@ -327,18 +327,20 @@ const BookForm: FC<BookFormProps> = ({
       </FormSection>
 
       {/* Action buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-zinc-800">
         <Button
           type="button"
           onClick={handleCancelClick}
           variant="outline"
           disabled={isSubmitting}
+          className="w-full sm:w-auto min-h-[48px] md:min-h-[44px] text-base md:text-sm"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !formState.isValid}
+          className="w-full sm:w-auto min-h-[48px] md:min-h-[44px] text-base md:text-sm"
         >
           {isSubmitting ? (
             <>
