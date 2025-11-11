@@ -62,14 +62,45 @@ const Preview: FC<BookProps> = ({
 
   const isMobile: boolean = useMediaQuery("(max-width: 600px)");
 
+  const showEmpty = book === initialBookImportData && !loading;
+  const showLoading = loading;
+  const showContent = book !== initialBookImportData && !loading;
+
   return (
-    <div className="mx-6 my-6 sm:mx-12 sm:my-12 bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-zinc-100 tracking-tight">
-          Preview
-        </h2>
-        {book !== initialBookImportData && !loading && (
-          <form noValidate autoComplete="off" onSubmit={handleSubmit}>
+    <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12">
+      <div className="p-6">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-zinc-100 tracking-tight">
+            Preview
+          </h2>
+
+          {/* Empty State */}
+          {showEmpty && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <ImageIcon className="w-16 h-16 text-zinc-700 mb-4 opacity-50" />
+              <p className="text-zinc-400 text-sm">
+                Search for a book by ISBN to see a preview here
+              </p>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {showLoading && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row gap-4">
+                <div className="w-[150px] h-[250px] bg-zinc-800 rounded animate-pulse" />
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="h-6 bg-zinc-800 rounded w-3/4 animate-pulse" />
+                  <div className="h-4 bg-zinc-800 rounded w-1/2 animate-pulse" />
+                  <div className="h-3 bg-zinc-800 rounded w-1/3 animate-pulse mt-4" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Content */}
+          {showContent && (
+            <form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
               {book.isIncomplete && (
                 <Alert className="border-amber-500/50 bg-amber-950/50 text-amber-400">
@@ -128,7 +159,8 @@ const Preview: FC<BookProps> = ({
               </Button>
             </div>
           </form>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
