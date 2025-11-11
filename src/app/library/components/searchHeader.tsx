@@ -136,7 +136,7 @@ const SearchHeader: FC<SearchHeaderProps> = ({
             {activeTitles.map((title) => (
               <div
                 key={`title-${title}`}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600/20 border border-blue-500/30 rounded-md text-xs flex-shrink-0"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600/20 border border-blue-500/30 rounded-md text-xs flex-shrink-0 animate-in fade-in slide-in-from-left-2 duration-200"
               >
                 <span className="text-blue-300 truncate max-w-[120px]">{title}</span>
                 <button
@@ -152,7 +152,7 @@ const SearchHeader: FC<SearchHeaderProps> = ({
             {activeAuthorsList.map((author) => (
               <div
                 key={`author-${author}`}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-green-600/20 border border-green-500/30 rounded-md text-xs flex-shrink-0"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-green-600/20 border border-green-500/30 rounded-md text-xs flex-shrink-0 animate-in fade-in slide-in-from-left-2 duration-200"
               >
                 <span className="text-green-300 truncate max-w-[120px]">{author}</span>
                 <button
@@ -168,7 +168,7 @@ const SearchHeader: FC<SearchHeaderProps> = ({
             {activeSubjectsList.map((subject) => (
               <div
                 key={`subject-${subject}`}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-600/20 border border-purple-500/30 rounded-md text-xs flex-shrink-0"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-600/20 border border-purple-500/30 rounded-md text-xs flex-shrink-0 animate-in fade-in slide-in-from-left-2 duration-200"
               >
                 <span className="text-purple-300 truncate max-w-[120px]">{subject}</span>
                 <button
