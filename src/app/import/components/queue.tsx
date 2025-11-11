@@ -1,14 +1,17 @@
 import { Dispatch, FC, SetStateAction, useState } from "react";
-import { Button, Card, CardContent, Typography, CircularProgress, Alert, Snackbar } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import Item from "./item";
 import { importBooks } from "@/utils/actions/books";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface QueueProps {
   books: Array<BookImportDataType>;
   setBooks: Dispatch<SetStateAction<BookImportDataType[]>>;
 }
+
 const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +39,8 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
       if (result?.success) {
         setBooks([]);
         setShowSuccess(true);
+        // Auto-hide success message after 4 seconds
+        setTimeout(() => setShowSuccess(false), 4000);
       } else {
         setError("Failed to import books. Please try again.");
       }
@@ -49,40 +54,30 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
 
   return (
     <>
-      <Card
-        sx={{
-          display: "flex",
-          minWidth: "200px",
-          minHeight: "90vh",
-          margin: { xs: "25px", md: "50px" },
-        }}
-      >
-        <CardContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            width: "100%",
-          }}
-        >
-          <Typography variant="h6" sx={{ marginBottom: "1em" }}>
+      <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12 flex flex-col min-h-[90vh]">
+        <div className="p-6 flex flex-col flex-1">
+          <h2 className="text-xl font-semibold text-zinc-100 tracking-tight mb-4">
             Queue
-          </Typography>
+          </h2>
 
           {error && (
-            <Alert
-              severity="error"
-              onClose={() => setError(null)}
-              sx={{ mb: 2 }}
-            >
-              {error}
+            <Alert className="mb-4 border-red-500/50 bg-red-950/50 text-red-400">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex-1">{error}</AlertDescription>
+              <button
+                onClick={() => setError(null)}
+                className="ml-auto text-red-400 hover:text-red-300"
+                aria-label="Close error"
+              >
+                ×
+              </button>
             </Alert>
           )}
 
           {books?.length ? (
-            <>
-              {books &&
-                books?.map((book, i) => (
+            <div className="flex flex-col flex-1 gap-4">
+              <div className="flex-1">
+                {books.map((book, i) => (
                   <Item
                     title={book.title}
                     authors={book.authors}
@@ -92,47 +87,51 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
                     handleDelete={handleDelete}
                   />
                 ))}
+              </div>
               <Button
                 onClick={handleSubmit}
-                size="medium"
-                sx={{ width: "50%", alignSelf: "flex-end" }}
-                variant="contained"
+                className="w-full md:w-1/2 self-end"
                 disabled={isImporting}
-                startIcon={isImporting ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {isImporting ? "Adding..." : "Add to library"}
+                {isImporting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add to library"
+                )}
               </Button>
-            </>
+            </div>
           ) : (
-            <div
-              style={{
-                border: "2px solid grey",
-                backgroundColor: "grey",
-                opacity: "5%",
-                margin: "10px",
-                borderRadius: "5%",
-                flex: 1,
-              }}
-            ></div>
+            <div className="flex-1 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-900/30 m-2" />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Snackbar
-        open={showSuccess}
-        autoHideDuration={4000}
-        onClose={() => setShowSuccess(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      {/* Success Toast */}
+      <div
+        className={cn(
+          "fixed bottom-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
+          showSuccess
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        )}
       >
-        <Alert
-          onClose={() => setShowSuccess(false)}
-          severity="success"
-          icon={<CheckCircleIcon />}
-          sx={{ width: "100%" }}
-        >
-          Books successfully added to your library!
+        <Alert className="border-green-500/50 bg-green-950/50 text-green-400 shadow-xl">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Books successfully added to your library!
+          </AlertDescription>
+          <button
+            onClick={() => setShowSuccess(false)}
+            className="ml-4 text-green-400 hover:text-green-300"
+            aria-label="Close success message"
+          >
+            ×
+          </button>
         </Alert>
-      </Snackbar>
+      </div>
     </>
   );
 };
