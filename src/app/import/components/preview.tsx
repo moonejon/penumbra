@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
-import theme from "@/theme";
 
 interface BookProps {
   book: BookImportDataType;
@@ -67,7 +66,7 @@ const Preview: FC<BookProps> = ({
     setBookData(initialBookImportData);
   };
 
-  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile: boolean = useMediaQuery("(max-width:600px)");
 
   return (
     <Card sx={{ margin: { xs: "25px", md: "50px" } }}>

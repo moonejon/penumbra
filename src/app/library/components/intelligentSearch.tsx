@@ -21,7 +21,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useRouter, useSearchParams } from "next/navigation";
-import theme from "@/theme";
 import { SearchSuggestion } from "@/shared.types";
 
 type IntelligentSearchProps = {
@@ -305,7 +304,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
             px: 2,
             py: 1,
             display: "block",
-            color: theme.palette.text.secondary,
             fontWeight: 600,
             textTransform: "uppercase",
             fontSize: "0.7rem",
@@ -323,10 +321,8 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                 sx={{
                   py: 1,
                   "&.Mui-selected": {
-                    backgroundColor: theme.palette.action.selected,
                   },
                   "&.Mui-selected:hover": {
-                    backgroundColor: theme.palette.action.hover,
                   },
                 }}
               >
@@ -369,13 +365,10 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           variant="outlined"
           size="small"
           sx={{
-            backgroundColor: theme.palette.background.paper,
             "& .MuiOutlinedInput-root": {
               "& fieldset": {
-                borderColor: theme.palette.divider,
               },
               "&:hover fieldset": {
-                borderColor: theme.palette.primary.main,
               },
             },
           }}
@@ -390,7 +383,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                     sx={{
                       mr: -0.5,
                       "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
                       },
                     }}
                     aria-label="Clear all filters"
@@ -415,7 +407,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               maxHeight: "400px",
               overflowY: "auto",
               zIndex: 1300,
-              backgroundColor: theme.palette.background.paper,
             }}
           >
             {error ? (
@@ -438,7 +429,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               </Box>
             ) : hasResults ? (
               <List disablePadding>
-                <Box sx={{ px: 2, py: 1, backgroundColor: theme.palette.action.hover }}>
+                <Box sx={{ px: 2, py: 1 }}>
                   <Typography variant="caption" color="text.secondary">
                     Press Enter to search titles for &quot;{query}&quot;
                   </Typography>
@@ -498,12 +489,8 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               size="small"
               onDelete={() => handleRemoveFilter("title")}
               sx={{
-                backgroundColor: theme.palette.primary.dark,
-                color: theme.palette.primary.contrastText,
                 "& .MuiChip-deleteIcon": {
-                  color: theme.palette.primary.contrastText,
                   "&:hover": {
-                    color: theme.palette.primary.light,
                   },
                 },
               }}
@@ -515,12 +502,8 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               size="small"
               onDelete={() => handleRemoveFilter("authors")}
               sx={{
-                backgroundColor: theme.palette.secondary.dark,
-                color: theme.palette.secondary.contrastText,
                 "& .MuiChip-deleteIcon": {
-                  color: theme.palette.secondary.contrastText,
                   "&:hover": {
-                    color: theme.palette.secondary.light,
                   },
                 },
               }}
@@ -532,12 +515,8 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               size="small"
               onDelete={() => handleRemoveFilter("subjects")}
               sx={{
-                backgroundColor: theme.palette.info.dark,
-                color: theme.palette.info.contrastText,
                 "& .MuiChip-deleteIcon": {
-                  color: theme.palette.info.contrastText,
                   "&:hover": {
-                    color: theme.palette.info.light,
                   },
                 },
               }}

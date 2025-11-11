@@ -5,7 +5,6 @@ import { BookImportDataType } from "@/shared.types";
 import Preview from "./preview";
 import Queue from "./queue";
 import Search from "./search";
-import theme from "@/theme";
 
 type ImportProps = object;
 
@@ -35,7 +34,7 @@ const Import: FC<ImportProps> = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [importQueue, setImportQueue] = useState<Array<BookImportDataType>>([]);
 
-  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile: boolean = useMediaQuery("(max-width:900px)");
 
   return (
     <Stack direction={isMobile ? "column" : "row"}>

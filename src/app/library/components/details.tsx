@@ -13,7 +13,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import parse from "html-react-parser";
 import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
-import theme from "@/theme";
 
 type BookProps = {
   book: BookType;
@@ -52,7 +51,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook }) => {
   }, [book.id, image]);
 
   const isMobilePortrait: boolean = useMediaQuery(
-    `${theme.breakpoints.down("sm")} and (orientation: portrait)`,
+    "(max-width:600px) and (orientation: portrait)",
   );
 
   return (

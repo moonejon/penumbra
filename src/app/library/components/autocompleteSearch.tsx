@@ -1,4 +1,3 @@
-import theme from "@/theme";
 import { Autocomplete, TextField } from "@mui/material";
 import _ from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -52,7 +51,6 @@ const AutoCompleteSearch: FC<AutoCompleteSearchProps> = ({
             />
         )}
         onChange={inDropdown ? handleSearchChange : _.debounce(handleSearchChange, 500)}
-        sx={{ backgroundColor: inDropdown ? theme.palette.background.paper : theme.palette.background.default }}
       />
     );
   }

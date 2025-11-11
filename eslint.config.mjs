@@ -13,7 +13,8 @@ export default defineConfig([
   {
     // Add this object to override the React rule
     rules: {
-      "react/react-in-jsx-scope": "off"
+      "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off" // Disable prop-types for TypeScript
     },
     settings: {
       react: {
