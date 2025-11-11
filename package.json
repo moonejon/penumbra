@@ -14,13 +14,6 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.19.5",
-    "@emotion/cache": "^11.14.0",
-    "@emotion/server": "^11.11.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^7.1.2",
-    "@mui/material": "^7.1.0",
-    "@mui/material-nextjs": "^7.1.0",
-    "@mui/x-data-grid": "^8.9.1",
     "@prisma/extension-accelerate": "^2.0.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@vercel/blob": "^2.0.0",

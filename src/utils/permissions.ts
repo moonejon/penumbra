@@ -136,15 +136,24 @@ export async function getViewableBookFilter() {
     return { visibility: BookVisibility.PUBLIC };
   }
 
-  // Authenticated - show public books OR user's own books
+  // Get the database user record for the authenticated user
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    // User is authenticated in Clerk but not in database yet
+    // Only show public books until user record is created
+    return { visibility: BookVisibility.PUBLIC };
+  }
+
+  // Authenticated with database record - show public books OR user's own books
+  // Using ownerId directly is more efficient than filtering through the owner relation
   return {
     OR: [
       { visibility: BookVisibility.PUBLIC },
-      {
-        owner: {
-          clerkId: userId,
-        },
-      },
+      { ownerId: user.id },
     ],
   };
 }

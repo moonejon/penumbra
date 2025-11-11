@@ -1,7 +1,6 @@
 "use client";
 
 import { FC } from "react";
-import { Container, Stack } from "@mui/material";
 import TextSearch from "./textSearch";
 import AutoCompleteSearch from "./autocompleteSearch";
 
@@ -12,13 +11,13 @@ type FiltersProps = {
 
 const Filters: FC<FiltersProps> = ({ authors, subjects }) => {
   return (
-    <Container>
-      <Stack spacing={1} sx={{ padding: "2em" }}>
+    <div className="w-full max-w-5xl mx-auto">
+      <div className="flex flex-col gap-4 p-8">
         <TextSearch filterType="title" />
         <AutoCompleteSearch filterType="authors" values={authors} />
         <AutoCompleteSearch filterType="subjects" values={subjects} />
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 };
 
