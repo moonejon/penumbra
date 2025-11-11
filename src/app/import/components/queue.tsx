@@ -54,8 +54,8 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
 
   return (
     <>
-      <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12 flex flex-col min-h-[90vh]">
-        <div className="p-6 flex flex-col flex-1">
+      <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12 flex flex-col max-h-[calc(100vh-6rem)] md:max-h-none">
+        <div className="p-6 flex flex-col flex-1 overflow-hidden">
           <h2 className="text-xl font-semibold text-zinc-100 tracking-tight mb-4">
             Queue
           </h2>
@@ -75,8 +75,8 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
           )}
 
           {books?.length ? (
-            <div className="flex flex-col flex-1 gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col flex-1 gap-4 min-h-0">
+              <div className="flex-1 overflow-y-auto hide-scrollbar pr-2 -mr-2">
                 {books.map((book, i) => (
                   <Item
                     title={book.title}
