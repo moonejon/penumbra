@@ -5,7 +5,6 @@ import { Dispatch, FC, SetStateAction } from "react";
 import { Box, Pagination, Stack, useMediaQuery, Skeleton, Card, CardContent } from "@mui/material";
 import Item from "./item";
 import { useRouter, useSearchParams } from "next/navigation";
-import theme from "@/theme";
 
 type ListProps = {
   rows: BookType[];
@@ -83,7 +82,7 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading
     router.push(`library/?${params.toString()}`);
   };
 
-  const isMobile: boolean = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile: boolean = useMediaQuery('(max-width:600px)');
 
   return (
     <Stack spacing={2}>
@@ -107,11 +106,6 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading
           count={pageCount}
           page={page}
           disabled={isLoading}
-          sx={{
-            button: {
-              background: theme.palette.background.default,
-            },
-          }}
           onChange={handlePageChange}
         />
       </Box>

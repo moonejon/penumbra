@@ -4,7 +4,6 @@ import { TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, FC } from "react";
 import _ from "lodash";
-import theme from "@/theme";
 
 type TextSearchProps = {
   filterType: "title";
@@ -28,7 +27,6 @@ const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
         id="outlined-basic"
         variant="filled"
         label="title"
-        sx={{ backgroundColor: theme.palette.background.default }}
         onChange={_.debounce(handleSearchChange, 500)}
       />
     );
