@@ -37,7 +37,7 @@ const Import: FC<ImportProps> = ({}) => {
   const isMobile: boolean = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className={`flex ${isMobile ? "flex-col" : "flex-row"}`}>
+    <div className={`flex ${isMobile ? "flex-col" : "flex-row gap-6"} px-6 md:px-12`}>
       <div className="w-full md:w-1/2">
         <Search setBookData={setBookData} setLoading={setLoading} />
         <Preview
