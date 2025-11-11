@@ -15,9 +15,9 @@ interface ModalProps {
 
 const sizeClasses = {
   sm: "max-w-md",
-  md: "max-w-2xl",
-  lg: "max-w-4xl",
-  xl: "max-w-6xl",
+  md: "max-w-full sm:max-w-2xl mx-0 sm:mx-4",
+  lg: "max-w-full md:max-w-4xl mx-0 md:mx-4",
+  xl: "max-w-full lg:max-w-6xl mx-0 lg:mx-4",
 };
 
 const Modal: FC<ModalProps> = ({
@@ -99,7 +99,7 @@ const Modal: FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -114,15 +114,19 @@ const Modal: FC<ModalProps> = ({
       {/* Modal content */}
       <div
         ref={modalRef}
+        style={{
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y'
+        }}
         className={cn(
-          "relative bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl",
-          "w-full max-h-[90vh] flex flex-col",
-          "animate-in fade-in-0 zoom-in-95 duration-200",
+          "relative bg-zinc-900 border-t md:border border-zinc-800 rounded-t-2xl md:rounded-lg shadow-2xl",
+          "w-full max-h-[92vh] md:max-h-[90vh] flex flex-col pb-safe",
+          "animate-in slide-in-from-bottom md:fade-in-0 md:zoom-in-95 duration-200",
           sizeClasses[size]
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-zinc-800">
           <h2
             id="modal-title"
             className="text-xl font-semibold text-zinc-100 tracking-tight"
@@ -132,7 +136,7 @@ const Modal: FC<ModalProps> = ({
           {showCloseButton && (
             <button
               onClick={onClose}
-              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -141,7 +145,7 @@ const Modal: FC<ModalProps> = ({
         </div>
 
         {/* Body - scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6 scroll-smooth-ios">
           {children}
         </div>
       </div>

@@ -87,37 +87,49 @@ const ArrayField: FC<ArrayFieldProps> = ({
                 <button
                   type="button"
                   onClick={() => removeValue(index)}
-                  className="text-zinc-400 hover:text-zinc-100 transition-colors"
+                  className="p-1 min-w-[24px] min-h-[24px] text-zinc-400 hover:text-zinc-100 transition-colors"
                   aria-label={`Remove ${value}`}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </span>
           ))}
 
-          {/* Input for new values */}
-          <input
-            id={name}
-            name={name}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={() => {
-              addValue();
-              onBlur?.();
-            }}
-            placeholder={values.length === 0 ? placeholder : ""}
-            disabled={disabled}
-            required={required && values.length === 0}
-            aria-required={required}
-            aria-invalid={hasError}
-            aria-describedby={
-              hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
-            }
-            className="flex-1 min-w-[120px] bg-transparent border-none text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
-          />
+          {/* Input with Add button */}
+          <div className="flex-1 flex items-center gap-2 min-w-[120px]">
+            <input
+              id={name}
+              name={name}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={() => {
+                addValue();
+                onBlur?.();
+              }}
+              placeholder={values.length === 0 ? placeholder : ""}
+              disabled={disabled}
+              required={required && values.length === 0}
+              aria-required={required}
+              aria-invalid={hasError}
+              aria-describedby={
+                hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
+              }
+              className="flex-1 min-w-[80px] sm:min-w-[120px] bg-transparent border-none text-base sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+            />
+            {inputValue.trim() && !disabled && (
+              <button
+                type="button"
+                onClick={addValue}
+                className="px-2 py-1 text-xs font-medium text-zinc-100 bg-zinc-700 hover:bg-zinc-600 rounded transition-colors flex-shrink-0"
+                aria-label="Add item"
+              >
+                + Add
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

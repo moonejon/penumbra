@@ -48,7 +48,7 @@ const ImageManager: FC<ImageManagerProps> = ({
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm font-medium transition-colors",
                 "border-b-2 -mb-[2px]",
                 activeTab === tab.id
                   ? "border-zinc-400 text-zinc-100"

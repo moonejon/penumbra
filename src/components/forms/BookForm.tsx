@@ -169,7 +169,7 @@ const BookForm: FC<BookFormProps> = ({
           helpText="Press Enter or comma to add multiple authors"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="ISBN-13"
             name="isbn13"
@@ -228,7 +228,7 @@ const BookForm: FC<BookFormProps> = ({
           maxLength={500}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="Publication Date"
             name="datePublished"
@@ -267,7 +267,7 @@ const BookForm: FC<BookFormProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextField
             label="Edition"
             name="edition"
@@ -327,18 +327,20 @@ const BookForm: FC<BookFormProps> = ({
       </FormSection>
 
       {/* Action buttons */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-zinc-800">
         <Button
           type="button"
           onClick={handleCancelClick}
           variant="outline"
           disabled={isSubmitting}
+          className="w-full sm:w-auto min-h-[48px] md:min-h-[44px] text-base md:text-sm"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !formState.isValid}
+          className="w-full sm:w-auto min-h-[48px] md:min-h-[44px] text-base md:text-sm"
         >
           {isSubmitting ? (
             <>
