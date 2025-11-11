@@ -142,6 +142,46 @@ export async function updateUserBio(bio: string) {
 }
 
 /**
+ * Update user's profile name
+ * @param name - User's name (max 100 characters)
+ * @returns Success status or error message
+ */
+export async function updateUserProfile(name: string) {
+  try {
+    // 1. Authenticate user
+    const user = await getCurrentUser();
+
+    // 2. Validate name length
+    if (name.length > 100) {
+      return {
+        success: false,
+        error: `Name too long (${name.length} characters). Maximum length is 100 characters`,
+      };
+    }
+
+    // 3. Update user name in database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { name: name || null },
+    });
+
+    // 4. Return success
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Profile update failed. Please try again.",
+    };
+  }
+}
+
+/**
  * Get the authenticated user's profile information
  * @returns User profile data or error message
  */

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ProfileBio } from './ProfileBio'
 import { FavoriteBooksSection } from './FavoriteBooksSection'
@@ -37,6 +38,13 @@ const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
     },
     ref
   ) => {
+    const router = useRouter()
+
+    const handleProfileUpdate = React.useCallback(() => {
+      // Refresh server-rendered data
+      router.refresh()
+    }, [router])
+
     return (
       <div
         ref={ref}
@@ -48,6 +56,7 @@ const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
           <ProfileBio
             profile={profile}
             isOwner={isOwner}
+            onProfileUpdate={handleProfileUpdate}
           />
 
           {/* Divider between Profile and Favorites */}

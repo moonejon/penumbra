@@ -2,27 +2,32 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { User } from 'lucide-react'
+import { User, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { EditProfileModal } from './EditProfileModal'
 import type { UserProfile } from '@/shared.types'
 
 export interface ProfileBioProps {
   profile: UserProfile | null
   isOwner: boolean
   className?: string
+  onProfileUpdate?: () => void
 }
 
 const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
   (
     {
       profile,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       isOwner,
       className,
+      onProfileUpdate,
     },
     ref
   ) => {
     const [imageError, setImageError] = React.useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
+    const [isHovering, setIsHovering] = React.useState(false)
 
     // Guest view (no profile)
     if (!profile) {
@@ -67,6 +72,8 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
           'flex flex-col items-center gap-4 py-8 md:py-12',
           className
         )}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Profile Image */}
         <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-zinc-700 bg-zinc-800">
@@ -110,6 +117,35 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
             <p className="text-base text-zinc-400">{profile.email}</p>
           )}
         </div>
+
+        {/* Edit Button (Owner Only) */}
+        {isOwner && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditModalOpen(true)}
+            className={cn(
+              'transition-opacity',
+              isHovering ? 'opacity-100' : 'opacity-0 md:opacity-100'
+            )}
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
+
+        {/* Edit Profile Modal */}
+        {isOwner && profile && (
+          <EditProfileModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            profile={profile}
+            onSuccess={() => {
+              // Call parent refresh callback if provided
+              onProfileUpdate?.()
+            }}
+          />
+        )}
       </div>
     )
   }
