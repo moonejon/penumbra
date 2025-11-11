@@ -1,0 +1,324 @@
+================================================================================
+HOME SCREEN DESIGN - DOCUMENTATION SUMMARY
+================================================================================
+
+Created: November 11, 2025
+Designer: UX Designer Agent
+Status: Design Phase Complete - Ready for Implementation
+
+================================================================================
+DOCUMENTATION FILES
+================================================================================
+
+1. HOME_SCREEN_DESIGN_SPEC.md (36KB)
+   - Comprehensive visual design specification
+   - Component-by-component specifications
+   - Color palette, typography, spacing guidelines
+   - Responsive behavior and breakpoints
+   - Animation strategy with Motion Primitives
+   - Accessibility requirements (WCAG 2.1 AA)
+   - Data requirements and API specifications
+   - User flows and interaction patterns
+
+2. COMPONENT_ARCHITECTURE.md (47KB)
+   - Technical component hierarchy
+   - Server vs Client component strategy
+   - Complete API route specifications
+   - Database schema design
+   - State management patterns
+   - Implementation phases (5 phases, 4-5 weeks)
+   - Integration with existing features
+
+3. README.md (10KB)
+   - Quick reference guide
+   - Key sections overview
+   - Component breakdown
+   - API endpoints summary
+   - Testing checklist
+   - Design decisions
+
+================================================================================
+KEY DESIGN ELEMENTS
+================================================================================
+
+HERO SECTION
+- Profile picture (120px mobile, 160px desktop, rounded-full)
+- Owner name (text-2xl, font-bold, centered)
+- Bio text (200-300 chars, text-zinc-400, max-w-prose)
+
+FAVORITE BOOKS
+- Year filter dropdown ("of 2025" / "of all time")
+- 5-6 book covers in responsive layout
+  - Mobile: Horizontal scroll
+  - Tablet: 4-column grid
+  - Desktop: 6-column grid (single row)
+- Click opens book details modal
+
+READING LISTS
+- Curated reading lists with preview
+- Card layout: 3 covers + title + description + count
+- Grid layout:
+  - Mobile: Single column
+  - Tablet/Desktop: 2-column grid
+
+================================================================================
+DESIGN SYSTEM
+================================================================================
+
+COLORS (Zinc Palette)
+- Background: bg-zinc-950
+- Text Primary: text-zinc-100
+- Text Secondary: text-zinc-400
+- Text Tertiary: text-zinc-500
+- Borders: border-zinc-800
+- Hover Borders: hover:border-zinc-700
+
+TYPOGRAPHY (Geist Fonts)
+- Hero name: text-2xl sm:text-3xl font-bold
+- Section headers: text-xl font-semibold
+- Body: text-base sm:text-lg text-zinc-400
+- Small: text-sm, text-xs
+
+SPACING
+- Container: max-w-screen-sm mx-auto px-4
+- Top padding: pt-20 (clears header)
+- Section spacing: space-y-16
+- Card padding: p-5
+
+ANIMATIONS (Motion v11)
+- Hero: Fade + slide up (spring, 400ms)
+- Favorites: Stagger fade + scale (50ms delay/book)
+- Lists: Sequential fade + slide (200ms delay)
+- Hover: scale(1.05) on covers
+- Respects prefers-reduced-motion
+
+================================================================================
+RESPONSIVE BEHAVIOR
+================================================================================
+
+BREAKPOINTS
+- Mobile: < 640px (sm)
+- Tablet: 640px - 768px (md)
+- Desktop: >= 768px (md) and >= 1024px (lg)
+
+LAYOUT CHANGES
+- Hero: 120px -> 160px profile, text-base -> text-lg
+- Favorites: Horizontal scroll -> 4-col grid -> 6-col grid
+- Lists: Single column -> 2-column grid
+
+================================================================================
+API ENDPOINTS NEEDED
+================================================================================
+
+1. GET /api/profile
+   Response: { ownerName, bio, profileImageUrl? }
+
+2. GET /api/favorites?filter=current_year|all_time
+   Response: { books: BookType[], year?: number }
+   Limit: 5-6 books max
+
+3. GET /api/reading-lists (NEW FEATURE)
+   Response: { lists: ReadingList[] }
+   Preview: First 3 book covers per list
+
+================================================================================
+DATABASE SCHEMA (NEW)
+================================================================================
+
+Reading lists require new tables:
+
+model ReadingList {
+  id          String   @id @default(cuid())
+  ownerId     Int
+  title       String
+  description String?
+  visibility  ListVisibility @default(PUBLIC)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  books       ReadingListBook[]
+}
+
+model ReadingListBook {
+  id            Int         @id @default(autoincrement())
+  readingListId String
+  bookId        Int
+  order         Int         @default(0)
+  addedAt       DateTime    @default(now())
+  @@unique([readingListId, bookId])
+}
+
+enum ListVisibility {
+  PRIVATE
+  PUBLIC
+  UNLISTED
+}
+
+================================================================================
+ACCESSIBILITY (WCAG 2.1 AA)
+================================================================================
+
+REQUIREMENTS
+- Color contrast >= 4.5:1 for text
+- Keyboard navigation (Tab, Enter, Space, ESC, Arrows)
+- Focus indicators visible (ring-2 ring-zinc-600)
+- Screen reader support (ARIA labels)
+- Touch targets >= 44x44px
+- Reduced motion support
+
+KEY ARIA ATTRIBUTES
+- aria-label on sections
+- aria-haspopup="true" on dropdown
+- aria-expanded on dropdown toggle
+- alt text on all images
+- Semantic HTML (section, h1, h2, article)
+
+================================================================================
+IMPLEMENTATION PHASES
+================================================================================
+
+PHASE 1 (Initial Implementation - IN SCOPE)
+1. Hero section with static profile data
+2. Favorite books with mock data
+3. Basic responsive layout
+4. Book details modal integration
+5. Year filter dropdown (functional)
+6. Animations (spring transitions)
+7. API integration for profile + favorites
+8. Loading and error states
+
+PHASE 2 (Reading Lists - FUTURE)
+1. Database schema migration
+2. API endpoints for CRUD operations
+3. List cards and detail page
+4. Owner controls (create/edit lists)
+
+PHASE 3 (Owner Edit Controls - FUTURE)
+1. Edit bio
+2. Manage favorites
+3. Reorder books in lists
+
+================================================================================
+OUT OF SCOPE (Phase 1)
+================================================================================
+
+The following are NOT included in initial implementation:
+
+1. Reading Lists Backend
+   - Database schema changes
+   - API endpoints
+   - List detail page (/lists/[listId])
+
+2. Owner Edit Controls
+   - Edit bio
+   - Manage favorites
+   - Create/edit/delete lists
+
+3. Advanced Features
+   - Share lists
+   - Export lists
+   - Privacy settings
+   - Collaborative lists
+
+================================================================================
+COMPONENTS TO BUILD
+================================================================================
+
+PAGE-SPECIFIC
+- HeroSection.tsx - Profile picture, name, bio
+- FavoriteBooksSection.tsx - Header, dropdown, cover browser
+- ReadingListsSection.tsx - List cards grid
+
+REUSABLE
+- FavoriteFilterDropdown.tsx - Year filter dropdown
+- FavoriteBookCard.tsx - Book cover with hover overlay
+- ReadingListCard.tsx - List preview card
+- ReadingListEmpty.tsx - Empty state
+
+REUSE EXISTING
+- Details component from /library (book modal)
+- Button from /components/ui/button.tsx
+- Skeleton components
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+VISUAL
+- Matches portfolio aesthetic
+- Responsive on mobile, tablet, desktop
+- Consistent spacing and typography
+- Smooth animations
+
+FUNCTIONAL
+- Dropdown opens/closes correctly
+- Book modal opens on cover click
+- Year filter updates favorites
+- Keyboard navigation works
+- Touch scrolling smooth on mobile
+
+ACCESSIBILITY
+- Screen reader announces all content
+- Focus indicators visible
+- ARIA attributes correct
+- Color contrast passes axe DevTools
+- Reduced motion respected
+
+PERFORMANCE
+- Lighthouse score >= 90
+- Images optimized
+- No layout shift (CLS)
+- Fast Time to Interactive (TTI)
+
+================================================================================
+DESIGN DECISIONS TO VALIDATE
+================================================================================
+
+1. Profile Image Source
+   - Portfolio (jonathanmooney.me) - RECOMMENDED
+   - Clerk user profile
+   - Custom upload (database field)
+
+2. Favorite Book Count
+   - Current: 5-6 books
+   - Configurable by owner (future)
+   - Default: 6 on desktop, 5 on mobile
+
+3. Reading List Preview
+   - Current: 3 book covers
+   - Alternative: 4-5 covers with overlap
+   - Recommended: 3 covers (clean, not cluttered)
+
+4. Favorites Logic
+   - How to determine "of 2025" vs "of all time"?
+   - Date added to library?
+   - Manual curation by owner?
+   - Most viewed/opened?
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Review design specification with stakeholders
+2. Create mock data for development/testing
+3. Implement Hero section first
+4. Add Favorites with dropdown
+5. Integrate with real API endpoints
+6. Accessibility audit
+7. Performance testing
+8. Deploy to production
+
+================================================================================
+RELATED DOCUMENTATION
+================================================================================
+
+- CLAUDE_PROGRESS.md - Project progress
+- docs/migration/portfolio-styling/README.md - Migration overview
+- docs/migration/portfolio-styling/VISUAL_DESIGN_PLAN.md - Full UX specs
+
+================================================================================
+QUESTIONS OR FEEDBACK
+================================================================================
+
+Contact: UX Designer agent or project lead
+
+================================================================================
