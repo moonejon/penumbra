@@ -57,13 +57,16 @@ const TextArea: FC<TextAreaProps> = ({
         maxLength={maxLength}
         disabled={disabled}
         required={required}
+        autoCapitalize="sentences"
+        spellCheck="true"
         aria-required={required}
         aria-invalid={hasError}
         aria-describedby={
           hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
         }
         className={cn(
-          "px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100",
+          "px-3 py-2 min-h-[100px] bg-zinc-900 border rounded-lg",
+          "text-base sm:text-sm text-zinc-100",
           "placeholder:text-zinc-600",
           "focus:outline-none focus:ring-2 focus:border-transparent",
           "disabled:opacity-50 disabled:cursor-not-allowed",

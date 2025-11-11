@@ -7,10 +7,22 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("q");
 
+  // Helper to create response with no-cache headers
+  const createResponse = (data: SearchSuggestion) => {
+    return NextResponse.json(data, {
+      headers: {
+        // Prevent caching to ensure suggestions always reflect current database state
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+  };
+
   try {
 
     if (!query || query.trim().length === 0) {
-      return NextResponse.json({
+      return createResponse({
         authors: [],
         titles: [],
         subjects: [],
@@ -19,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     // Minimum query length to reduce noise from single-character searches
     if (query.trim().length < 2) {
-      return NextResponse.json({
+      return createResponse({
         authors: [],
         titles: [],
         subjects: [],
@@ -29,14 +41,22 @@ export async function GET(request: NextRequest) {
     // Get viewable book filter (handles auth automatically)
     const visibilityFilter = await getViewableBookFilter();
 
-    // FIX #1: Rewrite query strategy to support partial matches
     // Fetch all viewable books to enable comprehensive author/subject search
-    // We'll filter everything in JavaScript to support partial matching on array fields
-    // Note: For large libraries (1000+ books), consider using PostgreSQL full-text search
+    // IMPORTANT: Only return authors/subjects from books that currently exist and are viewable
+    // This ensures deleted books or non-visible books don't appear in suggestions
     const allBooks = await prisma.book.findMany({
       where: visibilityFilter,
       select: { id: true, title: true, authors: true, subjects: true },
     });
+
+    // Early return if no books found - prevents showing empty suggestions
+    if (allBooks.length === 0) {
+      return createResponse({
+        authors: [],
+        titles: [],
+        subjects: [],
+      } as SearchSuggestion);
+    }
 
     // Extract and filter all matching items with ranking
     const queryLower = query.toLowerCase();
@@ -118,7 +138,7 @@ export async function GET(request: NextRequest) {
       .map(([subject]) => subject)
       .slice(0, 5);
 
-    return NextResponse.json({
+    return createResponse({
       authors,
       titles,
       subjects,
