@@ -114,7 +114,9 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
                   </label>
                   <input
                     id="isbn-input"
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="ISBN"
                     {...field}
                     className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
