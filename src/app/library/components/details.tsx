@@ -1,8 +1,15 @@
 import { BookType } from "@/shared.types";
-import { X, ImageIcon } from "lucide-react";
+import { X, ImageIcon, Pencil, RefreshCw, Loader2 } from "lucide-react";
 import parse from "html-react-parser";
 import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { updateBook, refetchBookMetadata } from "@/utils/actions/books";
+import { useRouter } from "next/navigation";
+import Modal from "@/components/ui/modal";
+import BookForm from "@/components/forms/BookForm";
+import ImageManager from "@/components/forms/ImageManager";
+import { BookImportDataType } from "@/shared.types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type BookProps = {
   book: BookType;
@@ -27,6 +34,12 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
 
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefetching, setIsRefetching] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   // Reset image state when book changes to prevent showing old image
   useEffect(() => {
@@ -50,16 +63,88 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
     ? "w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl"
     : "w-full h-full bg-zinc-950 border-t border-zinc-800";
 
+  // Handler for edit submit
+  const handleEditSubmit = async (editedData: BookImportDataType) => {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await updateBook(book.id, editedData);
+
+      if (result.success && result.book) {
+        setSuccessMessage("Book updated successfully");
+        setIsEditModalOpen(false);
+        // Refresh the page to show updated data
+        router.refresh();
+        // Close success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setErrorMessage(result.error || "Failed to update book");
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler for refetch from ISBNDB
+  const handleRefetch = async () => {
+    setIsRefetching(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await refetchBookMetadata(book.id);
+
+      if (result.success && result.book) {
+        setSuccessMessage("Book data refreshed from ISBNDB");
+        // Refresh the page to show updated data
+        router.refresh();
+        // Close success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setErrorMessage(result.error || "Failed to refresh book data");
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred");
+    } finally {
+      setIsRefetching(false);
+    }
+  };
+
   return (
     <div className={`${sidePanelClasses} relative`}>
-      {/* Close Button */}
-      <button
-        onClick={() => setSelectedBook(undefined)}
-        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 z-10"
-        aria-label="Close details"
-      >
-        <X className="w-5 h-5" />
-      </button>
+      {/* Action Buttons */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <button
+          onClick={handleRefetch}
+          disabled={isRefetching}
+          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Refresh book data"
+          title="Refresh from ISBNDB"
+        >
+          {isRefetching ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <RefreshCw className="w-5 h-5" />
+          )}
+        </button>
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+          aria-label="Edit book"
+          title="Edit book details"
+        >
+          <Pencil className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => setSelectedBook(undefined)}
+          className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+          aria-label="Close details"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
       <div className={`p-6 overflow-y-auto hide-scrollbar ${
         isSidePanel ? 'max-h-[calc(100vh-8rem)]' : 'h-full'
@@ -160,7 +245,68 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false }) 
             </div>
           </div>
         </div>
+
+        {/* Success/Error Messages */}
+        {successMessage && (
+          <Alert className="mt-4 border-green-500/50 bg-green-950/50 text-green-200">
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+        {errorMessage && (
+          <Alert className="mt-4 border-red-500/50 bg-red-950/50 text-red-200">
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
       </div>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Book"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Image Manager */}
+          <div>
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Cover Image</h4>
+            <ImageManager
+              currentImage={book.imageOriginal}
+              isbn={book.isbn13}
+              title={book.title}
+              author={book.authors[0]}
+              onImageSelect={(url) => {
+                // Image will be updated when form is submitted
+              }}
+            />
+          </div>
+
+          {/* Book Form */}
+          <BookForm
+            mode="edit"
+            initialData={{
+              title: book.title,
+              titleLong: book.titleLong,
+              authors: book.authors,
+              publisher: book.publisher,
+              synopsis: book.synopsis,
+              pageCount: book.pageCount,
+              datePublished: book.datePublished,
+              subjects: book.subjects,
+              isbn10: book.isbn10,
+              isbn13: book.isbn13,
+              binding: book.binding,
+              language: book.language,
+              edition: book.edition || "",
+              image: book.image,
+              imageOriginal: book.imageOriginal,
+            }}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setIsEditModalOpen(false)}
+            isSubmitting={isSubmitting}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

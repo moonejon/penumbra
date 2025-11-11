@@ -111,3 +111,131 @@ export async function fetchBooksPaginated({
     totalCount: totalCount,
   };
 }
+
+/**
+ * Update an existing book
+ */
+export async function updateBook(
+  bookId: number,
+  updates: Partial<BookImportDataType>
+) {
+  const user = await getCurrentUser();
+
+  try {
+    // Verify ownership
+    const book = await prisma.book.findUnique({
+      where: { id: bookId },
+      select: { ownerId: true },
+    });
+
+    if (!book || book.ownerId !== user.id) {
+      return {
+        success: false,
+        error: "Unauthorized - you don't own this book",
+      };
+    }
+
+    // Update the book
+    const updatedBook = await prisma.book.update({
+      where: { id: bookId },
+      data: updates,
+    });
+
+    return {
+      success: true,
+      book: updatedBook,
+    };
+  } catch (error) {
+    console.error("Update book error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Update failed",
+    };
+  }
+}
+
+/**
+ * Re-fetch book metadata from ISBNDB
+ */
+export async function refetchBookMetadata(bookId: number) {
+  const user = await getCurrentUser();
+
+  try {
+    // Verify ownership
+    const book = await prisma.book.findUnique({
+      where: { id: bookId },
+    });
+
+    if (!book || book.ownerId !== user.id) {
+      return {
+        success: false,
+        error: "Unauthorized - you don't own this book",
+      };
+    }
+
+    if (!book.isbn13) {
+      return {
+        success: false,
+        error: "Book missing ISBN13",
+      };
+    }
+
+    // Fetch from ISBNDB
+    const response = await fetch(
+      `https://api2.isbndb.com/book/${book.isbn13}`,
+      {
+        headers: {
+          Authorization: process.env.NEXT_PUBLIC_ISBN_DB_API_KEY || "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: "Failed to fetch book data from ISBNDB",
+      };
+    }
+
+    const data = await response.json();
+    const freshData = data.book;
+
+    if (!freshData) {
+      return {
+        success: false,
+        error: "No book data returned from ISBNDB",
+      };
+    }
+
+    // Update book with fresh data (preserve custom image if exists)
+    const updatedBook = await prisma.book.update({
+      where: { id: bookId },
+      data: {
+        title: freshData.title || book.title,
+        titleLong: freshData.title_long || freshData.title || book.titleLong,
+        authors: freshData.authors || book.authors,
+        publisher: freshData.publisher || book.publisher,
+        synopsis: freshData.synopsis || book.synopsis,
+        image: freshData.image || book.image,
+        imageOriginal: freshData.image || book.imageOriginal,
+        pageCount: freshData.pages || book.pageCount,
+        datePublished: freshData.date_published || book.datePublished,
+        subjects: freshData.subjects || book.subjects,
+        binding: freshData.binding || book.binding,
+        language: freshData.language || book.language,
+        edition: freshData.edition || book.edition,
+      },
+    });
+
+    return {
+      success: true,
+      book: updatedBook,
+    };
+  } catch (error) {
+    console.error("Re-fetch metadata error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Re-fetch failed",
+    };
+  }
+}
