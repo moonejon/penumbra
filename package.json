@@ -16,6 +16,7 @@
     "@clerk/nextjs": "^6.19.5",
     "@prisma/extension-accelerate": "^2.0.0",
     "@tailwindcss/postcss": "^4.1.17",
+    "@vercel/blob": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "geist": "^1.5.1",
@@ -49,5 +50,9 @@
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.1"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.17",
+    "lightningcss-linux-x64-gnu": "^1.30.2"
   }
 }

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Modal from "@/components/ui/modal";
+import BookForm from "@/components/forms/BookForm";
+import ImageManager from "@/components/forms/ImageManager";
 
 interface QueueProps {
   books: Array<BookImportDataType>;
@@ -29,6 +32,8 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   const [retryCount, setRetryCount] = useState(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
   // Cleanup timeouts on unmount
   const cleanup = () => {
@@ -45,6 +50,24 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
   const handleDelete = (key: number) => {
     const updatedBooks = books.filter((_, index) => index !== key);
     return setBooks(updatedBooks);
+  };
+
+  const handleEdit = (index: number) => {
+    setEditingIndex(index);
+  };
+
+  const handleEditSubmit = async (editedData: BookImportDataType) => {
+    setIsEditSubmitting(true);
+    try {
+      if (editingIndex !== null) {
+        const updatedBooks = [...books];
+        updatedBooks[editingIndex] = editedData;
+        setBooks(updatedBooks);
+        setEditingIndex(null);
+      }
+    } finally {
+      setIsEditSubmitting(false);
+    }
   };
 
   const calculateBackoff = (attempt: number): number => {
@@ -324,6 +347,7 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
                     key={i}
                     itemKey={i}
                     handleDelete={handleDelete}
+                    handleEdit={handleEdit}
                   />
                 ))}
               </div>
@@ -386,6 +410,47 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
           </button>
         </Alert>
       </div>
+
+      {/* Edit Modal */}
+      {editingIndex !== null && (
+        <Modal
+          isOpen={editingIndex !== null}
+          onClose={() => setEditingIndex(null)}
+          title="Edit Queue Item"
+          size="lg"
+        >
+          <div className="space-y-6">
+            {/* Image Manager */}
+            <div>
+              <h4 className="text-sm font-medium text-zinc-300 mb-3">Cover Image</h4>
+              <ImageManager
+                currentImage={books[editingIndex].imageOriginal}
+                isbn={books[editingIndex].isbn13}
+                title={books[editingIndex].title}
+                author={books[editingIndex].authors[0]}
+                onImageSelect={(url) => {
+                  const updatedBooks = [...books];
+                  updatedBooks[editingIndex] = {
+                    ...updatedBooks[editingIndex],
+                    image: url,
+                    imageOriginal: url,
+                  };
+                  setBooks(updatedBooks);
+                }}
+              />
+            </div>
+
+            {/* Book Form */}
+            <BookForm
+              mode="queue-edit"
+              initialData={books[editingIndex]}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setEditingIndex(null)}
+              isSubmitting={isEditSubmitting}
+            />
+          </div>
+        </Modal>
+      )}
     </>
   );
 };
