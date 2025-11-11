@@ -1,9 +1,9 @@
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, ImageIcon, Copy, Info } from "lucide-react";
+import { ImageIcon, Copy, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookProps {
@@ -24,6 +24,12 @@ const Preview: FC<BookProps> = ({
   const { authors, binding, datePublished } = book;
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+
+  // Reset image loading states when book changes
+  useEffect(() => {
+    setImageLoading(true);
+    setImageError(false);
+  }, [book.imageOriginal]);
 
   let { title } = book;
   if (book?.title?.includes(":")) {
