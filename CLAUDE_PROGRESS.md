@@ -197,17 +197,45 @@ Migrates Penumbra from Material-UI to Tailwind CSS + Motion Primitives, matching
 - Removed theme imports from all components
 - ⚠️ UI styling temporarily broken (expected)
 
+**Phase 2: Core UI Migration - IN PROGRESS ⏳**
+
+**PR #4: Header & Footer**
+- Created new Header component with scroll-based backdrop blur
+- Conditional auth navigation (Import/Dashboard only when signed in)
+- Mobile hamburger menu with full-screen overlay
+- Created Footer component with minimal design
+- Updated root layout with flex layout for sticky footer
+- Deleted old MUI navbar
+
+**PR #5: Book List Components**
+- Migrated book card (item.tsx) to Tailwind
+- Built custom Pagination component
+- Updated SkeletonBookCard with Tailwind animate-pulse
+- Converted library.tsx to max-w-screen-sm container
+- Migrated empty states with Lucide icons
+
+**PR #6: Search Header**
+- Migrated searchHeader.tsx to Tailwind
+- Added backdrop blur effect
+- Updated to max-w-screen-sm container
+- Sticky positioning below main header
+
+**PR #8: Book Details Modal**
+- Migrated details.tsx to Tailwind
+- Replaced MUI components with Tailwind divs
+- Updated close button with Lucide X icon
+- Preserved image caching and loading states
+
 **Current State:**
 - Build passing ✅
-- Tailwind infrastructure in place
-- MUI theme removed
-- Ready for Phase 2 component migration
+- 4 of 6 Phase 2 PRs complete
+- Library UI fully functional with Tailwind
+- All MUI components removed from core library views
 
-**Next: Phase 2 - Core UI Migration**
-- Rewrite navbar with admin menu
-- Migrate library components (list, item, details)
-- Migrate search components
-- Estimated: 6 PRs, 3-4 days
+**Next: Phase 2 Completion**
+- PR #9: Migrate intelligent search (complex, keyboard navigation)
+- PR #7: Final library polish (if needed)
+- Then: Phase 3 - Import Flow
 
 **Documentation:**
 - `docs/migration/portfolio-styling/README.md` - Migration overview

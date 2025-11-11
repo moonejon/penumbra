@@ -2,9 +2,9 @@
 
 import { BookType } from "@/shared.types";
 import { Dispatch, FC, SetStateAction } from "react";
-import { Box, Pagination, Stack, useMediaQuery, Skeleton, Card, CardContent } from "@mui/material";
 import Item from "./item";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type ListProps = {
   rows: BookType[];
@@ -12,80 +12,160 @@ type ListProps = {
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
   pageCount: number;
   isLoading?: boolean;
+  selectedBook?: BookType;
 };
 
 const SkeletonBookCard: FC = () => {
   return (
-    <Card
-      sx={{
-        maxHeight: "200px",
-        width: "auto",
-      }}
-    >
-      <CardContent
-        sx={{
-          paddingLeft: { xs: 1, md: 2 },
-        }}
-      >
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            justifyContent: "space-between",
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={4}
-            sx={{
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: { xs: "none", sm: "flex" },
-                alignItems: "center",
-                justifyContent: "center",
-                width: "120px",
-              }}
-            >
-              <Skeleton variant="rectangular" width={100} height={160} />
-            </Box>
-            <Stack
-              spacing={{ xs: 2, md: 7 }}
-              sx={{ marginLeft: { xs: "1em !important" }, flex: 1 }}
-            >
-              <Stack spacing={1}>
-                <Skeleton variant="text" width="60%" height={32} />
-                <Skeleton variant="text" width="40%" height={24} />
-              </Stack>
-              <Stack spacing={0.5}>
-                <Skeleton variant="text" width="50%" height={16} />
-                <Skeleton variant="text" width="30%" height={16} />
-                <Skeleton variant="text" width="20%" height={16} />
-              </Stack>
-            </Stack>
-          </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
+    <div className="border border-zinc-800 rounded-lg p-5">
+      <div className="flex gap-3 sm:gap-5">
+        {/* Book Cover Skeleton */}
+        <div className="flex items-center justify-center min-w-[70px] sm:min-w-[120px]">
+          <div className="w-[60px] h-[90px] sm:w-[100px] sm:h-[160px] bg-zinc-800 animate-pulse rounded" />
+        </div>
+
+        {/* Metadata Skeleton */}
+        <div className="flex flex-col gap-4 flex-1">
+          {/* Title and Authors */}
+          <div className="space-y-2">
+            <div className="h-6 bg-zinc-800 animate-pulse rounded w-3/5" />
+            <div className="h-5 bg-zinc-800 animate-pulse rounded w-2/5" />
+          </div>
+
+          {/* Publication Details */}
+          <div className="space-y-2">
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/2" />
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/3" />
+            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/4" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading = false }) => {
+// Simple Pagination Component
+const Pagination: FC<{
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  disabled?: boolean;
+  isMobile?: boolean;
+}> = ({ currentPage, totalPages, onPageChange, disabled = false, isMobile = false }) => {
+  const getPageNumbers = () => {
+    const delta = isMobile ? 1 : 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  const pages = totalPages > 1 ? getPageNumbers() : [];
+
+  return (
+    <div className="flex justify-center items-center gap-2 py-6 mt-2">
+      {/* Previous Button */}
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={disabled || currentPage === 1}
+        className={`px-4 py-2 rounded-lg border font-medium ${
+          disabled || currentPage === 1
+            ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
+            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
+        } transition-all duration-200 ${isMobile ? 'text-xs' : 'text-sm'}`}
+        aria-label="Previous page"
+      >
+        Previous
+      </button>
+
+      {/* Page Numbers */}
+      {pages.map((page, index) =>
+        page === '...' ? (
+          <span
+            key={`dots-${index}`}
+            className="px-2 text-zinc-600"
+          >
+            ...
+          </span>
+        ) : (
+          <button
+            key={page}
+            onClick={() => onPageChange(page as number)}
+            disabled={disabled}
+            className={`${
+              isMobile ? 'w-9 h-9 text-xs' : 'w-10 h-10 text-sm'
+            } rounded-lg border transition-all duration-200 font-medium ${
+              currentPage === page
+                ? 'border-zinc-600 bg-zinc-800 text-zinc-100 shadow-md ring-1 ring-zinc-700/50'
+                : disabled
+                ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
+                : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
+            }`}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+      {/* Next Button */}
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={disabled || currentPage === totalPages}
+        className={`px-4 py-2 rounded-lg border font-medium ${
+          disabled || currentPage === totalPages
+            ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
+            : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 hover:border-zinc-600'
+        } transition-all duration-200 ${isMobile ? 'text-xs' : 'text-sm'}`}
+        aria-label="Next page"
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
+const List: FC<ListProps> = ({
+  rows,
+  page,
+  setSelectedBook,
+  pageCount,
+  isLoading = false,
+  selectedBook
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isMobile = useMediaQuery('(max-width:600px)');
 
-  const handlePageChange = (_: unknown, page: number) => {
+  const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", page.toString());
+    params.set("page", newPage.toString());
     router.push(`library/?${params.toString()}`);
   };
 
-  const isMobile: boolean = useMediaQuery('(max-width:600px)');
-
   return (
-    <Stack spacing={2}>
+    <div className="flex flex-col gap-4">
       {isLoading ? (
         // Show 10 skeleton cards while loading
         <>
@@ -95,21 +175,25 @@ const List: FC<ListProps> = ({ rows, page, setSelectedBook, pageCount, isLoading
         </>
       ) : (
         rows?.map((book, i) => (
-          <Item book={book} key={i} setSelectedBook={setSelectedBook} />
+          <Item
+            book={book}
+            key={i}
+            setSelectedBook={setSelectedBook}
+            isSelected={selectedBook?.id === book.id}
+          />
         ))
       )}
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", py: 2 }}>
+
+      {pageCount > 1 && (
         <Pagination
-          variant="outlined"
-          size={isMobile ? "small" : "large"}
-          shape="rounded"
-          count={pageCount}
-          page={page}
+          currentPage={page}
+          totalPages={pageCount}
+          onPageChange={handlePageChange}
           disabled={isLoading}
-          onChange={handlePageChange}
+          isMobile={isMobile}
         />
-      </Box>
-    </Stack>
+      )}
+    </div>
   );
 };
 

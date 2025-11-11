@@ -4,7 +4,8 @@ import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Navbar } from './components/navbar'
+import { Header } from './components/header'
+import { Footer } from './components/footer'
 
 export const metadata: Metadata = {
   title: 'Penumbra',
@@ -23,15 +24,16 @@ export default function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable}`}
         suppressHydrationWarning
       >
-        <body className="font-sans antialiased">
+        <body className="font-sans antialiased tracking-tight flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
-            {children}
+            <Header />
+            <main className="relative mx-auto w-full max-w-5xl flex-1 px-4 pt-20">{children}</main>
+            <Footer />
           </ThemeProvider>
         </body>
       </html>

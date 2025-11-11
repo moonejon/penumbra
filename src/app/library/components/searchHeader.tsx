@@ -1,36 +1,18 @@
 "use client";
 
 import { FC } from "react";
-import { Box, Container } from "@mui/material";
 import IntelligentSearch from "./intelligentSearch";
 
 const SearchHeader: FC = () => {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-        py: { xs: 1, sm: 1.5 },
-      }}
-    >
-      <Container maxWidth="xl">
-        <Box
-          sx={{
-            display: "flex",
-            gap: { xs: 1, sm: 2 },
-            alignItems: "flex-start",
-            px: { xs: 1, sm: 2 },
-          }}
-        >
-          {/* Search takes up full width */}
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <IntelligentSearch />
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+    <div className="w-full sticky top-14 z-40 -mx-4 px-4 py-3 sm:py-4 bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800/50">
+      <div className="flex gap-2 sm:gap-4">
+        {/* Search takes up full width */}
+        <div className="flex-1 min-w-0">
+          <IntelligentSearch />
+        </div>
+      </div>
+    </div>
   );
 };
 
