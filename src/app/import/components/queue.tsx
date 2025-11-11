@@ -88,20 +88,22 @@ const Queue: FC<QueueProps> = ({ books, setBooks }) => {
                   />
                 ))}
               </div>
-              <Button
-                onClick={handleSubmit}
-                className="w-full md:w-1/2 self-end"
-                disabled={isImporting}
-              >
-                {isImporting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  "Add to library"
-                )}
-              </Button>
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full md:w-1/2"
+                  disabled={isImporting}
+                >
+                  {isImporting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to library"
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex-1 border-2 border-dashed border-zinc-800 rounded-lg bg-zinc-900/30 m-2" />

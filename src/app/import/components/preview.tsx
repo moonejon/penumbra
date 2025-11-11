@@ -2,7 +2,6 @@ import { Dispatch, FC, SetStateAction, useState } from "react";
 import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, ImageIcon, Copy, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -310,16 +309,15 @@ const Preview: FC<BookProps> = ({
 
                 {/* Submit Button */}
                 <div className="flex justify-end pt-2">
-                  <Button
+                  <button
                     type="submit"
-                    size="lg"
                     className={cn(
-                      "font-medium shadow-sm hover:shadow-md transition-all duration-200",
+                      "px-6 py-2.5 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium text-sm",
                       isMobile && "w-full"
                     )}
                   >
                     Add to Queue
-                  </Button>
+                  </button>
                 </div>
               </div>
             </form>
