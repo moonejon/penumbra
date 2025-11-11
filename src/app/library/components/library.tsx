@@ -1,31 +1,106 @@
 "use client";
 
 import { BookType } from "@/shared.types";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import List from "./list";
+import GridView from "./gridView";
 import Details from "./details";
-import SearchHeader from "./searchHeader";
+import SearchHeader, { ViewMode } from "./searchHeader";
 import { LibraryBig, SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PageSizeOption } from "./pageSizeSelector";
 
 type LibraryProps = {
   books: BookType[];
   pageCount: number;
   page: number;
+  pageSize: number;
   isLoading?: boolean;
 };
+
+const STORAGE_KEY = "library-view-mode";
+const PAGE_SIZE_STORAGE_KEY_LIST = "library-list-page-size";
+const PAGE_SIZE_STORAGE_KEY_GRID = "library-grid-page-size";
+
+// Page size options for list view
+const LIST_PAGE_SIZE_OPTIONS: PageSizeOption[] = [
+  { value: 10, label: "10" },
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+  { value: 100, label: "100" },
+];
+
+// Page size options for grid view
+const GRID_PAGE_SIZE_OPTIONS: PageSizeOption[] = [
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+  { value: 100, label: "100" },
+  { value: 200, label: "200" },
+];
+
+// Default page sizes
+const DEFAULT_LIST_PAGE_SIZE = 25;
+const DEFAULT_GRID_PAGE_SIZE = 25;
 
 const Library: FC<LibraryProps> = ({
   books,
   pageCount,
   page,
+  pageSize: initialPageSize,
   isLoading = false,
 }) => {
   const [selectedBook, setSelectedBook] = useState<BookType>();
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [pageSize, setPageSize] = useState<number>(initialPageSize);
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  // Load view mode from localStorage on mount
+  useEffect(() => {
+    const savedMode = localStorage.getItem(STORAGE_KEY) as ViewMode | null;
+    if (savedMode === "list" || savedMode === "grid") {
+      setViewMode(savedMode);
+    }
+  }, []);
+
+  // Load page size from localStorage based on current view mode
+  useEffect(() => {
+    const storageKey = viewMode === "list" ? PAGE_SIZE_STORAGE_KEY_LIST : PAGE_SIZE_STORAGE_KEY_GRID;
+    const defaultPageSize = viewMode === "list" ? DEFAULT_LIST_PAGE_SIZE : DEFAULT_GRID_PAGE_SIZE;
+
+    const savedPageSize = localStorage.getItem(storageKey);
+    const parsedPageSize = savedPageSize ? parseInt(savedPageSize, 10) : null;
+
+    // Use saved page size if valid, otherwise use default
+    if (parsedPageSize && !isNaN(parsedPageSize)) {
+      setPageSize(parsedPageSize);
+    } else {
+      setPageSize(defaultPageSize);
+    }
+  }, [viewMode]);
+
+  // Handle view mode change and persist to localStorage
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem(STORAGE_KEY, mode);
+  };
+
+  // Handle page size change, persist to localStorage, and update URL
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+
+    // Save to localStorage based on current view mode
+    const storageKey = viewMode === "list" ? PAGE_SIZE_STORAGE_KEY_LIST : PAGE_SIZE_STORAGE_KEY_GRID;
+    localStorage.setItem(storageKey, newPageSize.toString());
+
+    // Update URL with new page size and reset to page 1
+    const params = new URLSearchParams(searchParams);
+    params.set("pageSize", newPageSize.toString());
+    params.set("page", "1");
+    router.push(`/library?${params.toString()}`);
+  };
 
   const hasActiveFilters = !!(
     searchParams.get("title") ||
@@ -81,9 +156,18 @@ const Library: FC<LibraryProps> = ({
 
   const showEmptyState = !isLoading && books.length === 0;
 
+  // Get current page size options based on view mode
+  const currentPageSizeOptions = viewMode === "list" ? LIST_PAGE_SIZE_OPTIONS : GRID_PAGE_SIZE_OPTIONS;
+
   return (
     <>
-      <SearchHeader />
+      <SearchHeader
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        pageSize={pageSize}
+        pageSizeOptions={currentPageSizeOptions}
+        onPageSizeChange={handlePageSizeChange}
+      />
 
       <div className="mt-6">
         {showEmptyState ? (
@@ -94,16 +178,31 @@ const Library: FC<LibraryProps> = ({
           )
         ) : (
           <>
-            {/* Mobile: Full-screen toggle between list and details */}
+            {/* Mobile: Full-screen toggle between list/grid and details */}
             {!isDesktop && !selectedBook && (
-              <List
-                rows={books}
-                setSelectedBook={setSelectedBook}
-                page={page}
-                pageCount={pageCount}
-                isLoading={isLoading}
-                selectedBook={selectedBook}
-              />
+              <>
+                {viewMode === "list" ? (
+                  <List
+                    rows={books}
+                    setSelectedBook={setSelectedBook}
+                    page={page}
+                    pageCount={pageCount}
+                    isLoading={isLoading}
+                    selectedBook={selectedBook}
+                    pageSize={pageSize}
+                  />
+                ) : (
+                  <GridView
+                    rows={books}
+                    setSelectedBook={setSelectedBook}
+                    page={page}
+                    pageCount={pageCount}
+                    isLoading={isLoading}
+                    selectedBook={selectedBook}
+                    pageSize={pageSize}
+                  />
+                )}
+              </>
             )}
 
             {!isDesktop && selectedBook && (
@@ -119,18 +218,31 @@ const Library: FC<LibraryProps> = ({
             {/* Desktop: Side-by-side layout */}
             {isDesktop && (
               <div className="flex gap-6">
-                {/* Book List - 40% width */}
+                {/* Book List/Grid - 40% width */}
                 <div className={`transition-all duration-300 ${
                   selectedBook ? 'w-[40%]' : 'w-full'
                 }`}>
-                  <List
-                    rows={books}
-                    setSelectedBook={setSelectedBook}
-                    page={page}
-                    pageCount={pageCount}
-                    isLoading={isLoading}
-                    selectedBook={selectedBook}
-                  />
+                  {viewMode === "list" ? (
+                    <List
+                      rows={books}
+                      setSelectedBook={setSelectedBook}
+                      page={page}
+                      pageCount={pageCount}
+                      isLoading={isLoading}
+                      selectedBook={selectedBook}
+                      pageSize={pageSize}
+                    />
+                  ) : (
+                    <GridView
+                      rows={books}
+                      setSelectedBook={setSelectedBook}
+                      page={page}
+                      pageCount={pageCount}
+                      isLoading={isLoading}
+                      selectedBook={selectedBook}
+                      pageSize={pageSize}
+                    />
+                  )}
                 </div>
 
                 {/* Details Panel - 60% width */}

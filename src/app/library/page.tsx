@@ -6,6 +6,7 @@ export default async function LibraryPage({
 }: {
   searchParams: Promise<{
     page?: string;
+    pageSize?: string;
     title?: string;
     authors?: string;
     subjects?: string;
@@ -15,9 +16,11 @@ export default async function LibraryPage({
 
   const { title, authors, subjects } = params;
   const page = Number(params.page) || 1;
+  const pageSize = Number(params.pageSize) || 25; // Default to 25 for list view
 
   const result = await fetchBooksPaginated({
     page: page,
+    pageSize: pageSize,
     title: title,
     authors: authors,
     subjects: subjects,
@@ -30,6 +33,7 @@ export default async function LibraryPage({
       books={books}
       page={page}
       pageCount={pageCount}
+      pageSize={pageSize}
     />
   );
 }
