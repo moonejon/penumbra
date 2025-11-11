@@ -239,3 +239,42 @@ export async function refetchBookMetadata(bookId: number) {
     };
   }
 }
+
+/**
+ * Create a manual book entry (no ISBN lookup)
+ */
+export async function createManualBook(bookData: BookImportDataType) {
+  const user = await getCurrentUser();
+
+  try {
+    // Check for duplicate ISBN if provided
+    if (bookData.isbn13) {
+      const exists = await checkRecordExists(bookData.isbn13);
+      if (exists) {
+        return {
+          success: false,
+          error: "A book with this ISBN already exists in your library",
+        };
+      }
+    }
+
+    // Create the book
+    const book = await prisma.book.create({
+      data: {
+        ...bookData,
+        ownerId: user.id,
+      },
+    });
+
+    return {
+      success: true,
+      book,
+    };
+  } catch (error) {
+    console.error("Create manual book error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Creation failed",
+    };
+  }
+}
