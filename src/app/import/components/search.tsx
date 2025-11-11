@@ -105,23 +105,15 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="isbn-input"
-                    className="text-sm font-medium text-zinc-300"
-                  >
-                    Enter ISBN number
-                  </label>
-                  <input
-                    id="isbn-input"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="ISBN"
-                    {...field}
-                    className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
-                  />
-                </div>
+                <input
+                  id="isbn-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Enter ISBN number"
+                  {...field}
+                  className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
+                />
               )}
             />
             <div className="flex justify-end">
