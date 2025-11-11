@@ -3,7 +3,7 @@ import { BookImportDataType } from "@/shared.types";
 import { initialBookImportData } from "./import";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ImageIcon, Copy, Info } from "lucide-react";
+import { ImageIcon, Copy, Info, AlertCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookProps {
@@ -12,6 +12,8 @@ interface BookProps {
   loading: boolean;
   importQueue: BookImportDataType[];
   setImportQueue: Dispatch<SetStateAction<BookImportDataType[]>>;
+  error: string | null;
+  onRetry: () => void;
 }
 
 const Preview: FC<BookProps> = ({
@@ -20,6 +22,8 @@ const Preview: FC<BookProps> = ({
   loading,
   importQueue,
   setImportQueue,
+  error,
+  onRetry,
 }) => {
   const { authors, binding, datePublished } = book;
   const [imageLoading, setImageLoading] = useState(true);
@@ -68,9 +72,10 @@ const Preview: FC<BookProps> = ({
 
   const isMobile: boolean = useMediaQuery("(max-width: 600px)");
 
-  const showEmpty = book === initialBookImportData && !loading;
+  const showEmpty = book === initialBookImportData && !loading && !error;
   const showLoading = loading;
-  const showContent = book !== initialBookImportData && !loading;
+  const showError = error && !loading;
+  const showContent = book !== initialBookImportData && !loading && !error;
 
   return (
     <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12 transition-all duration-300">
@@ -90,6 +95,35 @@ const Preview: FC<BookProps> = ({
               <p className="text-zinc-400 text-sm max-w-xs">
                 Search for a book by ISBN to see a preview here
               </p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {showError && (
+            <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center gap-6 animate-in fade-in duration-300">
+              <div className="relative">
+                <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full" />
+                <div className="relative p-6 bg-red-950/30 rounded-full border border-red-500/20">
+                  <AlertCircle className="w-12 h-12 text-red-400" />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 max-w-md">
+                <h3 className="text-lg font-semibold text-red-300">
+                  Unable to Load Book
+                </h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  {error}
+                </p>
+              </div>
+
+              <button
+                onClick={onRetry}
+                className="px-6 py-2.5 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium text-sm flex items-center gap-2 border border-zinc-700"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </button>
             </div>
           )}
 
