@@ -370,7 +370,23 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               <div>
                 <div className="px-3 py-2 border-b border-zinc-800">
                   <p className="text-xs text-zinc-500">
-                    Press Enter to search titles for &quot;{query}&quot;
+                    {(() => {
+                      const flatItems = getFlatItems();
+                      if (selectedIndex >= 0 && selectedIndex < flatItems.length) {
+                        const selectedItem = flatItems[selectedIndex];
+                        switch (selectedItem.type) {
+                          case "author":
+                            return `Press Enter to filter by author: "${selectedItem.value}"`;
+                          case "title":
+                            return `Press Enter to view book: "${selectedItem.value}"`;
+                          case "subject":
+                            return `Press Enter to filter by subject: "${selectedItem.value}"`;
+                          default:
+                            return `Press Enter to search titles for "${query}"`;
+                        }
+                      }
+                      return `Press Enter to search titles for "${query}"`;
+                    })()}
                   </p>
                 </div>
                 {renderSection(
