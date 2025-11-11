@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2, Pencil } from "lucide-react";
 import { FC } from "react";
 
 interface ItemProps {
@@ -8,6 +8,7 @@ interface ItemProps {
   key: number;
   itemKey: number;
   handleDelete: (key: number) => void;
+  handleEdit?: (key: number) => void;
 }
 
 const Item: FC<ItemProps> = ({
@@ -16,6 +17,7 @@ const Item: FC<ItemProps> = ({
   isIncomplete,
   itemKey,
   handleDelete,
+  handleEdit,
 }) => {
   return (
     <div className="flex flex-row items-center justify-between min-h-[50px] bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-3 hover:border-zinc-700 transition-colors duration-200">
@@ -40,7 +42,16 @@ const Item: FC<ItemProps> = ({
           <p className="text-sm text-zinc-400 truncate">{authors.join(", ")}</p>
         </div>
       </div>
-      <div className="flex items-center ml-2 flex-shrink-0">
+      <div className="flex items-center ml-2 flex-shrink-0 gap-1">
+        {handleEdit && (
+          <button
+            onClick={() => handleEdit(itemKey)}
+            className="p-2 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors duration-200"
+            aria-label="Edit book"
+          >
+            <Pencil className="w-5 h-5" />
+          </button>
+        )}
         <button
           onClick={() => handleDelete(itemKey)}
           className="p-2 rounded-md hover:bg-red-950/50 hover:text-red-400 text-zinc-500 transition-colors duration-200"
