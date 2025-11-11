@@ -1,7 +1,7 @@
 "use client";
 
-import { FC, useState, useEffect, useRef, KeyboardEvent } from "react";
-import { X, Loader2, RotateCw } from "lucide-react";
+import { FC, useState, useEffect, useRef, KeyboardEvent, MouseEvent } from "react";
+import { X, Loader2, RotateCw, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchSuggestion } from "@/shared.types";
 
@@ -21,6 +21,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [totalItems, setTotalItems] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,11 +29,16 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Track active filters from URL params
+  // Track active filters from URL params (now supporting comma-separated values)
   const activeTitle = searchParams.get("title");
   const activeAuthors = searchParams.get("authors");
   const activeSubjects = searchParams.get("subjects");
   const hasActiveFilters = !!(activeTitle || activeAuthors || activeSubjects);
+
+  // Parse comma-separated filter values
+  const activeTitles = activeTitle ? activeTitle.split(",").filter(Boolean) : [];
+  const activeAuthorsList = activeAuthors ? activeAuthors.split(",").filter(Boolean) : [];
+  const activeSubjectsList = activeSubjects ? activeSubjects.split(",").filter(Boolean) : [];
 
   // Fetch suggestions with debouncing
   useEffect(() => {
@@ -109,9 +115,32 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     };
   }, [query]);
 
+  // Track keyboard modifiers for additive vs replacement behavior
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.shiftKey || e.altKey) {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: globalThis.KeyboardEvent) => {
+      if (!e.shiftKey && !e.altKey) {
+        setIsShiftPressed(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   // Handle click outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -192,38 +221,79 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     }
   };
 
-  // Handle selection of a suggestion
+  // Handle selection of a suggestion with support for additive filtering
   const handleSelection = (
     type: "author" | "title" | "subject",
-    value: string
+    value: string,
+    event?: MouseEvent<HTMLButtonElement>
   ) => {
     const params = new URLSearchParams(searchParams);
     params.delete("page");
 
+    // Check if modifier key was pressed (Shift or Alt) or if event has modifiers
+    const shouldReplace = isShiftPressed || event?.shiftKey || event?.altKey;
+
     switch (type) {
-      case "author":
-        // Filter library by author
-        params.set("authors", value);
-        params.delete("title");
-        params.delete("subjects");
-        router.push(`/library/?${params.toString()}`);
+      case "author": {
+        if (shouldReplace) {
+          // Replace all filters with just this author
+          params.set("authors", value);
+          params.delete("title");
+          params.delete("subjects");
+        } else {
+          // Add to existing authors (additive filtering)
+          const existingAuthors = params.get("authors");
+          const authorsList = existingAuthors ? existingAuthors.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!authorsList.includes(value)) {
+            authorsList.push(value);
+            params.set("authors", authorsList.join(","));
+          }
+        }
         break;
-      case "title":
-        // Filter library by exact title match
-        params.set("title", value);
-        params.delete("authors");
-        params.delete("subjects");
-        router.push(`/library/?${params.toString()}`);
+      }
+      case "title": {
+        if (shouldReplace) {
+          // Replace all filters with just this title
+          params.set("title", value);
+          params.delete("authors");
+          params.delete("subjects");
+        } else {
+          // Add to existing titles (additive filtering)
+          const existingTitles = params.get("title");
+          const titlesList = existingTitles ? existingTitles.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!titlesList.includes(value)) {
+            titlesList.push(value);
+            params.set("title", titlesList.join(","));
+          }
+        }
         break;
-      case "subject":
-        // Filter library by subject
-        params.set("subjects", value);
-        params.delete("title");
-        params.delete("authors");
-        router.push(`/library/?${params.toString()}`);
+      }
+      case "subject": {
+        if (shouldReplace) {
+          // Replace all filters with just this subject
+          params.set("subjects", value);
+          params.delete("title");
+          params.delete("authors");
+        } else {
+          // Add to existing subjects (additive filtering)
+          const existingSubjects = params.get("subjects");
+          const subjectsList = existingSubjects ? existingSubjects.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!subjectsList.includes(value)) {
+            subjectsList.push(value);
+            params.set("subjects", subjectsList.join(","));
+          }
+        }
         break;
+      }
     }
 
+    router.push(`/library/?${params.toString()}`);
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
@@ -259,11 +329,32 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     onClose?.();
   };
 
-  // Handle removing individual filter
-  const handleRemoveFilter = (filterType: "title" | "authors" | "subjects") => {
+  // Handle removing individual filter value
+  const handleRemoveFilter = (
+    filterType: "title" | "authors" | "subjects",
+    value?: string
+  ) => {
     const params = new URLSearchParams(searchParams);
-    params.delete(filterType);
     params.delete("page");
+
+    if (value) {
+      // Remove specific value from comma-separated list
+      const currentValue = params.get(filterType);
+      if (currentValue) {
+        const valuesList = currentValue.split(",").filter(Boolean);
+        const updatedList = valuesList.filter((v) => v !== value);
+
+        if (updatedList.length > 0) {
+          params.set(filterType, updatedList.join(","));
+        } else {
+          params.delete(filterType);
+        }
+      }
+    } else {
+      // Remove entire filter type
+      params.delete(filterType);
+    }
+
     router.push(`/library/?${params.toString()}`);
   };
 
@@ -287,7 +378,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           return (
             <button
               key={`${type}-${index}`}
-              onClick={() => handleSelection(type, item.value)}
+              onClick={(e) => handleSelection(type, item.value, e)}
               className={`w-full px-3 py-2 text-left text-sm transition-colors duration-150 ${
                 isSelected
                   ? "bg-zinc-800 text-zinc-100"
@@ -306,7 +397,74 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const hasResults = totalItems > 0;
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-3">
+      {/* Active Filter Pills - Now Above Search Input */}
+      {hasActiveFilters && (
+        <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              Active Filters
+            </span>
+            <button
+              onClick={handleClearAll}
+              className="px-2.5 py-1 text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-900/50 hover:bg-zinc-800/50 border border-zinc-800 hover:border-zinc-700 rounded transition-all duration-150"
+            >
+              Clear All
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {activeTitles.map((title) => (
+              <div
+                key={`title-${title}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-zinc-300">Title:</span>
+                <span className="text-zinc-100 truncate max-w-[200px]">{title}</span>
+                <button
+                  onClick={() => handleRemoveFilter("title", title)}
+                  className="ml-1 p-0.5 text-zinc-400 hover:text-zinc-100 transition-colors duration-150 rounded hover:bg-zinc-600/30"
+                  aria-label={`Remove title filter: ${title}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {activeAuthorsList.map((author) => (
+              <div
+                key={`author-${author}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900/50 border border-blue-800/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-blue-200">Author:</span>
+                <span className="text-blue-100 truncate max-w-[200px]">{author}</span>
+                <button
+                  onClick={() => handleRemoveFilter("authors", author)}
+                  className="ml-1 p-0.5 text-blue-300 hover:text-blue-100 transition-colors duration-150 rounded hover:bg-blue-800/30"
+                  aria-label={`Remove author filter: ${author}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {activeSubjectsList.map((subject) => (
+              <div
+                key={`subject-${subject}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-900/50 border border-purple-800/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-purple-200">Subject:</span>
+                <span className="text-purple-100 truncate max-w-[200px]">{subject}</span>
+                <button
+                  onClick={() => handleRemoveFilter("subjects", subject)}
+                  className="ml-1 p-0.5 text-purple-300 hover:text-purple-100 transition-colors duration-150 rounded hover:bg-purple-800/30"
+                  aria-label={`Remove subject filter: ${subject}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="relative w-full">
         {/* Search Input */}
         <div className="relative">
@@ -325,19 +483,10 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
             className="w-full px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
           />
 
-          {/* Loading spinner or clear button */}
+          {/* Loading spinner */}
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
             {isLoading && (
               <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
-            )}
-            {hasActiveFilters && !isLoading && (
-              <button
-                onClick={handleClearAll}
-                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
-                aria-label="Clear all filters"
-              >
-                <X className="w-4 h-4" />
-              </button>
             )}
           </div>
         </div>
@@ -368,7 +517,31 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
               </div>
             ) : hasResults ? (
               <div>
-                <div className="px-3 py-2 border-b border-zinc-800">
+                {/* Mode Indicator */}
+                <div className="px-3 py-2.5 border-b border-zinc-800 bg-zinc-900/50">
+                  {hasActiveFilters && (
+                    <div className="flex items-center gap-2 mb-2">
+                      {isShiftPressed ? (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="flex items-center justify-center w-5 h-5 rounded bg-amber-900/30 border border-amber-800/50">
+                            <X className="w-3 h-3 text-amber-400" />
+                          </div>
+                          <span className="text-amber-300 font-medium">
+                            Click to start new search (replace filters)
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="flex items-center justify-center w-5 h-5 rounded bg-green-900/30 border border-green-800/50">
+                            <Plus className="w-3 h-3 text-green-400" />
+                          </div>
+                          <span className="text-green-300 font-medium">
+                            Click to refine current results
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <p className="text-xs text-zinc-500">
                     {(() => {
                       const flatItems = getFlatItems();
@@ -385,7 +558,9 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                             return `Press Enter to search titles for "${query}"`;
                         }
                       }
-                      return `Press Enter to search titles for "${query}"`;
+                      return hasActiveFilters
+                        ? `Press Enter to search titles for "${query}" • Shift+Click to replace filters`
+                        : `Press Enter to search titles for "${query}"`;
                     })()}
                   </p>
                 </div>
@@ -426,51 +601,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           </div>
         )}
       </div>
-
-      {/* Active Filter Pills */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-2 mt-3">
-          {activeTitle && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
-              <span className="font-medium">Title:</span>
-              <span className="text-zinc-400 truncate max-w-[200px]">{activeTitle}</span>
-              <button
-                onClick={() => handleRemoveFilter("title")}
-                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
-                aria-label="Remove title filter"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-          {activeAuthors && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
-              <span className="font-medium">Author:</span>
-              <span className="text-zinc-400 truncate max-w-[200px]">{activeAuthors}</span>
-              <button
-                onClick={() => handleRemoveFilter("authors")}
-                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
-                aria-label="Remove author filter"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-          {activeSubjects && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-300">
-              <span className="font-medium">Subject:</span>
-              <span className="text-zinc-400 truncate max-w-[200px]">{activeSubjects}</span>
-              <button
-                onClick={() => handleRemoveFilter("subjects")}
-                className="ml-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors duration-150 rounded"
-                aria-label="Remove subject filter"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
