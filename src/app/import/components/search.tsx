@@ -1,14 +1,7 @@
+"use client";
+
 import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import {
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { BookImportDataType } from "@/shared.types";
 import { fetchMetadata } from "../../../utils/actions/isbndb/fetchMetadata";
 import { initialBookImportData } from "./import";
@@ -95,50 +88,52 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading }) => {
   }, [formState, reset]);
 
   return (
-    <Card
-      sx={{
-        minWidth: "40%",
-        margin: { xs: "25px", md: "50px" },
-      }}
-    >
-      <CardContent>
-        <Stack direction="column">
-          <Typography variant="h6">Search</Typography>
-          <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-            <Container
-              sx={{
-                padding: "25px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-              }}
-            >
-              <Controller
-                name="isbn"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <TextField
-                    label="Enter ISBN number"
-                    variant="outlined"
+    <div className="w-full border border-zinc-800 rounded-lg bg-zinc-900/50 shadow-xl my-6 sm:my-12">
+      <div className="p-6">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-zinc-100 tracking-tight">
+            Search
+          </h2>
+          <form
+            noValidate
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <Controller
+              name="isbn"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="isbn-input"
+                    className="text-sm font-medium text-zinc-300"
+                  >
+                    Enter ISBN number
+                  </label>
+                  <input
+                    id="isbn-input"
                     type="number"
+                    placeholder="ISBN"
                     {...field}
+                    className="w-full px-4 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
                   />
-                )}
-              />
-              <Button
+                </div>
+              )}
+            />
+            <div className="flex justify-end">
+              <button
                 type="submit"
-                variant="contained"
-                size="medium"
-                sx={{ width: "10%", alignSelf: "flex-end" }}
+                className="px-6 py-2.5 bg-zinc-800 text-zinc-100 rounded-lg hover:bg-zinc-700 transition-all duration-200 font-medium text-sm"
               >
                 Submit
-              </Button>
-            </Container>
+              </button>
+            </div>
           </form>
-        </Stack>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 

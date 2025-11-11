@@ -2,11 +2,11 @@
 
 import { BookType } from "@/shared.types";
 import { Dispatch, FC, SetStateAction } from "react";
-import Item from "./item";
+import GridItem from "./gridItem";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-type ListProps = {
+type GridViewProps = {
   rows: BookType[];
   page: number;
   setSelectedBook: Dispatch<SetStateAction<BookType | undefined>>;
@@ -14,33 +14,13 @@ type ListProps = {
   isLoading?: boolean;
   selectedBook?: BookType;
   pageSize: number;
+  isSidePanelOpen?: boolean;
 };
 
-const SkeletonBookCard: FC = () => {
+const SkeletonGridCard: FC = () => {
   return (
-    <div className="border border-zinc-800 rounded-lg p-5">
-      <div className="flex gap-3 sm:gap-5">
-        {/* Book Cover Skeleton */}
-        <div className="flex items-center justify-center min-w-[70px] sm:min-w-[120px]">
-          <div className="w-[60px] h-[90px] sm:w-[100px] sm:h-[160px] bg-zinc-800 animate-pulse rounded" />
-        </div>
-
-        {/* Metadata Skeleton */}
-        <div className="flex flex-col gap-4 flex-1">
-          {/* Title and Authors */}
-          <div className="space-y-2">
-            <div className="h-6 bg-zinc-800 animate-pulse rounded w-3/5" />
-            <div className="h-5 bg-zinc-800 animate-pulse rounded w-2/5" />
-          </div>
-
-          {/* Publication Details */}
-          <div className="space-y-2">
-            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/2" />
-            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/3" />
-            <div className="h-3 bg-zinc-800 animate-pulse rounded w-1/4" />
-          </div>
-        </div>
-      </div>
+    <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-zinc-900/50 border border-zinc-800">
+      <div className="w-full h-full bg-zinc-800 animate-pulse" />
     </div>
   );
 };
@@ -147,14 +127,15 @@ const Pagination: FC<{
   );
 };
 
-const List: FC<ListProps> = ({
+const GridView: FC<GridViewProps> = ({
   rows,
   page,
   setSelectedBook,
   pageCount,
   isLoading = false,
   selectedBook,
-  pageSize
+  pageSize,
+  isSidePanelOpen = false
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -167,24 +148,31 @@ const List: FC<ListProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      {isLoading ? (
-        // Show skeleton cards based on pageSize
-        <>
-          {Array.from({ length: pageSize }).map((_, i) => (
-            <SkeletonBookCard key={i} />
-          ))}
-        </>
-      ) : (
-        rows?.map((book, i) => (
-          <Item
-            book={book}
-            key={i}
-            setSelectedBook={setSelectedBook}
-            isSelected={selectedBook?.id === book.id}
-          />
-        ))
-      )}
+    <div>
+      {/* Grid Container with responsive columns - fewer columns when side panel is open */}
+      <div className={`grid gap-3 sm:gap-4 md:gap-5 ${
+        isSidePanelOpen
+          ? 'grid-cols-2 md:grid-cols-3'
+          : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+      }`}>
+        {isLoading ? (
+          // Show skeleton cards based on pageSize
+          <>
+            {Array.from({ length: pageSize }).map((_, i) => (
+              <SkeletonGridCard key={i} />
+            ))}
+          </>
+        ) : (
+          rows?.map((book, i) => (
+            <GridItem
+              book={book}
+              key={i}
+              setSelectedBook={setSelectedBook}
+              isSelected={selectedBook?.id === book.id}
+            />
+          ))
+        )}
+      </div>
 
       {pageCount > 1 && (
         <Pagination
@@ -199,4 +187,4 @@ const List: FC<ListProps> = ({
   );
 };
 
-export default List;
+export default GridView;
