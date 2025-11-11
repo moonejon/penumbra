@@ -1,25 +1,7 @@
 "use client";
 
-import { FC, useState, useEffect, useRef, KeyboardEvent } from "react";
-import {
-  TextField,
-  Paper,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  CircularProgress,
-  Box,
-  Divider,
-  IconButton,
-  Chip,
-  Stack,
-  Alert,
-  Button,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { FC, useState, useEffect, useRef, KeyboardEvent, MouseEvent } from "react";
+import { X, Loader2, RotateCw, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SearchSuggestion } from "@/shared.types";
 
@@ -39,6 +21,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [totalItems, setTotalItems] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,11 +29,16 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Track active filters from URL params
+  // Track active filters from URL params (now supporting comma-separated values)
   const activeTitle = searchParams.get("title");
   const activeAuthors = searchParams.get("authors");
   const activeSubjects = searchParams.get("subjects");
   const hasActiveFilters = !!(activeTitle || activeAuthors || activeSubjects);
+
+  // Parse comma-separated filter values
+  const activeTitles = activeTitle ? activeTitle.split(",").filter(Boolean) : [];
+  const activeAuthorsList = activeAuthors ? activeAuthors.split(",").filter(Boolean) : [];
+  const activeSubjectsList = activeSubjects ? activeSubjects.split(",").filter(Boolean) : [];
 
   // Fetch suggestions with debouncing
   useEffect(() => {
@@ -73,7 +61,6 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
           `/api/library/search-suggestions?q=${encodeURIComponent(query)}`
         );
 
-        // FIX #2: Add response validation to prevent crashes
         if (!response.ok) {
           console.error("Search suggestions API error:", response.status);
           setError("Failed to load suggestions. Please try again.");
@@ -128,9 +115,32 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     };
   }, [query]);
 
+  // Track keyboard modifiers for additive vs replacement behavior
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.shiftKey || e.altKey) {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: globalThis.KeyboardEvent) => {
+      if (!e.shiftKey && !e.altKey) {
+        setIsShiftPressed(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   // Handle click outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -211,39 +221,79 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     }
   };
 
-  // Handle selection of a suggestion
+  // Handle selection of a suggestion with support for additive filtering
   const handleSelection = (
     type: "author" | "title" | "subject",
-    value: string
+    value: string,
+    event?: MouseEvent<HTMLButtonElement>
   ) => {
     const params = new URLSearchParams(searchParams);
     params.delete("page");
 
+    // Check if modifier key was pressed (Shift or Alt) or if event has modifiers
+    const shouldReplace = isShiftPressed || event?.shiftKey || event?.altKey;
+
     switch (type) {
-      case "author":
-        // Filter library by author
-        params.set("authors", value);
-        params.delete("title");
-        params.delete("subjects");
-        router.push(`/library/?${params.toString()}`);
+      case "author": {
+        if (shouldReplace) {
+          // Replace all filters with just this author
+          params.set("authors", value);
+          params.delete("title");
+          params.delete("subjects");
+        } else {
+          // Add to existing authors (additive filtering)
+          const existingAuthors = params.get("authors");
+          const authorsList = existingAuthors ? existingAuthors.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!authorsList.includes(value)) {
+            authorsList.push(value);
+            params.set("authors", authorsList.join(","));
+          }
+        }
         break;
-      case "title":
-        // Filter library by exact title match
-        // This will show just that one book, and user can click to see details
-        params.set("title", value);
-        params.delete("authors");
-        params.delete("subjects");
-        router.push(`/library/?${params.toString()}`);
+      }
+      case "title": {
+        if (shouldReplace) {
+          // Replace all filters with just this title
+          params.set("title", value);
+          params.delete("authors");
+          params.delete("subjects");
+        } else {
+          // Add to existing titles (additive filtering)
+          const existingTitles = params.get("title");
+          const titlesList = existingTitles ? existingTitles.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!titlesList.includes(value)) {
+            titlesList.push(value);
+            params.set("title", titlesList.join(","));
+          }
+        }
         break;
-      case "subject":
-        // Filter library by subject
-        params.set("subjects", value);
-        params.delete("title");
-        params.delete("authors");
-        router.push(`/library/?${params.toString()}`);
+      }
+      case "subject": {
+        if (shouldReplace) {
+          // Replace all filters with just this subject
+          params.set("subjects", value);
+          params.delete("title");
+          params.delete("authors");
+        } else {
+          // Add to existing subjects (additive filtering)
+          const existingSubjects = params.get("subjects");
+          const subjectsList = existingSubjects ? existingSubjects.split(",").filter(Boolean) : [];
+
+          // Only add if not already present
+          if (!subjectsList.includes(value)) {
+            subjectsList.push(value);
+            params.set("subjects", subjectsList.join(","));
+          }
+        }
         break;
+      }
     }
 
+    router.push(`/library/?${params.toString()}`);
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
@@ -279,11 +329,32 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     onClose?.();
   };
 
-  // Handle removing individual filter
-  const handleRemoveFilter = (filterType: "title" | "authors" | "subjects") => {
+  // Handle removing individual filter value
+  const handleRemoveFilter = (
+    filterType: "title" | "authors" | "subjects",
+    value?: string
+  ) => {
     const params = new URLSearchParams(searchParams);
-    params.delete(filterType);
     params.delete("page");
+
+    if (value) {
+      // Remove specific value from comma-separated list
+      const currentValue = params.get(filterType);
+      if (currentValue) {
+        const valuesList = currentValue.split(",").filter(Boolean);
+        const updatedList = valuesList.filter((v) => v !== value);
+
+        if (updatedList.length > 0) {
+          params.set(filterType, updatedList.join(","));
+        } else {
+          params.delete(filterType);
+        }
+      }
+    } else {
+      // Remove entire filter type
+      params.delete(filterType);
+    }
+
     router.push(`/library/?${params.toString()}`);
   };
 
@@ -297,143 +368,202 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
     if (items.length === 0) return null;
 
     return (
-      <Box key={type}>
-        <Typography
-          variant="caption"
-          sx={{
-            px: 2,
-            py: 1,
-            display: "block",
-            fontWeight: 600,
-            textTransform: "uppercase",
-            fontSize: "0.7rem",
-          }}
-        >
+      <div key={type}>
+        <div className="px-3 py-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
           {title}
-        </Typography>
+        </div>
         {items.map((item, index) => {
           const absoluteIndex = startIndex + index;
+          const isSelected = selectedIndex === absoluteIndex;
           return (
-            <ListItem key={`${type}-${index}`} disablePadding>
-              <ListItemButton
-                selected={selectedIndex === absoluteIndex}
-                onClick={() => handleSelection(type, item.value)}
-                sx={{
-                  py: 1,
-                  "&.Mui-selected": {
-                  },
-                  "&.Mui-selected:hover": {
-                  },
-                }}
-              >
-                <ListItemText
-                  primary={item.value}
-                  primaryTypographyProps={{
-                    sx: {
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
+            <button
+              key={`${type}-${index}`}
+              onClick={(e) => handleSelection(type, item.value, e)}
+              className={`w-full px-3 py-2 text-left text-sm transition-colors duration-150 ${
+                isSelected
+                  ? "bg-zinc-800 text-zinc-100"
+                  : "text-zinc-300 hover:bg-zinc-900/50"
+              }`}
+            >
+              <div className="truncate">{item.value}</div>
+            </button>
           );
         })}
-        <Divider />
-      </Box>
+        <div className="border-b border-zinc-800" />
+      </div>
     );
   };
 
   const hasResults = totalItems > 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Box sx={{ position: "relative", width: "100%" }}>
-        <TextField
-          inputRef={inputRef}
-          fullWidth
-          placeholder="Search by title, author, or subject..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (query.trim() && hasResults) {
-              setIsOpen(true);
-            }
-          }}
-          variant="outlined"
-          size="small"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-              },
-              "&:hover fieldset": {
-              },
-            },
-          }}
-          InputProps={{
-            endAdornment: (
-              <>
-                {isLoading && <CircularProgress size={20} sx={{ mr: 1 }} />}
-                {hasActiveFilters && !isLoading && (
-                  <IconButton
-                    size="small"
-                    onClick={handleClearAll}
-                    sx={{
-                      mr: -0.5,
-                      "&:hover": {
-                      },
-                    }}
-                    aria-label="Clear all filters"
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </>
-            ),
-          }}
-        />
+    <div className="w-full space-y-3">
+      {/* Active Filter Pills - Now Above Search Input */}
+      {hasActiveFilters && (
+        <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              Active Filters
+            </span>
+            <button
+              onClick={handleClearAll}
+              className="px-2.5 py-1 text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-900/50 hover:bg-zinc-800/50 border border-zinc-800 hover:border-zinc-700 rounded transition-all duration-150"
+            >
+              Clear All
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {activeTitles.map((title) => (
+              <div
+                key={`title-${title}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-700/50 border border-zinc-600/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-zinc-300">Title:</span>
+                <span className="text-zinc-100 truncate max-w-[200px]">{title}</span>
+                <button
+                  onClick={() => handleRemoveFilter("title", title)}
+                  className="ml-1 p-0.5 text-zinc-400 hover:text-zinc-100 transition-colors duration-150 rounded hover:bg-zinc-600/30"
+                  aria-label={`Remove title filter: ${title}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {activeAuthorsList.map((author) => (
+              <div
+                key={`author-${author}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900/50 border border-blue-800/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-blue-200">Author:</span>
+                <span className="text-blue-100 truncate max-w-[200px]">{author}</span>
+                <button
+                  onClick={() => handleRemoveFilter("authors", author)}
+                  className="ml-1 p-0.5 text-blue-300 hover:text-blue-100 transition-colors duration-150 rounded hover:bg-blue-800/30"
+                  aria-label={`Remove author filter: ${author}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {activeSubjectsList.map((subject) => (
+              <div
+                key={`subject-${subject}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-900/50 border border-purple-800/50 rounded-lg text-xs"
+              >
+                <span className="font-semibold text-purple-200">Subject:</span>
+                <span className="text-purple-100 truncate max-w-[200px]">{subject}</span>
+                <button
+                  onClick={() => handleRemoveFilter("subjects", subject)}
+                  className="ml-1 p-0.5 text-purple-300 hover:text-purple-100 transition-colors duration-150 rounded hover:bg-purple-800/30"
+                  aria-label={`Remove subject filter: ${subject}`}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {isOpen && (query.trim().length > 0) && (
-          <Paper
-            ref={dropdownRef}
-            elevation={8}
-            sx={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
-              left: 0,
-              right: 0,
-              maxHeight: "400px",
-              overflowY: "auto",
-              zIndex: 1300,
+      <div className="relative w-full">
+        {/* Search Input */}
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search by title, author, or subject..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (query.trim() && hasResults) {
+                setIsOpen(true);
+              }
             }}
+            className="w-full h-[42px] px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
+          />
+
+          {/* Loading spinner */}
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {isLoading && (
+              <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+            )}
+          </div>
+        </div>
+
+        {/* Dropdown Suggestions */}
+        {isOpen && query.trim().length > 0 && (
+          <div
+            ref={dropdownRef}
+            className="absolute top-[calc(100%+4px)] left-0 right-0 max-h-[400px] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl z-50"
           >
             {error ? (
-              <Box sx={{ p: 2 }}>
-                <Alert
-                  severity="error"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
+              <div className="p-4">
+                <div className="bg-red-950/50 border border-red-900/50 rounded-lg p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm text-red-300 font-medium mb-1">Error</p>
+                      <p className="text-xs text-red-400">{error}</p>
+                    </div>
+                    <button
                       onClick={handleRetry}
-                      startIcon={<RefreshIcon />}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-300 hover:text-red-200 bg-red-950/50 hover:bg-red-950 border border-red-900/50 hover:border-red-800 rounded transition-all duration-150"
                     >
+                      <RotateCw className="w-3 h-3" />
                       Retry
-                    </Button>
-                  }
-                >
-                  {error}
-                </Alert>
-              </Box>
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : hasResults ? (
-              <List disablePadding>
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Press Enter to search titles for &quot;{query}&quot;
-                  </Typography>
-                </Box>
+              <div>
+                {/* Mode Indicator */}
+                <div className="px-3 py-2.5 border-b border-zinc-800 bg-zinc-900/50">
+                  {hasActiveFilters && (
+                    <div className="flex items-center gap-2 mb-2">
+                      {isShiftPressed ? (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="flex items-center justify-center w-5 h-5 rounded bg-amber-900/30 border border-amber-800/50">
+                            <X className="w-3 h-3 text-amber-400" />
+                          </div>
+                          <span className="text-amber-300 font-medium">
+                            Click to start new search (replace filters)
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="flex items-center justify-center w-5 h-5 rounded bg-green-900/30 border border-green-800/50">
+                            <Plus className="w-3 h-3 text-green-400" />
+                          </div>
+                          <span className="text-green-300 font-medium">
+                            Click to refine current results
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-xs text-zinc-500">
+                    {(() => {
+                      const flatItems = getFlatItems();
+                      if (selectedIndex >= 0 && selectedIndex < flatItems.length) {
+                        const selectedItem = flatItems[selectedIndex];
+                        switch (selectedItem.type) {
+                          case "author":
+                            return `Press Enter to filter by author: "${selectedItem.value}"`;
+                          case "title":
+                            return `Press Enter to view book: "${selectedItem.value}"`;
+                          case "subject":
+                            return `Press Enter to filter by subject: "${selectedItem.value}"`;
+                          default:
+                            return `Press Enter to search titles for "${query}"`;
+                        }
+                      }
+                      return hasActiveFilters
+                        ? `Press Enter to search titles for "${query}" • Shift+Click to replace filters`
+                        : `Press Enter to search titles for "${query}"`;
+                    })()}
+                  </p>
+                </div>
                 {renderSection(
                   "Authors",
                   suggestions.authors.map((a) => ({ value: a })),
@@ -455,76 +585,23 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                   "subject",
                   suggestions.authors.length + suggestions.titles.length
                 )}
-              </List>
+              </div>
             ) : (
               !isLoading && (
-                <Box sx={{ px: 2, py: 3, textAlign: "center" }}>
-                  <Typography variant="body2" color="text.secondary">
+                <div className="px-4 py-6 text-center">
+                  <p className="text-sm text-zinc-400 mb-1">
                     No suggestions found
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  </p>
+                  <p className="text-xs text-zinc-500">
                     Press Enter to search for &quot;{query}&quot;
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
               )
             )}
-          </Paper>
+          </div>
         )}
-      </Box>
-
-      {/* Active filter pills */}
-      {hasActiveFilters && (
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            mt: 1,
-            flexWrap: "wrap",
-            gap: 1,
-          }}
-        >
-          {activeTitle && (
-            <Chip
-              label={`Title: ${activeTitle}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("title")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
-          )}
-          {activeAuthors && (
-            <Chip
-              label={`Author: ${activeAuthors}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("authors")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
-          )}
-          {activeSubjects && (
-            <Chip
-              label={`Subject: ${activeSubjects}`}
-              size="small"
-              onDelete={() => handleRemoveFilter("subjects")}
-              sx={{
-                "& .MuiChip-deleteIcon": {
-                  "&:hover": {
-                  },
-                },
-              }}
-            />
-          )}
-        </Stack>
-      )}
-    </Box>
+      </div>
+    </div>
   );
 };
 
