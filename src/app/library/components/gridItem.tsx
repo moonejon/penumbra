@@ -8,9 +8,6 @@ type GridItemProps = {
   isSelected?: boolean;
 };
 
-// Client-side image cache to prevent unnecessary re-fetches
-const imageCache = new Map<string, boolean>();
-
 const GridItem: FC<GridItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
   const {
     title,
@@ -25,15 +22,8 @@ const GridItem: FC<GridItemProps> = ({ book, setSelectedBook, isSelected = false
 
   // Reset image state when book changes to prevent showing old image
   useEffect(() => {
-    // If image is in cache, load immediately
-    if (image && imageCache.has(image)) {
-      setImageLoading(false);
-      setImageError(false);
-    } else {
-      // Reset to loading state for new book
-      setImageLoading(true);
-      setImageError(false);
-    }
+    setImageLoading(true);
+    setImageError(false);
   }, [book.id, image]);
 
   return (
@@ -71,9 +61,6 @@ const GridItem: FC<GridItemProps> = ({ book, setSelectedBook, isSelected = false
               src={image}
               alt={`Cover of ${title}`}
               onLoad={() => {
-                if (image) {
-                  imageCache.set(image, true);
-                }
                 setImageLoading(false);
               }}
               onError={() => {
