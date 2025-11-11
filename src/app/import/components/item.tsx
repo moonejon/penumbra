@@ -1,7 +1,4 @@
-import { Card, IconButton, Tooltip, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-// import EditIcon from "@mui/icons-material/Edit";
-import WarningIcon from "@mui/icons-material/Warning";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { FC } from "react";
 
 interface ItemProps {
@@ -21,37 +18,38 @@ const Item: FC<ItemProps> = ({
   handleDelete,
 }) => {
   return (
-    <Card
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        minHeight: "50px",
-        minWidth: "450px",
-        justifyContent: "space-between",
-      }}
-    >
-      <div style={{ display: "inline-flex", justifyItems: "baseline" }}>
+    <div className="flex flex-row items-center justify-between min-h-[50px] bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-3 hover:border-zinc-700 transition-colors duration-200">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
         {isIncomplete && (
-          <Tooltip title="Incomplete data">
-            <IconButton>
-              <WarningIcon />
-            </IconButton>
-          </Tooltip>
+          <div className="group relative flex-shrink-0">
+            <button
+              className="p-2 rounded-md hover:bg-zinc-800 transition-colors"
+              aria-label="Incomplete data"
+            >
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+            </button>
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-800 text-zinc-100 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              Incomplete data
+            </span>
+          </div>
         )}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="subtitle1">{title}</Typography>
-          <Typography variant="subtitle2">{authors.join(", ")}</Typography>
+        <div className="flex flex-col min-w-0 flex-1">
+          <p className="text-base font-medium text-zinc-100 tracking-tight truncate">
+            {title}
+          </p>
+          <p className="text-sm text-zinc-400 truncate">{authors.join(", ")}</p>
         </div>
       </div>
-      <div id="icon-drawer">
-        {/*<IconButton aria-label="edit">
-            <EditIcon />
-        </IconButton>*/}
-        <IconButton aria-label="delete" onClick={() => handleDelete(itemKey)}>
-          <DeleteIcon />
-        </IconButton>
+      <div className="flex items-center ml-2 flex-shrink-0">
+        <button
+          onClick={() => handleDelete(itemKey)}
+          className="p-2 rounded-md hover:bg-red-950/50 hover:text-red-400 text-zinc-500 transition-colors duration-200"
+          aria-label="Delete book from queue"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
       </div>
-    </Card>
+    </div>
   );
 };
 
