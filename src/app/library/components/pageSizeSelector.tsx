@@ -22,7 +22,7 @@ const PageSizeSelector: FC<PageSizeSelectorProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className="flex items-center gap-2 border border-zinc-800 rounded-lg px-3 py-2 bg-zinc-900/50">
+    <div className="flex items-center gap-2 border border-zinc-800 rounded-lg px-3 py-2.5 bg-zinc-900/50 h-[42px]">
       <label
         htmlFor="page-size-select"
         className="text-sm text-zinc-400 whitespace-nowrap hidden sm:block"

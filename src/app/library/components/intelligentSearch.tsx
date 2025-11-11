@@ -480,7 +480,7 @@ const IntelligentSearch: FC<IntelligentSearchProps> = ({ onClose }) => {
                 setIsOpen(true);
               }
             }}
-            className="w-full px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
+            className="w-full h-[42px] px-4 py-2.5 pr-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-zinc-700 transition-all duration-200"
           />
 
           {/* Loading spinner */}
