@@ -13,6 +13,8 @@ interface PageProps {
 
 /**
  * Generate metadata for reading list detail page
+ * IMPORTANT: Uses fetchReadingListPublic to prevent private data leaks in metadata
+ * For non-public lists, returns generic metadata without exposing sensitive information
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
@@ -24,7 +26,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const result = await fetchReadingList(listId)
+  // Use public fetch to avoid authentication issues in metadata generation
+  // This prevents private list titles/descriptions from leaking into SEO/social previews
+  const result = await fetchReadingListPublic(listId)
 
   if (!result.success || !result.data) {
     return {
@@ -34,6 +38,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const list = result.data
 
+  // Only expose metadata for public lists to prevent privacy leaks
+  // Private/Friends/Unlisted lists get generic metadata
+  if (list.visibility !== 'PUBLIC') {
+    return {
+      title: 'Reading List - Penumbra',
+      description: 'A private reading list on Penumbra',
+    }
+  }
+
+  // For public lists, include full metadata for SEO and social sharing
   return {
     title: `${list.title} - Penumbra`,
     description: list.description || `A reading list with ${list.books.length} books`,
