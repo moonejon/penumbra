@@ -370,6 +370,11 @@ export async function getPublicUserProfile(clerkId: string) {
         name: true,
         email: true,
         profileImageUrl: true,
+        githubUrl: true,
+        instagramUrl: true,
+        linkedinUrl: true,
+        letterboxdUrl: true,
+        spotifyUrl: true,
       },
     });
 
@@ -387,11 +392,11 @@ export async function getPublicUserProfile(clerkId: string) {
       email: user.email,
       profileImageUrl: user.profileImageUrl,
       bio: null, // Bio field doesn't exist in schema yet
-      githubUrl: null, // Social media fields don't exist in schema yet
-      instagramUrl: null,
-      linkedinUrl: null,
-      letterboxdUrl: null,
-      spotifyUrl: null,
+      githubUrl: user.githubUrl || null,
+      instagramUrl: user.instagramUrl || null,
+      linkedinUrl: user.linkedinUrl || null,
+      letterboxdUrl: user.letterboxdUrl || null,
+      spotifyUrl: user.spotifyUrl || null,
     };
 
     return {
