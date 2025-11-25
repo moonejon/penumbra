@@ -5,6 +5,9 @@ import { getUserProfile, getPublicUserProfile } from '@/utils/actions/profile'
 import { fetchUserReadingLists, fetchPublicReadingLists } from '@/utils/actions/reading-lists'
 import type { UserProfile } from '@/shared.types'
 
+// Force dynamic rendering to ensure env vars are read at runtime
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Penumbra - Your Personal Library',
   description: 'Organize your favorite books and create custom reading lists',
