@@ -294,7 +294,7 @@ const Library: FC<LibraryProps> = ({
 
                 {/* Details Panel - 60% width */}
                 {selectedBook && (
-                  <div className="w-[60%] sticky top-20 self-start">
+                  <div className="w-[60%] sticky top-40 self-start h-[calc(100vh-10rem)]">
                     <Details
                       book={selectedBook}
                       setSelectedBook={setSelectedBook}

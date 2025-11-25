@@ -115,7 +115,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
   };
 
   return (
-    <div className={`${sidePanelClasses} relative`}>
+    <div className={`${sidePanelClasses} relative ${isSidePanel ? 'h-full overflow-hidden' : ''}`}>
       {/* Action Buttons */}
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
         {canEdit && (
@@ -123,7 +123,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
             <button
               onClick={handleRefetch}
               disabled={isRefetching}
-              className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center w-[44px] h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Refresh book data"
               title="Refresh from ISBNDB"
             >
@@ -135,7 +135,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
             </button>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+              className="flex items-center justify-center w-[44px] h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
               aria-label="Edit book"
               title="Edit book details"
             >
@@ -145,7 +145,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
         )}
         <button
           onClick={() => setSelectedBook(undefined)}
-          className="p-2.5 sm:p-2 min-w-[44px] min-h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+          className="flex items-center justify-center w-[44px] h-[44px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-all duration-200"
           aria-label="Close details"
         >
           <X className="w-5 h-5" />
@@ -153,7 +153,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
       </div>
 
       <div className={`p-6 overflow-y-auto hide-scrollbar ${
-        isSidePanel ? 'max-h-[calc(100vh-8rem)]' : 'h-full'
+        isSidePanel ? 'h-full' : 'h-full'
       }`}>
         <div className={`flex ${isSidePanel ? 'flex-col' : isMobilePortrait ? 'flex-col' : 'gap-8'}`}>
           {/* Book Cover */}

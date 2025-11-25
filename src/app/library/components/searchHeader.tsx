@@ -97,10 +97,10 @@ const SearchHeader: FC<SearchHeaderProps> = ({
 
           {/* View Toggle */}
           {onViewModeChange && (
-            <div className="flex items-center gap-1 border border-zinc-800 rounded-lg p-1 bg-zinc-900/50 h-[42px]">
+            <div className="flex items-center gap-1 border border-zinc-800 rounded-lg p-1 bg-zinc-900/50">
               <button
                 onClick={() => onViewModeChange("list")}
-                className={`p-2.5 sm:p-1.5 min-w-[44px] min-h-[44px] rounded-md transition-all duration-200 ${
+                className={`p-1.5 rounded-md transition-all duration-200 ${
                   viewMode === "list"
                     ? "bg-zinc-800 text-zinc-100"
                     : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
@@ -113,7 +113,7 @@ const SearchHeader: FC<SearchHeaderProps> = ({
               </button>
               <button
                 onClick={() => onViewModeChange("grid")}
-                className={`p-2.5 sm:p-1.5 min-w-[44px] min-h-[44px] rounded-md transition-all duration-200 ${
+                className={`p-1.5 rounded-md transition-all duration-200 ${
                   viewMode === "grid"
                     ? "bg-zinc-800 text-zinc-100"
                     : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
