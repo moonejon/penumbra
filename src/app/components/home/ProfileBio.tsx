@@ -147,20 +147,19 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
           </Button>
         </Link>
 
-        {/* Edit Button (Owner Only) */}
+        {/* Edit Button (Owner Only) - Subtle text link */}
         {isOwner && (
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={() => setIsEditModalOpen(true)}
             className={cn(
-              'transition-opacity',
-              isHovering ? 'opacity-100' : 'opacity-0 md:opacity-100'
+              'text-sm text-zinc-500 hover:text-zinc-300 transition-colors',
+              'flex items-center gap-1.5',
+              isHovering ? 'opacity-100' : 'opacity-50 md:opacity-70'
             )}
           >
-            <Pencil className="w-4 h-4 mr-2" />
+            <Pencil className="w-3 h-3" />
             Edit Profile
-          </Button>
+          </button>
         )}
 
         {/* Edit Profile Modal */}

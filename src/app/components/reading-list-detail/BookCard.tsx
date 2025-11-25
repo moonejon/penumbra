@@ -42,23 +42,25 @@ export function BookCard({
         className
       )}
     >
-      {/* Drag Handle - Desktop Only */}
-      <div
-        className={cn(
-          'hidden md:flex absolute top-2 left-2 z-10',
-          'items-center justify-center',
-          'w-8 h-8 bg-zinc-800/80 backdrop-blur-sm rounded-md',
-          'cursor-grab active:cursor-grabbing',
-          'opacity-0 group-hover:opacity-100',
-          'transition-opacity'
-        )}
-        aria-label="Drag to reorder"
-      >
-        <GripVertical className="w-4 h-4 text-zinc-400" />
-      </div>
+      {/* Drag Handle - Desktop Only, Owner Only */}
+      {isOwner && (
+        <div
+          className={cn(
+            'hidden md:flex absolute top-2 left-2 z-10',
+            'items-center justify-center',
+            'w-8 h-8 bg-zinc-800/80 backdrop-blur-sm rounded-md',
+            'cursor-grab active:cursor-grabbing',
+            'opacity-0 group-hover:opacity-100',
+            'transition-opacity'
+          )}
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4 text-zinc-400" />
+        </div>
+      )}
 
-      {/* Remove Button */}
-      {onRemove && (
+      {/* Remove Button - Owner Only */}
+      {isOwner && onRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation()
