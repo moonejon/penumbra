@@ -59,6 +59,7 @@ export function ReadingListDetailScreen({
 
   /**
    * Handle book reordering
+   * Uses optimistic updates with proper error recovery
    */
   const handleReorder = async (newOrder: BookInReadingListEntry[]) => {
     // Optimistically update UI
@@ -75,18 +76,42 @@ export function ReadingListDetailScreen({
 
       if (!result.success) {
         console.error('Failed to reorder books:', result.error)
-        // Revert to original order on error
-        setList(initialList)
+        // Fetch fresh data from server instead of using stale initialList
+        await fetchFreshListData()
       } else {
-        // Refresh to get latest data
+        // Success: refresh to sync with server state
         handleRefresh()
       }
     } catch (error) {
       console.error('Error reordering books:', error)
-      // Revert to original order on error
-      setList(initialList)
+      // On network/unexpected errors, fetch fresh data from server
+      await fetchFreshListData()
     } finally {
       setIsReordering(false)
+    }
+  }
+
+  /**
+   * Fetch fresh list data from server (error recovery)
+   * Used when optimistic updates fail to ensure we have the latest server state
+   */
+  const fetchFreshListData = async () => {
+    try {
+      const { fetchReadingList } = await import('@/utils/actions/reading-lists')
+      const result = await fetchReadingList(list.id)
+
+      if (result.success && result.data) {
+        // Update state with fresh server data
+        setList(result.data)
+      } else {
+        console.error('Failed to fetch fresh list data:', result.error)
+        // If we can't fetch fresh data, trigger a router refresh as fallback
+        handleRefresh()
+      }
+    } catch (error) {
+      console.error('Error fetching fresh list data:', error)
+      // Last resort: trigger router refresh
+      handleRefresh()
     }
   }
 
