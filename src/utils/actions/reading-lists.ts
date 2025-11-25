@@ -20,10 +20,13 @@ const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 /**
  * Upload a cover image for a reading list to Vercel Blob and update the list
+ * Implements proper transaction handling with rollback to prevent orphaned blob storage
  * @param formData - FormData containing the image file and listId
  * @returns Success status with image URL or error message
  */
 export async function uploadReadingListCover(formData: FormData) {
+  let newBlobUrl: string | null = null;
+
   try {
     // 1. Authenticate user
     const user = await getCurrentUser();
@@ -46,7 +49,7 @@ export async function uploadReadingListCover(formData: FormData) {
       };
     }
 
-    // 3. Verify list ownership
+    // 3. Verify list ownership and get current cover image
     const list = await prisma.readingList.findUnique({
       where: { id: parseInt(listId) },
       select: { ownerId: true, coverImage: true },
@@ -84,6 +87,9 @@ export async function uploadReadingListCover(formData: FormData) {
       };
     }
 
+    // Store old cover image URL for cleanup after successful update
+    const oldCoverImage = list.coverImage;
+
     // 6. Upload new image to Vercel Blob
     const fileExtension = file.name.split(".").pop() || "jpg";
     const timestamp = Date.now();
@@ -96,20 +102,43 @@ export async function uploadReadingListCover(formData: FormData) {
       }
     );
 
+    // Store the new blob URL for potential rollback
+    newBlobUrl = blob.url;
+
     // 7. Update reading list's coverImage in database
-    await prisma.readingList.update({
-      where: { id: parseInt(listId) },
-      data: { coverImage: blob.url },
-    });
+    // If this fails, we need to delete the newly uploaded blob (rollback)
+    try {
+      await prisma.readingList.update({
+        where: { id: parseInt(listId) },
+        data: { coverImage: blob.url },
+      });
+    } catch (dbError) {
+      // Database update failed - rollback by deleting the newly uploaded blob
+      console.error("Database update failed, rolling back blob upload:", dbError);
+
+      try {
+        await del(newBlobUrl);
+        console.log("Successfully rolled back blob upload");
+      } catch (rollbackError) {
+        // Log rollback failure but don't throw - the main error is more important
+        console.error("Failed to rollback blob upload (orphaned file created):", rollbackError);
+      }
+
+      // Re-throw the database error
+      throw dbError;
+    }
 
     // 8. Delete old image from Vercel Blob (if exists)
+    // Only delete AFTER successful database update to prevent data loss
     // Only delete if it's a Vercel Blob URL (not external URL or default)
-    if (list.coverImage && list.coverImage.includes("vercel-storage")) {
+    if (oldCoverImage && oldCoverImage.includes("vercel-storage")) {
       try {
-        await del(list.coverImage);
+        await del(oldCoverImage);
+        console.log("Successfully deleted old cover image");
       } catch (deleteError) {
         // Log but don't fail the request if old image deletion fails
-        console.error("Failed to delete old cover image:", deleteError);
+        // The new image is already successfully stored, so this is not critical
+        console.error("Failed to delete old cover image (orphaned file):", deleteError);
       }
     }
 
@@ -120,6 +149,17 @@ export async function uploadReadingListCover(formData: FormData) {
     };
   } catch (error) {
     console.error("Reading list cover upload error:", error);
+
+    // If we uploaded a blob but failed somewhere else, try to clean it up
+    if (newBlobUrl) {
+      try {
+        await del(newBlobUrl);
+        console.log("Cleaned up orphaned blob after error");
+      } catch (cleanupError) {
+        console.error("Failed to cleanup orphaned blob:", cleanupError);
+      }
+    }
+
     return {
       success: false,
       error:

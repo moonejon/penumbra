@@ -11,10 +11,13 @@ const MAX_BIO_LENGTH = 500;
 
 /**
  * Upload a profile image to Vercel Blob and update user profile
+ * Implements proper transaction handling with rollback to prevent orphaned blob storage
  * @param formData - FormData containing the image file
  * @returns Success status with image URL or error message
  */
 export async function uploadProfileImage(formData: FormData) {
+  let newBlobUrl: string | null = null;
+
   try {
     // 1. Authenticate user
     const user = await getCurrentUser();
@@ -47,10 +50,10 @@ export async function uploadProfileImage(formData: FormData) {
       };
     }
 
-    // 5. Get user's current profile image URL (if exists)
-    const currentProfileImage = user.profileImageUrl;
+    // Store old profile image URL for cleanup after successful update
+    const oldProfileImage = user.profileImageUrl;
 
-    // 6. Upload new image to Vercel Blob
+    // 5. Upload new image to Vercel Blob
     const fileExtension = file.name.split(".").pop() || "jpg";
     const timestamp = Date.now();
     const blob = await put(
@@ -62,30 +65,64 @@ export async function uploadProfileImage(formData: FormData) {
       }
     );
 
-    // 7. Update user's profileImageUrl in database
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { profileImageUrl: blob.url },
-    });
+    // Store the new blob URL for potential rollback
+    newBlobUrl = blob.url;
 
-    // 8. Delete old image from Vercel Blob (if exists)
-    // Only delete if it's a Vercel Blob URL (not external URL or default)
-    if (currentProfileImage && currentProfileImage.includes("vercel-storage")) {
+    // 6. Update user's profileImageUrl in database
+    // If this fails, we need to delete the newly uploaded blob (rollback)
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { profileImageUrl: blob.url },
+      });
+    } catch (dbError) {
+      // Database update failed - rollback by deleting the newly uploaded blob
+      console.error("Database update failed, rolling back blob upload:", dbError);
+
       try {
-        await del(currentProfileImage);
+        await del(newBlobUrl);
+        console.log("Successfully rolled back blob upload");
+      } catch (rollbackError) {
+        // Log rollback failure but don't throw - the main error is more important
+        console.error("Failed to rollback blob upload (orphaned file created):", rollbackError);
+      }
+
+      // Re-throw the database error
+      throw dbError;
+    }
+
+    // 7. Delete old image from Vercel Blob (if exists)
+    // Only delete AFTER successful database update to prevent data loss
+    // Only delete if it's a Vercel Blob URL (not external URL or default)
+    if (oldProfileImage && oldProfileImage.includes("vercel-storage")) {
+      try {
+        await del(oldProfileImage);
+        console.log("Successfully deleted old profile image");
       } catch (deleteError) {
         // Log but don't fail the request if old image deletion fails
-        console.error("Failed to delete old profile image:", deleteError);
+        // The new image is already successfully stored, so this is not critical
+        console.error("Failed to delete old profile image (orphaned file):", deleteError);
       }
     }
 
-    // 9. Return success with new image URL
+    // 8. Return success with new image URL
     return {
       success: true,
       imageUrl: blob.url,
     };
   } catch (error) {
     console.error("Profile image upload error:", error);
+
+    // If we uploaded a blob but failed somewhere else, try to clean it up
+    if (newBlobUrl) {
+      try {
+        await del(newBlobUrl);
+        console.log("Cleaned up orphaned blob after error");
+      } catch (cleanupError) {
+        console.error("Failed to cleanup orphaned blob:", cleanupError);
+      }
+    }
+
     return {
       success: false,
       error:
