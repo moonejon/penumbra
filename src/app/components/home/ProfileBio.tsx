@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { User, Pencil } from 'lucide-react'
+import Link from 'next/link'
+import { User, Pencil, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { EditProfileModal } from './EditProfileModal'
@@ -54,6 +55,18 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
               Discover and explore book collections from readers around the world
             </p>
           </div>
+
+          {/* Browse Library CTA */}
+          <Link href="/library">
+            <Button
+              variant="outline"
+              size="lg"
+              className="mt-2 border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-100"
+            >
+              <BookOpen className="w-5 h-5 mr-2" />
+              Browse Library
+            </Button>
+          </Link>
         </div>
       )
     }
@@ -121,6 +134,18 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
             <p className="text-base text-zinc-400">{profile.email}</p>
           )}
         </div>
+
+        {/* Browse Library CTA - Visible to all users */}
+        <Link href="/library">
+          <Button
+            variant="outline"
+            size="default"
+            className="border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-100"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Browse Library
+          </Button>
+        </Link>
 
         {/* Edit Button (Owner Only) */}
         {isOwner && (
