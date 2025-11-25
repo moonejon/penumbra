@@ -37,7 +37,7 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
         <div
           ref={ref}
           className={cn(
-            'flex flex-col items-center gap-4 py-8 md:py-12',
+            'flex flex-col items-center gap-4 py-4 md:py-6',
             className
           )}
         >
@@ -83,7 +83,7 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
       <div
         ref={ref}
         className={cn(
-          'flex flex-col items-center gap-4 py-8 md:py-12',
+          'flex flex-col items-center gap-4 py-4 md:py-6',
           className
         )}
         onMouseEnter={() => setIsHovering(true)}

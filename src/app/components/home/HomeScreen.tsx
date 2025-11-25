@@ -43,7 +43,7 @@ const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
         className={cn('w-full', className)}
       >
         {/* Main container with max-width and responsive padding */}
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-16">
+        <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
           {/* Profile Section */}
           <ProfileBio
             profile={profile}
@@ -52,7 +52,7 @@ const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
           />
 
           {/* Divider between Profile and Reading Lists */}
-          <div className="border-t border-zinc-800 pt-16" />
+          <div className="border-t border-zinc-800 pt-8" />
 
           {/* Reading Lists Section */}
           <ReadingListsSection
