@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Search, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, AlertCircle, ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Modal from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,7 @@ const BOOKS_PER_PAGE = 12
 /**
  * AddBooksModal Component
  * Modal for searching and adding books from user's library to a reading list
- * Features: search by title/author, pagination, excludes books already in list
+ * Features: search by title/author, pagination, shows books already in list
  */
 export function AddBooksModal({
   isOpen,
@@ -39,6 +39,21 @@ export function AddBooksModal({
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [addingBookId, setAddingBookId] = React.useState<number | null>(null)
+  // Track books added during this session to avoid double-refresh flicker
+  const [locallyAddedBookIds, setLocallyAddedBookIds] = React.useState<Set<number>>(new Set())
+
+  // Memoize existingBookIds to prevent unnecessary re-fetches
+  const existingBookIdsRef = React.useRef(existingBookIds)
+  React.useEffect(() => {
+    existingBookIdsRef.current = existingBookIds
+  }, [existingBookIds])
+
+  /**
+   * Check if a book is already in the list (either from props or added this session)
+   */
+  const isBookInList = React.useCallback((bookId: number) => {
+    return existingBookIdsRef.current.includes(bookId) || locallyAddedBookIds.has(bookId)
+  }, [locallyAddedBookIds])
 
   /**
    * Fetch books from library
@@ -54,12 +69,8 @@ export function AddBooksModal({
         title: query || undefined,
       })
 
-      // Filter out books already in the list
-      const availableBooks = result.books.filter(
-        (book) => !existingBookIds.includes(book.id)
-      )
-
-      setBooks(availableBooks)
+      // Show all books (don't filter out ones in the list)
+      setBooks(result.books)
       setTotalPages(result.pageCount)
     } catch (err) {
       console.error('Error fetching books:', err)
@@ -67,7 +78,7 @@ export function AddBooksModal({
     } finally {
       setIsLoading(false)
     }
-  }, [existingBookIds])
+  }, [])
 
   /**
    * Load books when modal opens or search/page changes
@@ -88,6 +99,7 @@ export function AddBooksModal({
       setBooks([])
       setError(null)
       setAddingBookId(null)
+      setLocallyAddedBookIds(new Set())
     }
   }, [isOpen])
 
@@ -110,8 +122,9 @@ export function AddBooksModal({
       const result = await addBookToReadingList(listId, bookId)
 
       if (result.success) {
-        // Remove the book from the available list
-        setBooks((prev) => prev.filter((book) => book.id !== bookId))
+        // Track this book as added locally to prevent flicker on refresh
+        setLocallyAddedBookIds((prev) => new Set(prev).add(bookId))
+        // Notify parent to refresh data
         onSuccess()
       } else {
         setError(result.error || 'Failed to add book to list')
@@ -212,46 +225,68 @@ export function AddBooksModal({
           ) : (
             // Books grid
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden hover:border-zinc-600 transition-colors"
-                >
-                  {/* Book Cover */}
-                  <div className="relative aspect-[2/3] w-full bg-zinc-800">
-                    <Image
-                      src={book.image || '/placeholder-book.png'}
-                      alt={`Cover of ${book.title}`}
-                      fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      className="object-cover"
-                    />
-                  </div>
-
-                  {/* Book Info */}
-                  <div className="p-3">
-                    <h4 className="text-sm font-medium text-zinc-100 line-clamp-2 mb-1">
-                      {book.title}
-                    </h4>
-                    {book.authors && book.authors.length > 0 && (
-                      <p className="text-xs text-zinc-400 line-clamp-1 mb-3">
-                        {book.authors.join(', ')}
-                      </p>
+              {books.map((book) => {
+                const inList = isBookInList(book.id)
+                return (
+                  <div
+                    key={book.id}
+                    className={cn(
+                      'bg-zinc-900 border rounded-lg overflow-hidden transition-colors',
+                      inList
+                        ? 'border-zinc-700 opacity-75'
+                        : 'border-zinc-800 hover:border-zinc-600'
                     )}
+                  >
+                    {/* Book Cover */}
+                    <div className="relative aspect-[2/3] w-full bg-zinc-800">
+                      <Image
+                        src={book.image || '/placeholder-book.png'}
+                        alt={`Cover of ${book.title}`}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        className="object-cover"
+                      />
+                      {inList && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="bg-zinc-800/90 rounded-full p-2">
+                            <Check className="w-5 h-5 text-green-400" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Add Button */}
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => handleAddBook(book.id)}
-                      disabled={addingBookId === book.id}
-                      className="w-full min-h-[44px]"
-                    >
-                      {addingBookId === book.id ? 'Adding...' : 'Add'}
-                    </Button>
+                    {/* Book Info */}
+                    <div className="p-3">
+                      <h4 className="text-sm font-medium text-zinc-100 line-clamp-2 mb-1">
+                        {book.title}
+                      </h4>
+                      {book.authors && book.authors.length > 0 && (
+                        <p className="text-xs text-zinc-400 line-clamp-1 mb-3">
+                          {book.authors.join(', ')}
+                        </p>
+                      )}
+
+                      {/* Add Button or In List indicator */}
+                      {inList ? (
+                        <div className="w-full min-h-[44px] flex items-center justify-center text-sm text-zinc-400 bg-zinc-800 rounded-md">
+                          <Check className="w-4 h-4 mr-1.5 text-green-400" />
+                          In List
+                        </div>
+                      ) : (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleAddBook(book.id)}
+                          disabled={addingBookId === book.id}
+                          className="w-full min-h-[44px]"
+                        >
+                          {addingBookId === book.id ? 'Adding...' : 'Add'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
