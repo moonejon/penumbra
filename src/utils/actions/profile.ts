@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { put, del } from "@vercel/blob";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/utils/permissions";
@@ -293,10 +294,35 @@ export async function updateUserProfile(name: string) {
  */
 export async function getUserProfile() {
   try {
-    // 1. Authenticate user
-    const user = await getCurrentUser();
+    // 1. Get Clerk user ID (check authentication)
+    const { userId: clerkId } = await auth();
 
-    // 2. Build profile object matching UserProfile type
+    if (!clerkId) {
+      return {
+        success: false,
+        error: "User not authenticated",
+      };
+    }
+
+    // 2. Fetch user from database by clerkId
+    // Note: User record may not exist yet if Clerk webhook hasn't completed
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      // User is authenticated in Clerk but not in database yet
+      // This can happen immediately after sign-up before webhook completes
+      console.warn(
+        `User ${clerkId} authenticated in Clerk but not found in database - webhook may be pending`
+      );
+      return {
+        success: false,
+        error: "User profile is being created. Please refresh the page in a moment.",
+      };
+    }
+
+    // 3. Build profile object matching UserProfile type
     const profile: UserProfile = {
       id: user.clerkId, // Use Clerk ID for consistency with public profiles
       name: user.name,
@@ -304,19 +330,14 @@ export async function getUserProfile() {
       profileImageUrl: user.profileImageUrl,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bio: (user as any).bio || null, // Type assertion for bio field until schema is updated
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      githubUrl: (user as any).githubUrl || null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      instagramUrl: (user as any).instagramUrl || null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      linkedinUrl: (user as any).linkedinUrl || null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      letterboxdUrl: (user as any).letterboxdUrl || null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      spotifyUrl: (user as any).spotifyUrl || null,
+      githubUrl: user.githubUrl || null,
+      instagramUrl: user.instagramUrl || null,
+      linkedinUrl: user.linkedinUrl || null,
+      letterboxdUrl: user.letterboxdUrl || null,
+      spotifyUrl: user.spotifyUrl || null,
     };
 
-    // 3. Return success with profile data
+    // 4. Return success with profile data
     return {
       success: true,
       profile,
