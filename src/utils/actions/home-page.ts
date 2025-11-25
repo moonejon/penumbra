@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import type { UserProfile, ReadingListWithBooks } from "@/shared.types";
+import { getDefaultUserClerkId } from "./admin-settings";
 
 // Define clear result types
 export type HomePageStatus =
@@ -52,14 +53,14 @@ export async function getHomePageData(): Promise<HomePageResult> {
       targetClerkId = clerkId;
       isOwner = true;
     } else {
-      // Not authenticated: check for default user
-      const defaultUserId = process.env.DEFAULT_USER_ID?.trim();
+      // Not authenticated: get default user from database
+      const defaultUserId = await getDefaultUserClerkId();
 
       if (!defaultUserId) {
-        // No default user configured - return error state
+        // No default user configured - return guest view state
         return {
           status: "not_configured",
-          error: "DEFAULT_USER_ID environment variable is not configured",
+          error: "No default user configured in admin settings",
           profile: null,
           readingLists: [],
           permissions: {
