@@ -106,6 +106,9 @@ model ReadingList {
   // For other types, can be null or used for custom categorization
   year String?
 
+  // Custom cover image URL (optional, falls back to book collage)
+  coverImage String?
+
   // Books in this reading list via join table
   books BookInReadingList[]
 
