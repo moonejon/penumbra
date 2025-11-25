@@ -14,6 +14,24 @@ import type {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
+// Map MIME types to file extensions (secure approach: derive extension from MIME type)
+const MIME_TO_EXTENSION: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+/**
+ * Get safe file extension from MIME type
+ * SECURITY: Never trust user-provided filenames - derive extension from validated MIME type
+ * @param mimeType - Validated MIME type of the file
+ * @returns Safe file extension or null if MIME type is not allowed
+ */
+function getExtensionFromMimeType(mimeType: string): string | null {
+  return MIME_TO_EXTENSION[mimeType] || null;
+}
+
 /**
  * CRUD Operations for Reading Lists
  */
@@ -90,8 +108,17 @@ export async function uploadReadingListCover(formData: FormData) {
     // Store old cover image URL for cleanup after successful update
     const oldCoverImage = list.coverImage;
 
-    // 6. Upload new image to Vercel Blob
-    const fileExtension = file.name.split(".").pop() || "jpg";
+    // 6. Derive secure file extension from validated MIME type
+    // SECURITY: Never trust user-provided filename - derive from MIME type instead
+    const fileExtension = getExtensionFromMimeType(file.type);
+    if (!fileExtension) {
+      return {
+        success: false,
+        error: "Invalid file type after validation",
+      };
+    }
+
+    // 7. Upload new image to Vercel Blob
     const timestamp = Date.now();
     const blob = await put(
       `reading-list-covers/${user.id}/list-${listId}-${timestamp}.${fileExtension}`,
@@ -105,7 +132,7 @@ export async function uploadReadingListCover(formData: FormData) {
     // Store the new blob URL for potential rollback
     newBlobUrl = blob.url;
 
-    // 7. Update reading list's coverImage in database
+    // 8. Update reading list's coverImage in database
     // If this fails, we need to delete the newly uploaded blob (rollback)
     try {
       await prisma.readingList.update({
@@ -128,7 +155,7 @@ export async function uploadReadingListCover(formData: FormData) {
       throw dbError;
     }
 
-    // 8. Delete old image from Vercel Blob (if exists)
+    // 9. Delete old image from Vercel Blob (if exists)
     // Only delete AFTER successful database update to prevent data loss
     // Only delete if it's a Vercel Blob URL (not external URL or default)
     if (oldCoverImage && oldCoverImage.includes("vercel-storage")) {
@@ -142,7 +169,7 @@ export async function uploadReadingListCover(formData: FormData) {
       }
     }
 
-    // 9. Return success with new image URL
+    // 10. Return success with new image URL
     return {
       success: true,
       imageUrl: blob.url,
@@ -281,6 +308,7 @@ export async function fetchUserReadingLists() {
               select: {
                 id: true,
                 image: true,
+                visibility: true, // Include visibility for filtering
               },
             },
           },
@@ -293,6 +321,9 @@ export async function fetchUserReadingLists() {
         updatedAt: "desc",
       },
     });
+
+    // Note: We include all books in the owner's view since they own all books in their lists
+    // Visibility is checked at the application level when lists are shared publicly
 
     return { success: true, data: lists };
   } catch (error) {
@@ -342,6 +373,7 @@ export async function fetchPublicReadingLists(clerkId: string) {
               select: {
                 id: true,
                 image: true,
+                visibility: true, // Include visibility for filtering
               },
             },
           },
@@ -355,7 +387,14 @@ export async function fetchPublicReadingLists(clerkId: string) {
       },
     });
 
-    return { success: true, data: lists };
+    // Filter out PRIVATE books from public lists to prevent privacy violations
+    // If a book's visibility changes to PRIVATE while in a PUBLIC list, it should not be visible
+    const filteredLists = lists.map((list) => ({
+      ...list,
+      books: list.books.filter((entry) => entry.book.visibility === "PUBLIC"),
+    }));
+
+    return { success: true, data: filteredLists };
   } catch (error) {
     console.error("Fetch public reading lists error:", error);
     return {
@@ -415,6 +454,7 @@ export async function fetchReadingList(listId: number) {
  * Books are ordered by position (ascending)
  * Returns the reading list without ownership validation
  * Caller should check visibility permissions
+ * SECURITY: Filters out PRIVATE books to prevent privacy violations
  */
 export async function fetchReadingListPublic(listId: number) {
   try {
@@ -436,7 +476,15 @@ export async function fetchReadingListPublic(listId: number) {
       return { success: false, error: "Reading list not found" };
     }
 
-    return { success: true, data: list as ReadingListWithBooks };
+    // Filter out PRIVATE books from the list to prevent privacy violations
+    // If a book's visibility changes to PRIVATE while in a PUBLIC/FRIENDS/UNLISTED list,
+    // it should not be visible to non-owners
+    const filteredList = {
+      ...list,
+      books: list.books.filter((entry) => entry.book.visibility === "PUBLIC"),
+    };
+
+    return { success: true, data: filteredList as ReadingListWithBooks };
   } catch (error) {
     console.error("Fetch public reading list error:", error);
     return {
