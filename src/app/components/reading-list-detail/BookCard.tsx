@@ -12,6 +12,7 @@ interface BookCardProps {
   onRemove?: () => void
   onViewDetails?: () => void
   isDragging?: boolean
+  isOwner?: boolean
   className?: string
 }
 
@@ -27,6 +28,7 @@ export function BookCard({
   onRemove,
   onViewDetails,
   isDragging = false,
+  isOwner = true,
   className,
 }: BookCardProps) {
   return (
@@ -77,8 +79,8 @@ export function BookCard({
         </button>
       )}
 
-      {/* Notes Indicator */}
-      {notes && (
+      {/* Notes Indicator - Only visible to owner */}
+      {notes && isOwner && (
         <div
           className="absolute bottom-2 right-2 z-10 flex items-center justify-center w-6 h-6 bg-blue-500/80 backdrop-blur-sm rounded-full"
           aria-label="Has notes"

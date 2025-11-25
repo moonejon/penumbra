@@ -12,6 +12,7 @@ interface BookGridProps {
   onRemoveBook: (bookId: number) => void
   onViewBookDetails: (entry: BookInReadingListEntry) => void
   isReordering?: boolean
+  isOwner: boolean
   className?: string
 }
 
@@ -27,6 +28,7 @@ export function BookGrid({
   onRemoveBook,
   onViewBookDetails,
   isReordering = false,
+  isOwner,
   className,
 }: BookGridProps) {
   // Empty state
@@ -61,33 +63,52 @@ export function BookGrid({
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Desktop: Drag-and-drop enabled grid */}
-      <div className="hidden md:block">
-        <Reorder.Group
-          axis="y"
-          values={books}
-          onReorder={onReorder}
-          className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-        >
-          {books.map((entry) => (
-            <Reorder.Item
-              key={entry.book.id}
-              value={entry}
-              className="cursor-grab active:cursor-grabbing"
-              drag={!isReordering}
-              whileDrag={{ scale: 1.05, zIndex: 50 }}
-              transition={{ duration: 0.2 }}
-            >
+      {/* Desktop: Drag-and-drop enabled grid (only for owners) */}
+      {isOwner ? (
+        <div className="hidden md:block">
+          <Reorder.Group
+            axis="y"
+            values={books}
+            onReorder={onReorder}
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+          >
+            {books.map((entry) => (
+              <Reorder.Item
+                key={entry.book.id}
+                value={entry}
+                className="cursor-grab active:cursor-grabbing"
+                drag={!isReordering}
+                whileDrag={{ scale: 1.05, zIndex: 50 }}
+                transition={{ duration: 0.2 }}
+              >
+                <BookCard
+                  book={entry.book}
+                  notes={entry.notes}
+                  onRemove={() => onRemoveBook(entry.book.id)}
+                  onViewDetails={() => onViewBookDetails(entry)}
+                  isOwner={isOwner}
+                />
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+      ) : (
+        // Desktop: Static grid for non-owners
+        <div className="hidden md:block">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {books.map((entry) => (
               <BookCard
+                key={entry.book.id}
                 book={entry.book}
                 notes={entry.notes}
                 onRemove={() => onRemoveBook(entry.book.id)}
                 onViewDetails={() => onViewBookDetails(entry)}
+                isOwner={isOwner}
               />
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Mobile: Static grid without drag-and-drop */}
       <div className="block md:hidden">
@@ -99,6 +120,7 @@ export function BookGrid({
               notes={entry.notes}
               onRemove={() => onRemoveBook(entry.book.id)}
               onViewDetails={() => onViewBookDetails(entry)}
+              isOwner={isOwner}
             />
           ))}
         </div>
