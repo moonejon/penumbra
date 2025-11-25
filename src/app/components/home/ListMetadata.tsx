@@ -24,15 +24,15 @@ export function ListMetadata({
   const bookCountText = bookCount === 1 ? '1 book' : `${bookCount} books`
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn('flex flex-col gap-1', className)}>
       {/* Title */}
-      <h3 className="text-xl font-semibold text-zinc-100 line-clamp-2">
+      <h3 className="text-sm sm:text-base font-semibold text-zinc-100 line-clamp-2">
         {title}
       </h3>
 
       {/* Description - only show if provided */}
       {description && (
-        <p className="text-sm text-zinc-400 line-clamp-2">
+        <p className="text-xs text-zinc-400 line-clamp-2">
           {description}
         </p>
       )}
