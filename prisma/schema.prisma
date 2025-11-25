@@ -46,6 +46,13 @@ model User {
   // Format: https://[vercel-blob-url]/[user-id]/profile.[ext]
   profileImageUrl String? @db.Text
 
+  // Social media links
+  githubUrl     String? @db.Text
+  instagramUrl  String? @db.Text
+  linkedinUrl   String? @db.Text
+  letterboxdUrl String? @db.Text
+  spotifyUrl    String? @db.Text
+
   books        Book[]
   readingLists ReadingList[]
   createdAt    DateTime      @default(now())
