@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
 import { BookType } from "@/shared.types";
 import { ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 type ItemProps = {
   book: BookType;
@@ -59,14 +60,16 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
         {/* Book Cover */}
         <div className="flex items-center justify-center min-w-[70px] sm:min-w-[120px]">
           {image && !imageError ? (
-            <div className="relative w-[60px] sm:w-[100px]">
+            <div className="relative w-[60px] h-[90px] sm:w-[100px] sm:h-[160px]">
               {imageLoading && (
-                <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded w-[60px] h-[90px] sm:w-[100px] sm:h-[160px]" />
+                <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded" />
               )}
-              <img
+              <Image
                 src={image}
                 alt={`Cover of ${title}`}
-                onLoad={() => {
+                width={100}
+                height={160}
+                onLoadingComplete={() => {
                   if (image) {
                     imageCache.set(image, true);
                   }
@@ -76,7 +79,7 @@ const Item: FC<ItemProps> = ({ book, setSelectedBook, isSelected = false }) => {
                   setImageLoading(false);
                   setImageError(true);
                 }}
-                className={`max-h-[90px] sm:max-h-[160px] object-fill transition-opacity duration-300 rounded shadow-md ${
+                className={`max-h-[90px] sm:max-h-[160px] w-auto object-contain transition-opacity duration-300 rounded shadow-md ${
                   imageLoading ? 'opacity-0' : 'opacity-100'
                 }`}
               />
