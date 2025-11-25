@@ -51,7 +51,7 @@ export function ReadingListHeader({
         aria-label="Back to home"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Library
+        Back to Profile
       </button>
 
       {/* Header Content */}
