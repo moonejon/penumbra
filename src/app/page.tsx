@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
-import { auth } from '@clerk/nextjs/server'
 import { HomeScreen } from '@/app/components/home'
-import { getUserProfile, getPublicUserProfile } from '@/utils/actions/profile'
-import { fetchUserReadingLists, fetchPublicReadingLists } from '@/utils/actions/reading-lists'
-import type { UserProfile } from '@/shared.types'
+import { getHomePageData } from '@/utils/actions/home-page'
 
 // Force dynamic rendering to ensure env vars are read at runtime
 export const dynamic = 'force-dynamic'
@@ -19,16 +16,11 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  // Get current user from Clerk
-  const { userId } = await auth()
+  // Get unified home page data (handles both authenticated and public views)
+  const result = await getHomePageData()
 
-  // Get the default user ID from environment variable
-  // Trim whitespace/newlines to handle misconfigured env vars
-  const defaultUserId = process.env.DEFAULT_USER_ID?.trim()
-
-  // Validate environment configuration for unauthenticated users
-  if (!userId && !defaultUserId) {
-    // Missing DEFAULT_USER_ID configuration - show helpful error UI
+  // Handle configuration error (DEFAULT_USER_ID not set)
+  if (result.status === 'not_configured') {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg p-6">
@@ -51,55 +43,52 @@ export default async function HomePage() {
     )
   }
 
-  // Determine which user's profile to show
-  // If signed in, show their own profile; otherwise show default user's profile
-  const profileUserId = userId || defaultUserId
-
-  // Determine if page is being viewed by owner
-  const isOwner = !!userId && userId === profileUserId
-
-  // Initialize data with defaults
-  let profile: UserProfile | null = null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let readingLists: any = []
-
-  if (profileUserId) {
-    try {
-      // If viewing your own profile (authenticated), fetch all lists
-      // If viewing public profile (not authenticated), fetch only public lists
-      const [profileResult, listsResult] = await Promise.all([
-        userId && userId === profileUserId
-          ? getUserProfile()
-          : getPublicUserProfile(profileUserId),
-        userId && userId === profileUserId
-          ? fetchUserReadingLists()
-          : fetchPublicReadingLists(profileUserId),
-      ])
-
-      // Extract data from server action responses with fallbacks
-      profile = profileResult.success && profileResult.profile ? profileResult.profile : null
-      readingLists = listsResult.success && listsResult.data ? listsResult.data : []
-
-      // Log errors for debugging (but don't crash the page)
-      if (!profileResult.success) {
-        console.error('Failed to fetch profile:', profileResult.error)
-      }
-      if (!listsResult.success) {
-        console.error('Failed to fetch reading lists:', listsResult.error)
-      }
-    } catch (error) {
-      // Catch any unexpected errors and log them
-      console.error('Unexpected error fetching home page data:', error)
-      // Data remains at default empty values
-    }
+  // Handle user not found error (DEFAULT_USER_ID references non-existent user)
+  if (result.status === 'user_not_found') {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h1 className="text-xl font-semibold text-zinc-100 mb-2">
+            User Not Found
+          </h1>
+          <p className="text-zinc-400 mb-4">
+            The configured default user could not be found in the database.
+          </p>
+          <p className="text-zinc-500 text-sm">
+            Sign in to view your personal library, or contact the administrator to fix
+            the default user configuration.
+          </p>
+        </div>
+      </div>
+    )
   }
 
+  // Handle general errors
+  if (result.status === 'error') {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h1 className="text-xl font-semibold text-zinc-100 mb-2">
+            Error Loading Page
+          </h1>
+          <p className="text-zinc-400 mb-4">
+            An error occurred while loading the home page.
+          </p>
+          <p className="text-zinc-500 text-sm">
+            {result.error || 'Please try again later.'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Success: render home screen
   return (
     <div className="min-h-screen bg-zinc-950">
       <HomeScreen
-        profile={profile}
-        initialReadingLists={readingLists}
-        isOwner={isOwner}
+        profile={result.profile}
+        initialReadingLists={result.readingLists}
+        isOwner={result.isOwner}
       />
     </div>
   )
