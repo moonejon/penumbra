@@ -23,7 +23,8 @@ export default async function HomePage() {
   const { userId } = await auth()
 
   // Get the default user ID from environment variable
-  const defaultUserId = process.env.DEFAULT_USER_ID
+  // Trim whitespace/newlines to handle misconfigured env vars
+  const defaultUserId = process.env.DEFAULT_USER_ID?.trim()
 
   // Validate environment configuration for unauthenticated users
   if (!userId && !defaultUserId) {
