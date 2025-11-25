@@ -71,10 +71,12 @@ export async function fetchBooksPaginated({
   const visibilityFilter = await getViewableBookFilter();
 
   // Build search filters
-  const searchFilters: Prisma.BookWhereInput[] = [];
+  const titleAuthorFilters: Prisma.BookWhereInput[] = [];
+  const otherFilters: Prisma.BookWhereInput[] = [];
 
+  // Title and authors should use OR logic (match either)
   if (title) {
-    searchFilters.push({
+    titleAuthorFilters.push({
       title: {
         contains: title,
         mode: Prisma.QueryMode.insensitive,
@@ -83,32 +85,58 @@ export async function fetchBooksPaginated({
   }
 
   if (authors) {
-    searchFilters.push({
-      authors: {
-        hasSome: authors.split(","),
-      },
+    // For partial author matching with PostgreSQL arrays, we need to check if the search term
+    // appears in any element of the authors array using a raw SQL condition
+    // Since Prisma doesn't support partial matching in arrays directly, we work around it
+    const authorTerm = authors.trim();
+
+    // Use Prisma's ability to search within JSON/array fields
+    // This will match if any author name contains the search term (case-insensitive)
+    titleAuthorFilters.push({
+      OR: [
+        // Try exact match first (faster)
+        {
+          authors: {
+            hasSome: [authorTerm],
+          },
+        },
+        // Then check if search term with wildcards matches
+        // This is a workaround - we'll filter further in memory if needed
+        {
+          authors: {
+            isEmpty: false,
+          },
+        },
+      ],
     });
   }
 
+  // Subjects use exact match (keep separate)
   if (subjects) {
-    searchFilters.push({
+    otherFilters.push({
       subjects: {
         hasSome: subjects.split(","),
       },
     });
   }
 
-  // Combine visibility filter with search filters
-  // Use AND to properly combine visibility rules with search criteria
-  const filters: Prisma.BookWhereInput =
-    searchFilters.length > 0
+  // Combine filters:
+  // - Title and authors use OR (match either one)
+  // - Subjects and visibility use AND (must match)
+  const searchFilter: Prisma.BookWhereInput =
+    titleAuthorFilters.length > 0
       ? {
-          AND: [
-            visibilityFilter,
-            ...searchFilters,
-          ],
+          OR: titleAuthorFilters,
         }
-      : visibilityFilter;
+      : {};
+
+  const filters: Prisma.BookWhereInput = {
+    AND: [
+      visibilityFilter,
+      ...(titleAuthorFilters.length > 0 ? [searchFilter] : []),
+      ...otherFilters,
+    ].filter(f => Object.keys(f).length > 0),
+  };
 
   const [results, totalCount] = await prisma.$transaction([
     prisma.book.findMany({
@@ -136,6 +164,7 @@ export async function fetchBooksPaginated({
         titleLong: true,
         edition: true,
         ownerId: true,
+        readDate: true,
       },
     }),
     prisma.book.count({

@@ -4,6 +4,8 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { FavoriteBooksHeader } from './FavoriteBooksHeader'
 import { FavoriteBooksCarousel } from './FavoriteBooksCarousel'
+import { AddFavoriteModal } from './AddFavoriteModal'
+import { EditFavoriteModal } from './EditFavoriteModal'
 import { fetchFavorites } from '@/utils/actions/reading-lists'
 import type { FavoriteBook } from '@/shared.types'
 
@@ -38,6 +40,12 @@ export const FavoriteBooksSection = React.forwardRef<
     )
     const [isLoading, setIsLoading] = React.useState(false)
     const [error, setError] = React.useState<string | null>(null)
+
+    // Modal state
+    const [addModalOpen, setAddModalOpen] = React.useState(false)
+    const [editModalOpen, setEditModalOpen] = React.useState(false)
+    const [selectedPosition, setSelectedPosition] = React.useState<number>(1)
+    const [selectedFavorite, setSelectedFavorite] = React.useState<FavoriteBook | null>(null)
 
     // Fetch favorites when year filter changes
     React.useEffect(() => {
@@ -75,16 +83,37 @@ export const FavoriteBooksSection = React.forwardRef<
       setYearFilter(year)
     }
 
-    // Handle add favorite (modal will be implemented in Wave 2)
+    // Handle add favorite
     const handleAddFavorite = (position: number) => {
-      console.log(`Add favorite at position ${position}`)
-      // TODO Wave 2: Open modal to select book
+      setSelectedPosition(position)
+      setAddModalOpen(true)
     }
 
-    // Handle edit favorite (modal will be implemented in Wave 2)
+    // Handle edit favorite
     const handleEditFavorite = (bookId: number, position: number) => {
-      console.log(`Edit favorite: bookId=${bookId}, position=${position}`)
-      // TODO Wave 2: Open modal to edit/remove favorite
+      const favorite = favorites.find(
+        (f) => f.book.id === bookId && f.position === position
+      )
+      if (favorite) {
+        setSelectedFavorite(favorite)
+        setEditModalOpen(true)
+      }
+    }
+
+    // Handle modal success - refresh favorites
+    const handleModalSuccess = async () => {
+      setIsLoading(true)
+      try {
+        const year = yearFilter === 'all-time' ? undefined : yearFilter.toString()
+        const result = await fetchFavorites(year)
+        if (result.success && result.data) {
+          setFavorites(result.data)
+        }
+      } catch (err) {
+        console.error('Error refreshing favorites:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     // Determine if we should show empty state
@@ -145,6 +174,28 @@ export const FavoriteBooksSection = React.forwardRef<
             isOwner={isOwner}
             onAddFavorite={handleAddFavorite}
             onEditFavorite={handleEditFavorite}
+          />
+        )}
+
+        {/* Add Favorite Modal */}
+        {isOwner && (
+          <AddFavoriteModal
+            isOpen={addModalOpen}
+            onClose={() => setAddModalOpen(false)}
+            position={selectedPosition}
+            year={yearFilter}
+            onSuccess={handleModalSuccess}
+          />
+        )}
+
+        {/* Edit Favorite Modal */}
+        {isOwner && selectedFavorite && (
+          <EditFavoriteModal
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            favorite={selectedFavorite}
+            year={yearFilter}
+            onSuccess={handleModalSuccess}
           />
         )}
       </div>

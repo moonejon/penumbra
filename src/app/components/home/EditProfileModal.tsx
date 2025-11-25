@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { AlertCircle, User, Upload, Loader2, X } from 'lucide-react'
+import { AlertCircle, Upload, Loader2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Modal from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -283,6 +283,7 @@ export function EditProfileModal({
                 variant="outline"
                 size="sm"
                 onClick={() => setShowImageUpload(true)}
+                className="min-h-[44px]"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Change Image
@@ -293,7 +294,7 @@ export function EditProfileModal({
                   variant="ghost"
                   size="sm"
                   onClick={handleRemoveImage}
-                  className="text-red-400 hover:text-red-300"
+                  className="text-red-400 hover:text-red-300 min-h-[44px]"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Remove
@@ -312,6 +313,7 @@ export function EditProfileModal({
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isSubmitting}
+                  className="min-h-[44px]"
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   Select Image
@@ -340,6 +342,7 @@ export function EditProfileModal({
                     variant="ghost"
                     size="sm"
                     onClick={handleCancelImageSelection}
+                    className="min-h-[44px]"
                   >
                     Cancel
                   </Button>
@@ -354,6 +357,7 @@ export function EditProfileModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowImageUpload(false)}
+                    className="min-h-[44px]"
                   >
                     Cancel
                   </Button>
@@ -394,8 +398,12 @@ export function EditProfileModal({
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? 'name-error' : undefined}
             maxLength={100}
+            inputMode="text"
+            autoComplete="name"
+            autoCapitalize="words"
             className={cn(
-              'px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100',
+              'px-3 py-2 bg-zinc-900 border rounded-lg',
+              'text-base sm:text-sm text-zinc-100',
               'placeholder:text-zinc-600',
               'focus:outline-none focus:ring-2 focus:border-transparent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -445,8 +453,11 @@ export function EditProfileModal({
             aria-describedby={errors.bio ? 'bio-error' : undefined}
             rows={4}
             maxLength={500}
+            inputMode="text"
+            autoComplete="off"
             className={cn(
-              'px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100',
+              'px-3 py-2 bg-zinc-900 border rounded-lg',
+              'text-base sm:text-sm text-zinc-100',
               'placeholder:text-zinc-600',
               'focus:outline-none focus:ring-2 focus:border-transparent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -487,7 +498,7 @@ export function EditProfileModal({
             variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             Cancel
           </Button>
@@ -495,7 +506,7 @@ export function EditProfileModal({
             type="submit"
             variant="default"
             disabled={isSubmitting || !hasChanges}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             {isSubmitting ? (
               <>

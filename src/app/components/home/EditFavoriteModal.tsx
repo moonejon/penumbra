@@ -125,7 +125,7 @@ export const EditFavoriteModal = React.forwardRef<
           <Button
             variant="secondary"
             onClick={() => setShowRemoveConfirm(false)}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
             disabled={isRemoving}
           >
             Cancel
@@ -133,7 +133,7 @@ export const EditFavoriteModal = React.forwardRef<
           <Button
             variant="destructive"
             onClick={handleRemoveFavorite}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
             disabled={isRemoving}
           >
             {isRemoving ? 'Removing...' : 'Remove'}
@@ -195,8 +195,9 @@ export const EditFavoriteModal = React.forwardRef<
               }
               className={cn(
                 'w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg',
-                'text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:border-transparent',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'text-base sm:text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'min-h-[44px]'
               )}
               disabled={isChangingPosition || isRemoving}
               aria-label="Select new position"
@@ -214,7 +215,7 @@ export const EditFavoriteModal = React.forwardRef<
                 variant="default"
                 onClick={handleChangePosition}
                 disabled={isChangingPosition || isRemoving}
-                className="w-full"
+                className="w-full min-h-[44px]"
               >
                 {isChangingPosition ? 'Moving...' : `Move to Position #${newPosition}`}
               </Button>
@@ -227,7 +228,7 @@ export const EditFavoriteModal = React.forwardRef<
               variant="destructive"
               onClick={() => setShowRemoveConfirm(true)}
               disabled={isChangingPosition || isRemoving}
-              className="w-full"
+              className="w-full min-h-[44px]"
             >
               Remove from Favorites
             </Button>

@@ -63,7 +63,7 @@ export function CreateReadingListModal({
   const [formData, setFormData] = React.useState<FormData>({
     title: '',
     description: '',
-    visibility: 'PUBLIC'
+    visibility: 'PRIVATE'
   })
 
   const [errors, setErrors] = React.useState<FormErrors>({})
@@ -76,7 +76,7 @@ export function CreateReadingListModal({
       setFormData({
         title: '',
         description: '',
-        visibility: 'PUBLIC'
+        visibility: 'PRIVATE'
       })
       setErrors({})
     }
@@ -210,8 +210,12 @@ export function CreateReadingListModal({
             aria-invalid={!!errors.title}
             aria-describedby={errors.title ? 'title-error' : undefined}
             maxLength={100}
+            inputMode="text"
+            autoComplete="off"
+            autoCapitalize="words"
             className={cn(
-              'px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100',
+              'px-3 py-2 bg-zinc-900 border rounded-lg',
+              'text-base sm:text-sm text-zinc-100',
               'placeholder:text-zinc-600',
               'focus:outline-none focus:ring-2 focus:border-transparent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -256,8 +260,11 @@ export function CreateReadingListModal({
             aria-describedby={errors.description ? 'description-error' : undefined}
             rows={3}
             maxLength={500}
+            inputMode="text"
+            autoComplete="off"
             className={cn(
-              'px-3 py-2 bg-zinc-900 border rounded-lg text-zinc-100',
+              'px-3 py-2 bg-zinc-900 border rounded-lg',
+              'text-base sm:text-sm text-zinc-100',
               'placeholder:text-zinc-600',
               'focus:outline-none focus:ring-2 focus:border-transparent',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -326,7 +333,7 @@ export function CreateReadingListModal({
             variant="secondary"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             Cancel
           </Button>
@@ -334,7 +341,7 @@ export function CreateReadingListModal({
             type="submit"
             variant="default"
             disabled={isSubmitting || !formData.title.trim()}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             {isSubmitting ? 'Creating...' : 'Create List'}
           </Button>

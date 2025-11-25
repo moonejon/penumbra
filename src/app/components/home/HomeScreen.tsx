@@ -4,14 +4,11 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ProfileBio } from './ProfileBio'
-import { FavoriteBooksSection } from './FavoriteBooksSection'
 import { ReadingListsSection } from './ReadingListsSection'
-import type { UserProfile, FavoriteBook, ReadingListWithBooks } from '@/shared.types'
+import type { UserProfile, ReadingListWithBooks } from '@/shared.types'
 
 export interface HomeScreenProps {
   profile: UserProfile | null
-  initialFavorites: FavoriteBook[]
-  initialAvailableYears: number[]
   initialReadingLists: ReadingListWithBooks[]
   isOwner: boolean
   className?: string
@@ -21,17 +18,12 @@ export interface HomeScreenProps {
  * HomeScreen Component
  * Main container that composes all home screen sections:
  * - ProfileBio: User profile information and avatar
- * - FavoriteBooksSection: User's favorite books with year filtering
  * - ReadingListsSection: User's reading lists
- *
- * Phase 2 Wave 1: Integration of sections from Agents 1 and 2
  */
 const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
   (
     {
       profile,
-      initialFavorites,
-      initialAvailableYears,
       initialReadingLists,
       isOwner,
       className,
@@ -59,17 +51,7 @@ const HomeScreen = React.forwardRef<HTMLDivElement, HomeScreenProps>(
             onProfileUpdate={handleProfileUpdate}
           />
 
-          {/* Divider between Profile and Favorites */}
-          <div className="border-t border-zinc-800 pt-16" />
-
-          {/* Favorites Section */}
-          <FavoriteBooksSection
-            initialFavorites={initialFavorites}
-            initialAvailableYears={initialAvailableYears}
-            isOwner={isOwner}
-          />
-
-          {/* Divider between Favorites and Reading Lists */}
+          {/* Divider between Profile and Reading Lists */}
           <div className="border-t border-zinc-800 pt-16" />
 
           {/* Reading Lists Section */}

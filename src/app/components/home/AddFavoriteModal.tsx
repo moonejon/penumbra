@@ -4,7 +4,7 @@ import * as React from 'react'
 import Modal from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { BookCoverCard } from '@/components/ui/BookCoverCard'
-import { fetchBooks } from '@/utils/actions/books'
+import { fetchBooksPaginated } from '@/utils/actions/books'
 import { setFavorite } from '@/utils/actions/reading-lists'
 import type { BookType } from '@/shared.types'
 import { Search } from 'lucide-react'
@@ -24,7 +24,6 @@ export const AddFavoriteModal = React.forwardRef<
 >(({ isOpen, onClose, position, year, onSuccess }, ref) => {
   // State management
   const [books, setBooks] = React.useState<BookType[]>([])
-  const [filteredBooks, setFilteredBooks] = React.useState<BookType[]>([])
   const [selectedBook, setSelectedBook] = React.useState<BookType | null>(null)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -33,6 +32,7 @@ export const AddFavoriteModal = React.forwardRef<
 
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(1)
+  const [totalPages, setTotalPages] = React.useState(0)
   const BOOKS_PER_PAGE = 12
 
   // Debounced search query
@@ -48,7 +48,7 @@ export const AddFavoriteModal = React.forwardRef<
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Fetch books on mount
+  // Fetch books with server-side search and pagination
   React.useEffect(() => {
     if (!isOpen) return
 
@@ -57,19 +57,27 @@ export const AddFavoriteModal = React.forwardRef<
       setError(null)
 
       try {
-        const userBooks = await fetchBooks()
+        const result = await fetchBooksPaginated({
+          pageSize: BOOKS_PER_PAGE,
+          page: currentPage,
+          title: debouncedQuery || undefined,
+        })
 
-        if (!userBooks || userBooks.length === 0) {
+        if (!result.books || result.books.length === 0) {
           setBooks([])
-          setFilteredBooks([])
-          setError('No books found in your library')
+          setTotalPages(0)
+          if (debouncedQuery) {
+            setError('No books found matching your search')
+          } else {
+            setError('No books found in your library')
+          }
           return
         }
 
-        // Filter by year if not all-time
-        let filtered = userBooks
+        // Filter by year if not all-time (client-side filter for year)
+        let filtered = result.books
         if (year !== 'all-time') {
-          filtered = userBooks.filter((book) => {
+          filtered = result.books.filter((book) => {
             if (!book.readDate) return false
             const bookYear = new Date(book.readDate).getFullYear()
             return bookYear === year
@@ -77,44 +85,26 @@ export const AddFavoriteModal = React.forwardRef<
         }
 
         setBooks(filtered)
-        setFilteredBooks(filtered)
+        setTotalPages(result.pageCount)
+
+        // Clear error if books were found
+        if (filtered.length > 0) {
+          setError(null)
+        } else if (year !== 'all-time') {
+          setError(`No books read in ${year}`)
+        }
       } catch (err) {
         console.error('Error fetching books:', err)
         setError('Failed to load books')
         setBooks([])
-        setFilteredBooks([])
+        setTotalPages(0)
       } finally {
         setIsLoading(false)
       }
     }
 
     loadBooks()
-  }, [isOpen, year])
-
-  // Filter books by search query
-  React.useEffect(() => {
-    if (!debouncedQuery.trim()) {
-      setFilteredBooks(books)
-      return
-    }
-
-    const query = debouncedQuery.toLowerCase()
-    const filtered = books.filter((book) => {
-      const titleMatch = book.title.toLowerCase().includes(query)
-      const authorMatch = book.authors.some((author) =>
-        author.toLowerCase().includes(query)
-      )
-      return titleMatch || authorMatch
-    })
-
-    setFilteredBooks(filtered)
-  }, [debouncedQuery, books])
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE)
-  const startIndex = (currentPage - 1) * BOOKS_PER_PAGE
-  const endIndex = startIndex + BOOKS_PER_PAGE
-  const paginatedBooks = filteredBooks.slice(startIndex, endIndex)
+  }, [isOpen, currentPage, debouncedQuery, year])
 
   // Handle book selection
   const handleBookSelect = (book: BookType) => {
@@ -191,10 +181,14 @@ export const AddFavoriteModal = React.forwardRef<
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search by title or author..."
+            placeholder="Search by title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:border-transparent"
+            inputMode="search"
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-base sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:border-transparent"
             aria-label="Search books"
           />
         </div>
@@ -215,7 +209,7 @@ export const AddFavoriteModal = React.forwardRef<
         )}
 
         {/* Empty State */}
-        {!isLoading && filteredBooks.length === 0 && (
+        {!isLoading && books.length === 0 && (
           <div className="py-12 text-center">
             <p className="text-zinc-400">
               {searchQuery.trim()
@@ -228,14 +222,14 @@ export const AddFavoriteModal = React.forwardRef<
         )}
 
         {/* Books Grid */}
-        {!isLoading && paginatedBooks.length > 0 && (
+        {!isLoading && books.length > 0 && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {paginatedBooks.map((book) => (
+              {books.map((book) => (
                 <div
                   key={book.id}
                   className={cn(
-                    'relative rounded-lg transition-all',
+                    'relative rounded-lg transition-all min-h-[44px]',
                     selectedBook?.id === book.id
                       ? 'ring-2 ring-blue-500'
                       : 'hover:ring-2 hover:ring-zinc-600'
@@ -268,6 +262,7 @@ export const AddFavoriteModal = React.forwardRef<
                   onClick={goToPrevPage}
                   disabled={currentPage === 1}
                   aria-label="Previous page"
+                  className="min-h-[44px] min-w-[44px]"
                 >
                   Previous
                 </Button>
@@ -279,6 +274,7 @@ export const AddFavoriteModal = React.forwardRef<
                   onClick={goToNextPage}
                   disabled={currentPage === totalPages}
                   aria-label="Next page"
+                  className="min-h-[44px] min-w-[44px]"
                 >
                   Next
                 </Button>
@@ -292,7 +288,7 @@ export const AddFavoriteModal = React.forwardRef<
           <Button
             variant="secondary"
             onClick={handleClose}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
             disabled={isSubmitting}
           >
             Cancel
@@ -300,7 +296,7 @@ export const AddFavoriteModal = React.forwardRef<
           <Button
             variant="default"
             onClick={handleSubmit}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
             disabled={!selectedBook || isSubmitting}
           >
             {isSubmitting ? 'Adding...' : 'Add to Favorites'}

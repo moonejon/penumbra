@@ -71,6 +71,7 @@ export interface ReadingList {
   visibility: ReadingListVisibilityEnum;
   type: ReadingListTypeEnum;
   year?: string | null; // For FAVORITES_YEAR type, stores the year (e.g., "2024")
+  coverImage?: string | null; // Custom cover image URL (optional, falls back to book collage)
   createdAt: Date;
   updatedAt: Date;
 }
