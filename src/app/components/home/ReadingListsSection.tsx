@@ -82,7 +82,7 @@ export function ReadingListsSection({
     <>
       <section className={cn('flex flex-col gap-6', className)}>
         {/* Header with title and create button, plus view toggle */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-row justify-between items-center gap-3">
           <ReadingListsHeader isOwner={isOwner} onCreateList={handleCreateList} />
 
           {/* Only show view toggle if there are lists to view */}
@@ -95,7 +95,7 @@ export function ReadingListsSection({
         {lists.length === 0 ? (
           <EmptyReadingListsState isOwner={isOwner} onCreateList={handleCreateList} />
         ) : (
-          <ReadingListGrid lists={lists} viewMode={viewMode} />
+          <ReadingListGrid lists={lists} viewMode={viewMode} isOwner={isOwner} />
         )}
       </section>
 

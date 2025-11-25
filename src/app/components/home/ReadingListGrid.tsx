@@ -9,6 +9,7 @@ import { ReadingListCard } from './ReadingListCard'
 interface ReadingListGridProps {
   lists: ReadingListWithBooks[]
   viewMode: 'list' | 'grid'
+  isOwner?: boolean
   className?: string
 }
 
@@ -20,6 +21,7 @@ interface ReadingListGridProps {
 export function ReadingListGrid({
   lists,
   viewMode,
+  isOwner = false,
   className,
 }: ReadingListGridProps) {
   const router = useRouter()
@@ -37,10 +39,10 @@ export function ReadingListGrid({
   return (
     <div
       className={cn(
-        'grid gap-4',
+        'grid gap-3',
         // Responsive grid columns
         viewMode === 'grid'
-          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
           : 'grid-cols-1',
         className
       )}
@@ -51,6 +53,7 @@ export function ReadingListGrid({
           list={list}
           viewMode={viewMode}
           onClick={() => handleListClick(list.id)}
+          isOwner={isOwner}
         />
       ))}
     </div>

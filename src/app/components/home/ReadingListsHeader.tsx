@@ -22,14 +22,9 @@ export function ReadingListsHeader({
   className,
 }: ReadingListsHeaderProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4',
-        className
-      )}
-    >
+    <div className={cn('flex items-center gap-3', className)}>
       {/* Section Title */}
-      <h2 className="text-3xl font-bold text-zinc-100">
+      <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100">
         Reading Lists
       </h2>
 
@@ -38,11 +33,13 @@ export function ReadingListsHeader({
         <Button
           onClick={onCreateList}
           variant="default"
-          className="gap-2"
+          size="sm"
+          className="gap-1.5 text-sm"
           aria-label="Create new reading list"
         >
-          <Plus size={20} aria-hidden="true" />
-          Create List
+          <Plus size={16} aria-hidden="true" />
+          <span className="hidden sm:inline">Create List</span>
+          <span className="sm:hidden">Create</span>
         </Button>
       )}
     </div>
