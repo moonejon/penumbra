@@ -96,6 +96,9 @@ export interface BookInReadingListEntry {
  */
 export interface ReadingListWithBooks extends ReadingList {
   books: BookInReadingListEntry[];
+  _count?: {
+    books: number;
+  };
 }
 
 /**
@@ -112,7 +115,7 @@ export interface FavoriteBook {
  * Subset of User model for display purposes
  */
 export interface UserProfile {
-  id: number;
+  id: number | string; // Can be either database ID (number) or Clerk ID (string)
   name?: string | null;
   email: string;
   profileImageUrl?: string | null;
