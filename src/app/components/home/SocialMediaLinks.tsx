@@ -130,33 +130,17 @@ const SocialMediaLinks = React.forwardRef<HTMLDivElement, SocialMediaLinksProps>
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              'group relative flex items-center justify-center',
+              'flex items-center justify-center',
               'transition-all duration-200 ease-out',
               'hover:scale-110',
               'focus-visible:outline-none',
               'active:scale-95',
               link.colorClass
             )}
-            aria-label={`Visit ${link.label} profile`}
+            aria-label={`Visit ${link.label}`}
             role="listitem"
           >
             {link.icon}
-
-            {/* Tooltip on hover */}
-            <span
-              className={cn(
-                'absolute -bottom-7 left-1/2 -translate-x-1/2',
-                'px-2 py-0.5 rounded text-xs',
-                'text-white/60',
-                'whitespace-nowrap',
-                'opacity-0 group-hover:opacity-100',
-                'transition-opacity duration-200',
-                'pointer-events-none'
-              )}
-              role="tooltip"
-            >
-              {link.label}
-            </span>
           </a>
         ))}
       </div>
