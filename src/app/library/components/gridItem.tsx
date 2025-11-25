@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction, useState, useEffect } from "react";
 import { BookType } from "@/shared.types";
 import { ImageIcon, BookOpen } from "lucide-react";
+import Image from "next/image";
 
 type GridItemProps = {
   book: BookType;
@@ -57,17 +58,19 @@ const GridItem: FC<GridItemProps> = ({ book, setSelectedBook, isSelected = false
             )}
 
             {/* Book Cover Image */}
-            <img
+            <Image
               src={image}
               alt={`Cover of ${title}`}
-              onLoad={() => {
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              onLoadingComplete={() => {
                 setImageLoading(false);
               }}
               onError={() => {
                 setImageLoading(false);
                 setImageError(true);
               }}
-              className={`w-full h-full object-cover transition-all duration-300 ${
+              className={`object-cover transition-all duration-300 ${
                 imageLoading ? 'opacity-0' : 'opacity-100'
               } ${showOverlay ? 'scale-105' : 'scale-100'}`}
             />
