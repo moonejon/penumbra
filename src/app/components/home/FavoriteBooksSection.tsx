@@ -47,6 +47,9 @@ export const FavoriteBooksSection = React.forwardRef<
     const [selectedPosition, setSelectedPosition] = React.useState<number>(1)
     const [selectedFavorite, setSelectedFavorite] = React.useState<FavoriteBook | null>(null)
 
+    // Track if we've initialized with server data to prevent unnecessary fetches
+    const hasInitialized = React.useRef(false)
+
     // Fetch favorites when year filter changes
     React.useEffect(() => {
       const loadFavorites = async () => {
@@ -72,11 +75,15 @@ export const FavoriteBooksSection = React.forwardRef<
         }
       }
 
-      // Only fetch if not using initial data (all-time on first render)
-      if (yearFilter !== 'all-time' || favorites !== initialFavorites) {
-        loadFavorites()
+      // On first render with all-time filter, use initial data from server
+      // Only fetch from API when year filter changes or on subsequent renders
+      if (yearFilter === 'all-time' && !hasInitialized.current) {
+        hasInitialized.current = true
+        return
       }
-    }, [yearFilter, initialFavorites, favorites])
+
+      loadFavorites()
+    }, [yearFilter])
 
     // Handle year filter change
     const handleYearChange = (year: 'all-time' | number) => {
