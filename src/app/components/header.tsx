@@ -30,22 +30,12 @@ export function Header() {
         <div className="max-w-5xl mx-auto px-4">
           <nav className="flex items-center justify-between h-14">
             {/* Brand */}
-            <div className="relative">
-              <a
-                href="https://jonathanmooney.me"
-                className="absolute -top-3.5 left-0 text-[10px] text-zinc-500 hover:text-zinc-400 transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ← portfolio
-              </a>
-              <Link
-                href="/"
-                className="text-xl font-semibold text-zinc-100 hover:text-zinc-400 transition-colors"
-              >
-                Penumbra
-              </Link>
-            </div>
+            <Link
+              href="/"
+              className="text-xl font-semibold text-zinc-100 hover:text-zinc-400 transition-colors"
+            >
+              Penumbra
+            </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">

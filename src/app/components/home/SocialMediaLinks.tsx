@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Github, Instagram, Linkedin } from 'lucide-react'
+import { ArrowLeft, Github, Instagram, Linkedin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { UserProfile } from '@/shared.types'
 
@@ -48,6 +48,15 @@ const SocialMediaLinks = React.forwardRef<HTMLDivElement, SocialMediaLinksProps>
     // Build array of social links from profile
     const socialLinks: SocialLink[] = React.useMemo(() => {
       const links: SocialLink[] = []
+
+      // Portfolio link always first
+      links.push({
+        url: 'https://jonathanmooney.me',
+        icon: <ArrowLeft className="w-5 h-5" />,
+        label: 'Portfolio',
+        platform: 'portfolio',
+        colorClass: 'text-zinc-500 hover:text-zinc-300',
+      })
 
       if (profile.githubUrl) {
         links.push({
