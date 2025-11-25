@@ -85,30 +85,23 @@ export async function fetchBooksPaginated({
   }
 
   if (authors) {
-    // For partial author matching with PostgreSQL arrays, we need to check if the search term
-    // appears in any element of the authors array using a raw SQL condition
-    // Since Prisma doesn't support partial matching in arrays directly, we work around it
-    const authorTerm = authors.trim();
+    // For author matching, we support comma-separated author names
+    // Each author term is matched case-insensitively against the authors array
+    const authorTerms = authors.split(",").map(a => a.trim()).filter(Boolean);
 
-    // Use Prisma's ability to search within JSON/array fields
-    // This will match if any author name contains the search term (case-insensitive)
-    titleAuthorFilters.push({
-      OR: [
-        // Try exact match first (faster)
-        {
-          authors: {
-            hasSome: [authorTerm],
-          },
-        },
-        // Then check if search term with wildcards matches
-        // This is a workaround - we'll filter further in memory if needed
-        {
-          authors: {
-            isEmpty: false,
-          },
-        },
-      ],
-    });
+    // Build OR conditions for each author search term
+    const authorConditions: Prisma.BookWhereInput[] = authorTerms.map(term => ({
+      // Use hasSome for exact matching of author names
+      authors: {
+        hasSome: [term],
+      },
+    }));
+
+    if (authorConditions.length > 0) {
+      titleAuthorFilters.push({
+        OR: authorConditions,
+      });
+    }
   }
 
   // Subjects use exact match (keep separate)
