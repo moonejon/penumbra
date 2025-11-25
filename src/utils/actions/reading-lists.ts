@@ -1,5 +1,6 @@
 "use server";
 
+import { put, del } from "@vercel/blob";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/utils/permissions";
 import type {
@@ -10,9 +11,124 @@ import type {
   ReadingListVisibilityEnum,
 } from "@/shared.types";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
 /**
  * CRUD Operations for Reading Lists
  */
+
+/**
+ * Upload a cover image for a reading list to Vercel Blob and update the list
+ * @param formData - FormData containing the image file and listId
+ * @returns Success status with image URL or error message
+ */
+export async function uploadReadingListCover(formData: FormData) {
+  try {
+    // 1. Authenticate user
+    const user = await getCurrentUser();
+
+    // 2. Get listId and file from formData
+    const listId = formData.get("listId") as string;
+    const file = formData.get("file") as File;
+
+    if (!listId) {
+      return {
+        success: false,
+        error: "No list ID provided",
+      };
+    }
+
+    if (!file) {
+      return {
+        success: false,
+        error: "No file provided",
+      };
+    }
+
+    // 3. Verify list ownership
+    const list = await prisma.readingList.findUnique({
+      where: { id: parseInt(listId) },
+      select: { ownerId: true, coverImage: true },
+    });
+
+    if (!list) {
+      return {
+        success: false,
+        error: "Reading list not found",
+      };
+    }
+
+    if (list.ownerId !== user.id) {
+      return {
+        success: false,
+        error: "Unauthorized - you don't own this reading list",
+      };
+    }
+
+    // 4. Validate file type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return {
+        success: false,
+        error: "Invalid file type. Only JPEG, PNG, and WebP are allowed",
+      };
+    }
+
+    // 5. Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        success: false,
+        error: `File too large (${(file.size / 1024 / 1024).toFixed(
+          1
+        )}MB). Maximum size is 5MB`,
+      };
+    }
+
+    // 6. Upload new image to Vercel Blob
+    const fileExtension = file.name.split(".").pop() || "jpg";
+    const timestamp = Date.now();
+    const blob = await put(
+      `reading-list-covers/${user.id}/list-${listId}-${timestamp}.${fileExtension}`,
+      file,
+      {
+        access: "public",
+        addRandomSuffix: false, // We're already using timestamp for uniqueness
+      }
+    );
+
+    // 7. Update reading list's coverImage in database
+    await prisma.readingList.update({
+      where: { id: parseInt(listId) },
+      data: { coverImage: blob.url },
+    });
+
+    // 8. Delete old image from Vercel Blob (if exists)
+    // Only delete if it's a Vercel Blob URL (not external URL or default)
+    if (list.coverImage && list.coverImage.includes("vercel-storage")) {
+      try {
+        await del(list.coverImage);
+      } catch (deleteError) {
+        // Log but don't fail the request if old image deletion fails
+        console.error("Failed to delete old cover image:", deleteError);
+      }
+    }
+
+    // 9. Return success with new image URL
+    return {
+      success: true,
+      imageUrl: blob.url,
+    };
+  } catch (error) {
+    console.error("Reading list cover upload error:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Upload failed. Please try again.",
+    };
+  }
+}
 
 /**
  * Create a new reading list
@@ -115,6 +231,20 @@ export async function fetchUserReadingLists() {
         ownerId: user.id,
       },
       include: {
+        books: {
+          take: 4, // Only fetch first 4 books for cover preview
+          orderBy: {
+            position: "asc",
+          },
+          include: {
+            book: {
+              select: {
+                id: true,
+                image: true,
+              },
+            },
+          },
+        },
         _count: {
           select: { books: true },
         },
@@ -127,6 +257,67 @@ export async function fetchUserReadingLists() {
     return { success: true, data: lists };
   } catch (error) {
     console.error("Fetch user reading lists error:", error);
+    return {
+      success: false,
+      error: "Failed to fetch reading lists",
+    };
+  }
+}
+
+/**
+ * Fetch public reading lists for a specific user by Clerk ID
+ * Only returns public lists (no authentication required)
+ * @param clerkId - The Clerk ID of the user whose reading lists to fetch
+ * @returns Array of public reading lists with book covers
+ */
+export async function fetchPublicReadingLists(clerkId: string) {
+  try {
+    // First, find the user by clerkId to get their integer ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Then fetch their public reading lists
+    const lists = await prisma.readingList.findMany({
+      where: {
+        ownerId: user.id,
+        visibility: "PUBLIC", // Only fetch public lists (enum value)
+      },
+      include: {
+        books: {
+          take: 4, // Only fetch first 4 books for cover preview
+          orderBy: {
+            position: "asc",
+          },
+          include: {
+            book: {
+              select: {
+                id: true,
+                image: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: { books: true },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+
+    return { success: true, data: lists };
+  } catch (error) {
+    console.error("Fetch public reading lists error:", error);
     return {
       success: false,
       error: "Failed to fetch reading lists",
@@ -180,7 +371,43 @@ export async function fetchReadingList(listId: number) {
 }
 
 /**
- * Update reading list metadata (title, description, visibility)
+ * Fetch a single reading list with all its books (no authentication required)
+ * Books are ordered by position (ascending)
+ * Returns the reading list without ownership validation
+ * Caller should check visibility permissions
+ */
+export async function fetchReadingListPublic(listId: number) {
+  try {
+    const list = await prisma.readingList.findUnique({
+      where: { id: listId },
+      include: {
+        books: {
+          include: {
+            book: true,
+          },
+          orderBy: {
+            position: "asc",
+          },
+        },
+      },
+    });
+
+    if (!list) {
+      return { success: false, error: "Reading list not found" };
+    }
+
+    return { success: true, data: list as ReadingListWithBooks };
+  } catch (error) {
+    console.error("Fetch public reading list error:", error);
+    return {
+      success: false,
+      error: "Failed to fetch reading list",
+    };
+  }
+}
+
+/**
+ * Update reading list metadata (title, description, visibility, coverImage)
  * Cannot change type or year after creation
  */
 export async function updateReadingList(
@@ -189,6 +416,7 @@ export async function updateReadingList(
     title?: string;
     description?: string;
     visibility?: ReadingListVisibilityEnum;
+    coverImage?: string;
   }
 ) {
   try {
@@ -231,6 +459,7 @@ export async function updateReadingList(
       title?: string;
       description?: string | null;
       visibility?: ReadingListVisibilityEnum;
+      coverImage?: string | null;
     } = {};
 
     if (updates.title !== undefined) {
@@ -241,6 +470,9 @@ export async function updateReadingList(
     }
     if (updates.visibility !== undefined) {
       updateData.visibility = updates.visibility;
+    }
+    if (updates.coverImage !== undefined) {
+      updateData.coverImage = updates.coverImage || null;
     }
 
     // Update the list
