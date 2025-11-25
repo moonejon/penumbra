@@ -80,7 +80,7 @@ export function ReadingListsSection({
 
   return (
     <>
-      <section className={cn('flex flex-col gap-6', className)}>
+      <section className={cn('flex flex-col gap-4', className)}>
         {/* Header with title and create button, plus view toggle */}
         <div className="flex flex-row justify-between items-center gap-3">
           <ReadingListsHeader isOwner={isOwner} onCreateList={handleCreateList} />
