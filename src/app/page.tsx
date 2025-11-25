@@ -20,7 +20,32 @@ export default async function HomePage() {
   const { userId } = await auth()
 
   // Get the default user ID from environment variable
-  const defaultUserId = process.env.DEFAULT_USER_ID || ''
+  const defaultUserId = process.env.DEFAULT_USER_ID
+
+  // Validate environment configuration for unauthenticated users
+  if (!userId && !defaultUserId) {
+    // Missing DEFAULT_USER_ID configuration - show helpful error UI
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h1 className="text-xl font-semibold text-zinc-100 mb-2">
+            Configuration Required
+          </h1>
+          <p className="text-zinc-400 mb-4">
+            The application is not properly configured. Please set the{' '}
+            <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-sm text-amber-400">
+              DEFAULT_USER_ID
+            </code>{' '}
+            environment variable to enable public viewing.
+          </p>
+          <p className="text-zinc-500 text-sm">
+            Sign in to view your personal library, or contact the administrator to configure
+            the default user for public viewing.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   // Determine which user's profile to show
   // If signed in, show their own profile; otherwise show default user's profile
