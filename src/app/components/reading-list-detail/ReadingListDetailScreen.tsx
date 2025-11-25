@@ -179,6 +179,7 @@ export function ReadingListDetailScreen({
           onRemoveBook={handleRemoveBook}
           onViewBookDetails={handleViewBookDetails}
           isReordering={isReordering}
+          isOwner={isOwner}
         />
 
         {/* Modals */}
@@ -227,6 +228,7 @@ export function ReadingListDetailScreen({
           onSuccess={handleRefresh}
           listId={list.id}
           entry={selectedEntry}
+          isOwner={isOwner}
         />
 
         {/* Remove Book Confirmation Modal */}

@@ -12,6 +12,7 @@ interface BookGridProps {
   onRemoveBook: (bookId: number) => void
   onViewBookDetails: (entry: BookInReadingListEntry) => void
   isReordering?: boolean
+  isOwner: boolean
   className?: string
 }
 
@@ -27,6 +28,7 @@ export function BookGrid({
   onRemoveBook,
   onViewBookDetails,
   isReordering = false,
+  isOwner,
   className,
 }: BookGridProps) {
   // Empty state
@@ -83,6 +85,7 @@ export function BookGrid({
                 notes={entry.notes}
                 onRemove={() => onRemoveBook(entry.book.id)}
                 onViewDetails={() => onViewBookDetails(entry)}
+                isOwner={isOwner}
               />
             </Reorder.Item>
           ))}
@@ -99,6 +102,7 @@ export function BookGrid({
               notes={entry.notes}
               onRemove={() => onRemoveBook(entry.book.id)}
               onViewDetails={() => onViewBookDetails(entry)}
+              isOwner={isOwner}
             />
           ))}
         </div>

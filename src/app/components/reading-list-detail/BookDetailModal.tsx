@@ -18,6 +18,7 @@ interface BookDetailModalProps {
   onSuccess: () => void
   listId: number
   entry: BookInReadingListEntry | null
+  isOwner: boolean
 }
 
 const MAX_NOTES_LENGTH = 2000
@@ -33,6 +34,7 @@ export function BookDetailModal({
   onSuccess,
   listId,
   entry,
+  isOwner,
 }: BookDetailModalProps) {
   const [notes, setNotes] = React.useState('')
   const [isSaving, setIsSaving] = React.useState(false)
@@ -202,55 +204,59 @@ export function BookDetailModal({
           </div>
         )}
 
-        {/* Notes Section */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="notes" className="text-sm font-medium text-zinc-300">
-            Notes
-            <span className="text-zinc-500 font-normal ml-2">(Optional)</span>
-          </label>
-          <textarea
-            id="notes"
-            placeholder="Add your thoughts, quotes, or reminders about this book..."
-            value={notes}
-            onChange={(e) => handleNotesChange(e.target.value)}
-            disabled={isSaving || isRemoving}
-            rows={6}
-            maxLength={MAX_NOTES_LENGTH}
-            inputMode="text"
-            autoComplete="off"
-            className={cn(
-              'px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg',
-              'text-base sm:text-sm text-zinc-100',
-              'placeholder:text-zinc-600',
-              'focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              'resize-vertical transition-colors'
-            )}
-          />
-          {/* Character Count */}
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-500">
-              {notes.length}/{MAX_NOTES_LENGTH}
-            </p>
-            {hasUnsavedChanges && (
-              <p className="text-xs text-yellow-500">Unsaved changes</p>
-            )}
+        {/* Notes Section - Only visible to owner */}
+        {isOwner && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="notes" className="text-sm font-medium text-zinc-300">
+              Notes
+              <span className="text-zinc-500 font-normal ml-2">(Optional)</span>
+            </label>
+            <textarea
+              id="notes"
+              placeholder="Add your thoughts, quotes, or reminders about this book..."
+              value={notes}
+              onChange={(e) => handleNotesChange(e.target.value)}
+              disabled={isSaving || isRemoving}
+              rows={6}
+              maxLength={MAX_NOTES_LENGTH}
+              inputMode="text"
+              autoComplete="off"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'resize-vertical transition-colors'
+              )}
+            />
+            {/* Character Count */}
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-zinc-500">
+                {notes.length}/{MAX_NOTES_LENGTH}
+              </p>
+              {hasUnsavedChanges && (
+                <p className="text-xs text-yellow-500">Unsaved changes</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-800">
-          {/* Remove from List Button */}
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleRemoveBook}
-            disabled={isSaving || isRemoving}
-            className="gap-2 sm:w-auto min-h-[44px]"
-          >
-            <Trash2 className="w-4 h-4" />
-            {isRemoving ? 'Removing...' : 'Remove from List'}
-          </Button>
+          {/* Remove from List Button - Only for owner */}
+          {isOwner && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleRemoveBook}
+              disabled={isSaving || isRemoving}
+              className="gap-2 sm:w-auto min-h-[44px]"
+            >
+              <Trash2 className="w-4 h-4" />
+              {isRemoving ? 'Removing...' : 'Remove from List'}
+            </Button>
+          )}
 
           <div className="flex-1" />
 
@@ -265,16 +271,18 @@ export function BookDetailModal({
             Close
           </Button>
 
-          {/* Save Notes Button */}
-          <Button
-            type="button"
-            variant="default"
-            onClick={handleSaveNotes}
-            disabled={!hasUnsavedChanges || isSaving || isRemoving}
-            className="sm:w-auto min-h-[44px]"
-          >
-            {isSaving ? 'Saving...' : 'Save Notes'}
-          </Button>
+          {/* Save Notes Button - Only for owner */}
+          {isOwner && (
+            <Button
+              type="button"
+              variant="default"
+              onClick={handleSaveNotes}
+              disabled={!hasUnsavedChanges || isSaving || isRemoving}
+              className="sm:w-auto min-h-[44px]"
+            >
+              {isSaving ? 'Saving...' : 'Save Notes'}
+            </Button>
+          )}
         </div>
       </div>
     </Modal>
