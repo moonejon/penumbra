@@ -9,6 +9,24 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_BIO_LENGTH = 500;
 
+// Map MIME types to file extensions (secure approach: derive extension from MIME type)
+const MIME_TO_EXTENSION: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+/**
+ * Get safe file extension from MIME type
+ * SECURITY: Never trust user-provided filenames - derive extension from validated MIME type
+ * @param mimeType - Validated MIME type of the file
+ * @returns Safe file extension or null if MIME type is not allowed
+ */
+function getExtensionFromMimeType(mimeType: string): string | null {
+  return MIME_TO_EXTENSION[mimeType] || null;
+}
+
 /**
  * Upload a profile image to Vercel Blob and update user profile
  * Implements proper transaction handling with rollback to prevent orphaned blob storage
@@ -53,8 +71,17 @@ export async function uploadProfileImage(formData: FormData) {
     // Store old profile image URL for cleanup after successful update
     const oldProfileImage = user.profileImageUrl;
 
-    // 5. Upload new image to Vercel Blob
-    const fileExtension = file.name.split(".").pop() || "jpg";
+    // 5. Derive secure file extension from validated MIME type
+    // SECURITY: Never trust user-provided filename - derive from MIME type instead
+    const fileExtension = getExtensionFromMimeType(file.type);
+    if (!fileExtension) {
+      return {
+        success: false,
+        error: "Invalid file type after validation",
+      };
+    }
+
+    // 6. Upload new image to Vercel Blob
     const timestamp = Date.now();
     const blob = await put(
       `profile-images/${user.id}/profile-${timestamp}.${fileExtension}`,
@@ -68,7 +95,7 @@ export async function uploadProfileImage(formData: FormData) {
     // Store the new blob URL for potential rollback
     newBlobUrl = blob.url;
 
-    // 6. Update user's profileImageUrl in database
+    // 7. Update user's profileImageUrl in database
     // If this fails, we need to delete the newly uploaded blob (rollback)
     try {
       await prisma.user.update({
@@ -91,7 +118,7 @@ export async function uploadProfileImage(formData: FormData) {
       throw dbError;
     }
 
-    // 7. Delete old image from Vercel Blob (if exists)
+    // 8. Delete old image from Vercel Blob (if exists)
     // Only delete AFTER successful database update to prevent data loss
     // Only delete if it's a Vercel Blob URL (not external URL or default)
     if (oldProfileImage && oldProfileImage.includes("vercel-storage")) {
@@ -105,7 +132,7 @@ export async function uploadProfileImage(formData: FormData) {
       }
     }
 
-    // 8. Return success with new image URL
+    // 9. Return success with new image URL
     return {
       success: true,
       imageUrl: blob.url,
@@ -179,6 +206,36 @@ export async function updateUserBio(bio: string) {
 }
 
 /**
+ * Sanitize user input to prevent XSS and database corruption
+ * Removes dangerous characters and normalizes whitespace
+ * @param input - Raw user input string
+ * @returns Sanitized string
+ */
+function sanitizeInput(input: string): string {
+  // 1. Trim whitespace
+  let sanitized = input.trim();
+
+  // 2. Remove control characters (0x00-0x1F, 0x7F-0x9F) except newlines/tabs
+  // eslint-disable-next-line no-control-regex
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "");
+
+  // 3. Remove zero-width characters that can cause display issues
+  sanitized = sanitized.replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+  // 4. Remove directional override characters (can enable spoofing)
+  sanitized = sanitized.replace(/[\u202A-\u202E\u2066-\u2069]/g, "");
+
+  // 5. Normalize Unicode to prevent homograph attacks
+  sanitized = sanitized.normalize("NFC");
+
+  // 6. Replace multiple consecutive spaces with single space
+  sanitized = sanitized.replace(/\s+/g, " ");
+
+  // 7. Final trim
+  return sanitized.trim();
+}
+
+/**
  * Update user's profile name
  * @param name - User's name (max 100 characters)
  * @returns Success status or error message
@@ -188,21 +245,32 @@ export async function updateUserProfile(name: string) {
     // 1. Authenticate user
     const user = await getCurrentUser();
 
-    // 2. Validate name length
-    if (name.length > 100) {
+    // 2. Sanitize input to prevent XSS and database corruption
+    const sanitizedName = sanitizeInput(name);
+
+    // 3. Validate name is not empty after sanitization
+    if (sanitizedName.length === 0 && name.length > 0) {
       return {
         success: false,
-        error: `Name too long (${name.length} characters). Maximum length is 100 characters`,
+        error: "Name contains only invalid characters",
       };
     }
 
-    // 3. Update user name in database
+    // 4. Validate name length after sanitization
+    if (sanitizedName.length > 100) {
+      return {
+        success: false,
+        error: `Name too long (${sanitizedName.length} characters). Maximum length is 100 characters`,
+      };
+    }
+
+    // 5. Update user name in database with sanitized value
     await prisma.user.update({
       where: { id: user.id },
-      data: { name: name || null },
+      data: { name: sanitizedName || null },
     });
 
-    // 4. Return success
+    // 6. Return success
     return {
       success: true,
     };
@@ -229,7 +297,7 @@ export async function getUserProfile() {
 
     // 2. Build profile object matching UserProfile type
     const profile: UserProfile = {
-      id: user.id,
+      id: user.clerkId, // Use Clerk ID for consistency with public profiles
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,

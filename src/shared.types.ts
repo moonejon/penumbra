@@ -115,7 +115,7 @@ export interface FavoriteBook {
  * Subset of User model for display purposes
  */
 export interface UserProfile {
-  id: number | string; // Can be either database ID (number) or Clerk ID (string)
+  id: string; // Clerk ID - stable external identifier used across the app
   name?: string | null;
   email: string;
   profileImageUrl?: string | null;
