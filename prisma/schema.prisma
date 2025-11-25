@@ -163,3 +163,20 @@ model BookInReadingList {
   @@index([readingListId, position]) // For fetching books in order
   @@index([bookId]) // For finding all lists containing a book
 }
+
+// App-wide settings stored in database (singleton pattern)
+// This allows admins to configure app behavior without env variable changes
+model AppSettings {
+  id Int @id @default(1) // Always ID 1 (singleton)
+
+  // Default user profile to show on home page for unauthenticated visitors
+  // References User.clerkId (not internal id) for consistency with auth system
+  defaultUserClerkId String?
+
+  // Future settings can be added here:
+  // siteName String?
+  // siteDescription String?
+  // maintenanceMode Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+}
