@@ -115,7 +115,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
   };
 
   return (
-    <div className={`${sidePanelClasses} relative`}>
+    <div className={`${sidePanelClasses} relative ${isSidePanel ? 'h-full overflow-hidden' : ''}`}>
       {/* Action Buttons */}
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
         {canEdit && (
@@ -153,7 +153,7 @@ const Details: FC<BookProps> = ({ book, setSelectedBook, isSidePanel = false, cu
       </div>
 
       <div className={`p-6 overflow-y-auto hide-scrollbar ${
-        isSidePanel ? 'max-h-[calc(100vh-8rem)]' : 'h-full'
+        isSidePanel ? 'h-full' : 'h-full'
       }`}>
         <div className={`flex ${isSidePanel ? 'flex-col' : isMobilePortrait ? 'flex-col' : 'gap-8'}`}>
           {/* Book Cover */}
