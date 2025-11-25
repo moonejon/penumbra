@@ -1,13 +1,64 @@
-# Test Helpers and Factories
+# Penumbra Testing Guide
 
-Comprehensive test utilities for the Penumbra project, including database helpers and data factories.
+Comprehensive test utilities for the Penumbra project, including database helpers, data factories, and integration tests.
 
-## Installation
+## Quick Start
 
-First, install the required testing dependencies:
+### 1. Database Setup (Required for Integration Tests)
+
+Integration tests require a PostgreSQL database. Choose one of these options:
+
+#### Option A: Local PostgreSQL (Recommended)
+
+```bash
+# Install PostgreSQL
+brew install postgresql@15  # macOS
+brew services start postgresql@15
+
+# Create test database
+psql postgres -c "CREATE USER test WITH PASSWORD 'test';"
+psql postgres -c "CREATE DATABASE penumbra_test OWNER test;"
+psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE penumbra_test TO test;"
+
+# Run migrations
+export DEWEY_DB_DATABASE_URL="postgresql://test:test@localhost:5432/penumbra_test"
+npx prisma migrate deploy
+npx prisma generate
+```
+
+#### Option B: Docker
+
+```bash
+docker run --name penumbra-test-db \
+  -e POSTGRES_USER=test \
+  -e POSTGRES_PASSWORD=test \
+  -e POSTGRES_DB=penumbra_test \
+  -p 5432:5432 \
+  -d postgres:15
+
+# Run migrations
+export DEWEY_DB_DATABASE_URL="postgresql://test:test@localhost:5432/penumbra_test"
+npx prisma migrate deploy
+npx prisma generate
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install --save-dev @faker-js/faker @types/node
+```
+
+### 3. Run Tests
+
+```bash
+# All tests
+npm test
+
+# With coverage
+npm test:coverage
+
+# Watch mode
+npm test:watch
 ```
 
 ## Overview

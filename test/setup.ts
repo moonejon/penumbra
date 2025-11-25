@@ -98,7 +98,12 @@ vi.mock('@clerk/nextjs', () => ({
 
 // Set test environment variables
 process.env.NODE_ENV = 'test'
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+
+// Use DATABASE_URL from environment if available (for CI/CD), otherwise use default
+if (!process.env.DEWEY_DB_DATABASE_URL) {
+  process.env.DEWEY_DB_DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/penumbra_test'
+}
+
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_test'
 process.env.CLERK_SECRET_KEY = 'sk_test_test'
 

@@ -24,6 +24,9 @@ const TextSearch: FC<TextSearchProps> = ({ filterType }) => {
   if (filterType == "title") {
     return (
       <div className="w-full">
+        <label htmlFor="title-search" className="sr-only">
+          Search by title
+        </label>
         <Input
           id="title-search"
           type="text"
