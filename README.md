@@ -16,7 +16,16 @@
 
 Whether you're showcasing your favorite reads, organizing books into themed reading lists, or simply maintaining a personal catalog, Penumbra offers a beautiful, minimalist interface that puts your books front and center.
 
-![Home Screen Demo](./docs/assets/home-screen-demo.gif)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/home-desktop.gif" alt="Home Screen - Desktop" width="600"/></td>
+<td><img src="./docs/assets/home-mobile.gif" alt="Home Screen - Mobile" width="280"/></td>
+</tr>
+</table>
 
 ---
 
@@ -32,7 +41,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **Curated Reading Lists** - Themed collections with custom titles and descriptions
 - **Clean, Modern UI** - Dark theme with responsive design for all devices
 
-![Public Library View](./docs/assets/public-library-view.png)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/public-library-desktop.png" alt="Public Library - Desktop" width="600"/></td>
+<td><img src="./docs/assets/public-library-mobile.png" alt="Public Library - Mobile" width="280"/></td>
+</tr>
+</table>
 
 ### For Authenticated Users
 
@@ -46,7 +64,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **Rich Metadata** - Automatic retrieval of covers, synopses, authors, subjects, and publication details
 - **Visibility Controls** - Set books as PUBLIC, PRIVATE, UNLISTED, or FRIENDS-only
 
-![Book Import Interface](./docs/assets/book-import-demo.gif)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/book-import-desktop.gif" alt="Book Import - Desktop" width="500"/></td>
+<td><img src="./docs/assets/book-import-mobile.gif" alt="Book Import - Mobile" width="240"/></td>
+</tr>
+</table>
 
 </details>
 
@@ -59,7 +86,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **Favorites System** - Curate up to 5-6 favorite books (all-time or by year)
 - **Visibility Management** - Control which lists are public vs. private
 
-![Reading Lists Management](./docs/assets/reading-lists-demo.png)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/reading-lists-desktop.png" alt="Reading Lists - Desktop" width="500"/></td>
+<td><img src="./docs/assets/reading-lists-mobile.png" alt="Reading Lists - Mobile" width="240"/></td>
+</tr>
+</table>
 
 </details>
 
@@ -71,7 +107,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **Read Date Tracking** - Track when you read each book for temporal filtering
 - **Year-Based Filtering** - View favorites by specific years (e.g., "Favorite Books I Read in 2024")
 
-![Profile Customization](./docs/assets/profile-customization-demo.gif)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/profile-desktop.gif" alt="Profile Customization - Desktop" width="500"/></td>
+<td><img src="./docs/assets/profile-mobile.gif" alt="Profile Customization - Mobile" width="240"/></td>
+</tr>
+</table>
 
 </details>
 
@@ -83,7 +128,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **Search & Filter** - Search by title, author, or subject across your entire collection
 - **Pagination** - Configurable page sizes (25, 50, 100 items)
 
-![Library Grid View](./docs/assets/library-grid-view.png)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/library-desktop.png" alt="Library View - Desktop" width="500"/></td>
+<td><img src="./docs/assets/library-mobile.png" alt="Library View - Mobile" width="240"/></td>
+</tr>
+</table>
 
 </details>
 
@@ -96,7 +150,16 @@ Browse beautiful book collections curated by library owners. Each home screen di
 - **User Management** - View all registered users and their Clerk IDs
 - **App Settings** - Configure application-wide defaults stored in the database
 
-![Admin Settings Panel](./docs/assets/admin-settings-demo.png)
+<table>
+<tr>
+<td align="center"><strong>Desktop</strong></td>
+<td align="center"><strong>Mobile</strong></td>
+</tr>
+<tr>
+<td><img src="./docs/assets/admin-desktop.png" alt="Admin Settings - Desktop" width="500"/></td>
+<td><img src="./docs/assets/admin-mobile.png" alt="Admin Settings - Mobile" width="240"/></td>
+</tr>
+</table>
 
 </details>
 
