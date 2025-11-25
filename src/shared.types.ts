@@ -120,6 +120,11 @@ export interface UserProfile {
   email: string;
   profileImageUrl?: string | null;
   bio?: string | null; // Future field for user biography
+  githubUrl?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  letterboxdUrl?: string | null;
+  spotifyUrl?: string | null;
 }
 
 export type { BookType, BookImportDataType, SearchSuggestion };

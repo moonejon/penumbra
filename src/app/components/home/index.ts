@@ -1,5 +1,6 @@
 // Home screen components
 export { ProfileBio } from './ProfileBio'
+export { SocialMediaLinks } from './SocialMediaLinks'
 export { FavoriteBooksSection } from './FavoriteBooksSection'
 export { FavoriteBooksHeader } from './FavoriteBooksHeader'
 export { FavoriteBooksCarousel } from './FavoriteBooksCarousel'

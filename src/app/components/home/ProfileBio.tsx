@@ -6,6 +6,7 @@ import { User, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { EditProfileModal } from './EditProfileModal'
+import { SocialMediaLinks } from './SocialMediaLinks'
 import type { UserProfile } from '@/shared.types'
 
 export interface ProfileBioProps {
@@ -97,13 +98,16 @@ const ProfileBio = React.forwardRef<HTMLDivElement, ProfileBioProps>(
         </div>
 
         {/* User Info */}
-        <div className="flex flex-col items-center gap-2 text-center max-w-2xl px-4">
+        <div className="flex flex-col items-center gap-3 text-center max-w-2xl px-4">
           {/* Name */}
           {profile.name && (
             <h1 className="text-2xl md:text-3xl font-semibold text-zinc-100">
               {profile.name}
             </h1>
           )}
+
+          {/* Social Media Links */}
+          <SocialMediaLinks profile={profile} />
 
           {/* Bio */}
           {profile.bio && (

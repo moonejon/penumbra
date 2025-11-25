@@ -8,6 +8,7 @@ import type { UserProfile } from "@/shared.types";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_BIO_LENGTH = 500;
+const MAX_URL_LENGTH = 2048; // Standard URL length limit
 
 // Map MIME types to file extensions (secure approach: derive extension from MIME type)
 const MIME_TO_EXTENSION: Record<string, string> = {
@@ -303,6 +304,16 @@ export async function getUserProfile() {
       profileImageUrl: user.profileImageUrl,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bio: (user as any).bio || null, // Type assertion for bio field until schema is updated
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      githubUrl: (user as any).githubUrl || null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      instagramUrl: (user as any).instagramUrl || null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      linkedinUrl: (user as any).linkedinUrl || null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      letterboxdUrl: (user as any).letterboxdUrl || null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      spotifyUrl: (user as any).spotifyUrl || null,
     };
 
     // 3. Return success with profile data
@@ -355,6 +366,11 @@ export async function getPublicUserProfile(clerkId: string) {
       email: user.email,
       profileImageUrl: user.profileImageUrl,
       bio: null, // Bio field doesn't exist in schema yet
+      githubUrl: null, // Social media fields don't exist in schema yet
+      instagramUrl: null,
+      linkedinUrl: null,
+      letterboxdUrl: null,
+      spotifyUrl: null,
     };
 
     return {
@@ -369,6 +385,95 @@ export async function getPublicUserProfile(clerkId: string) {
         error instanceof Error
           ? error.message
           : "Failed to retrieve profile. Please try again.",
+    };
+  }
+}
+
+/**
+ * Validate URL format
+ * @param url - URL string to validate
+ * @returns true if valid, false otherwise
+ */
+function isValidUrl(url: string): boolean {
+  if (!url || url.trim().length === 0) {
+    return true; // Empty URLs are valid (optional field)
+  }
+
+  try {
+    const urlObj = new URL(url);
+    // Only allow http and https protocols
+    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Update user's social media links
+ * @param socialMediaData - Object containing social media URLs
+ * @returns Success status or error message
+ */
+export async function updateSocialMediaLinks(socialMediaData: {
+  githubUrl?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  letterboxdUrl?: string;
+  spotifyUrl?: string;
+}) {
+  try {
+    // 1. Authenticate user
+    const user = await getCurrentUser();
+
+    // 2. Validate all URLs
+    const urls = {
+      githubUrl: socialMediaData.githubUrl?.trim() || "",
+      instagramUrl: socialMediaData.instagramUrl?.trim() || "",
+      linkedinUrl: socialMediaData.linkedinUrl?.trim() || "",
+      letterboxdUrl: socialMediaData.letterboxdUrl?.trim() || "",
+      spotifyUrl: socialMediaData.spotifyUrl?.trim() || "",
+    };
+
+    // Validate each URL
+    for (const [key, url] of Object.entries(urls)) {
+      if (url && url.length > MAX_URL_LENGTH) {
+        return {
+          success: false,
+          error: `${key} is too long. Maximum length is ${MAX_URL_LENGTH} characters`,
+        };
+      }
+
+      if (!isValidUrl(url)) {
+        return {
+          success: false,
+          error: `${key} is not a valid URL. Please use a complete URL starting with http:// or https://`,
+        };
+      }
+    }
+
+    // 3. Update user's social media links in database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        githubUrl: urls.githubUrl || null,
+        instagramUrl: urls.instagramUrl || null,
+        linkedinUrl: urls.linkedinUrl || null,
+        letterboxdUrl: urls.letterboxdUrl || null,
+        spotifyUrl: urls.spotifyUrl || null,
+      },
+    });
+
+    // 4. Return success
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Update social media links error:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Social media update failed. Please try again.",
     };
   }
 }

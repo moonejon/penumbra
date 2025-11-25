@@ -6,7 +6,7 @@ import { AlertCircle, Upload, Loader2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Modal from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { uploadProfileImage, updateUserProfile } from '@/utils/actions/profile'
+import { uploadProfileImage, updateUserProfile, updateSocialMediaLinks } from '@/utils/actions/profile'
 import type { UserProfile } from '@/shared.types'
 
 interface EditProfileModalProps {
@@ -20,6 +20,11 @@ interface FormErrors {
   name?: string
   bio?: string
   image?: string
+  githubUrl?: string
+  instagramUrl?: string
+  linkedinUrl?: string
+  letterboxdUrl?: string
+  spotifyUrl?: string
   general?: string
 }
 
@@ -37,6 +42,11 @@ export function EditProfileModal({
   // Form state
   const [name, setName] = React.useState(profile.name || '')
   const [bio, setBio] = React.useState(profile.bio || '')
+  const [githubUrl, setGithubUrl] = React.useState(profile.githubUrl || '')
+  const [instagramUrl, setInstagramUrl] = React.useState(profile.instagramUrl || '')
+  const [linkedinUrl, setLinkedinUrl] = React.useState(profile.linkedinUrl || '')
+  const [letterboxdUrl, setLetterboxdUrl] = React.useState(profile.letterboxdUrl || '')
+  const [spotifyUrl, setSpotifyUrl] = React.useState(profile.spotifyUrl || '')
   const [imageFile, setImageFile] = React.useState<File | null>(null)
   const [imagePreview, setImagePreview] = React.useState<string | null>(null)
   const [removeImage, setRemoveImage] = React.useState(false)
@@ -53,6 +63,11 @@ export function EditProfileModal({
     if (isOpen) {
       setName(profile.name || '')
       setBio(profile.bio || '')
+      setGithubUrl(profile.githubUrl || '')
+      setInstagramUrl(profile.instagramUrl || '')
+      setLinkedinUrl(profile.linkedinUrl || '')
+      setLetterboxdUrl(profile.letterboxdUrl || '')
+      setSpotifyUrl(profile.spotifyUrl || '')
       setImageFile(null)
       setImagePreview(null)
       setRemoveImage(false)
@@ -196,7 +211,27 @@ export function EditProfileModal({
         // Currently disabled until bio field migration is run
       }
 
-      // 4. Handle image removal
+      // 4. Update social media links if changed
+      if (
+        githubUrl !== (profile.githubUrl || '') ||
+        instagramUrl !== (profile.instagramUrl || '') ||
+        linkedinUrl !== (profile.linkedinUrl || '') ||
+        letterboxdUrl !== (profile.letterboxdUrl || '') ||
+        spotifyUrl !== (profile.spotifyUrl || '')
+      ) {
+        const result = await updateSocialMediaLinks({
+          githubUrl,
+          instagramUrl,
+          linkedinUrl,
+          letterboxdUrl,
+          spotifyUrl,
+        })
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to update social media links')
+        }
+      }
+
+      // 5. Handle image removal
       if (removeImage && profile.profileImageUrl) {
         // TODO: Implement removeProfileImage server action if needed
         console.log('Remove profile image')
@@ -231,6 +266,11 @@ export function EditProfileModal({
   const hasChanges =
     name !== (profile.name || '') ||
     bio !== (profile.bio || '') ||
+    githubUrl !== (profile.githubUrl || '') ||
+    instagramUrl !== (profile.instagramUrl || '') ||
+    linkedinUrl !== (profile.linkedinUrl || '') ||
+    letterboxdUrl !== (profile.letterboxdUrl || '') ||
+    spotifyUrl !== (profile.spotifyUrl || '') ||
     imageFile !== null ||
     removeImage
 
@@ -484,10 +524,255 @@ export function EditProfileModal({
           </p>
         </div>
 
+        {/* Social Media Links Section */}
+        <div className="space-y-4 pt-4 border-t border-zinc-800">
+          <h3 className="text-sm font-medium text-zinc-300">Social Media</h3>
+
+          {/* GitHub URL */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="githubUrl"
+              className="text-sm font-medium text-zinc-400"
+            >
+              GitHub URL
+            </label>
+            <input
+              type="url"
+              id="githubUrl"
+              placeholder="https://github.com/username"
+              value={githubUrl}
+              onChange={(e) => {
+                setGithubUrl(e.target.value)
+                if (errors.githubUrl) {
+                  setErrors({ ...errors, githubUrl: undefined })
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.githubUrl}
+              aria-describedby={errors.githubUrl ? 'github-error' : undefined}
+              inputMode="url"
+              autoComplete="url"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors',
+                errors.githubUrl
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-zinc-800 focus:ring-zinc-600'
+              )}
+            />
+            {errors.githubUrl && (
+              <p
+                id="github-error"
+                className="text-xs text-red-400 flex items-center gap-1"
+                role="alert"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {errors.githubUrl}
+              </p>
+            )}
+          </div>
+
+          {/* Instagram URL */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="instagramUrl"
+              className="text-sm font-medium text-zinc-400"
+            >
+              Instagram URL
+            </label>
+            <input
+              type="url"
+              id="instagramUrl"
+              placeholder="https://instagram.com/username"
+              value={instagramUrl}
+              onChange={(e) => {
+                setInstagramUrl(e.target.value)
+                if (errors.instagramUrl) {
+                  setErrors({ ...errors, instagramUrl: undefined })
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.instagramUrl}
+              aria-describedby={errors.instagramUrl ? 'instagram-error' : undefined}
+              inputMode="url"
+              autoComplete="url"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors',
+                errors.instagramUrl
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-zinc-800 focus:ring-zinc-600'
+              )}
+            />
+            {errors.instagramUrl && (
+              <p
+                id="instagram-error"
+                className="text-xs text-red-400 flex items-center gap-1"
+                role="alert"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {errors.instagramUrl}
+              </p>
+            )}
+          </div>
+
+          {/* LinkedIn URL */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="linkedinUrl"
+              className="text-sm font-medium text-zinc-400"
+            >
+              LinkedIn URL
+            </label>
+            <input
+              type="url"
+              id="linkedinUrl"
+              placeholder="https://linkedin.com/in/username"
+              value={linkedinUrl}
+              onChange={(e) => {
+                setLinkedinUrl(e.target.value)
+                if (errors.linkedinUrl) {
+                  setErrors({ ...errors, linkedinUrl: undefined })
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.linkedinUrl}
+              aria-describedby={errors.linkedinUrl ? 'linkedin-error' : undefined}
+              inputMode="url"
+              autoComplete="url"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors',
+                errors.linkedinUrl
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-zinc-800 focus:ring-zinc-600'
+              )}
+            />
+            {errors.linkedinUrl && (
+              <p
+                id="linkedin-error"
+                className="text-xs text-red-400 flex items-center gap-1"
+                role="alert"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {errors.linkedinUrl}
+              </p>
+            )}
+          </div>
+
+          {/* Letterboxd URL */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="letterboxdUrl"
+              className="text-sm font-medium text-zinc-400"
+            >
+              Letterboxd URL
+            </label>
+            <input
+              type="url"
+              id="letterboxdUrl"
+              placeholder="https://letterboxd.com/username"
+              value={letterboxdUrl}
+              onChange={(e) => {
+                setLetterboxdUrl(e.target.value)
+                if (errors.letterboxdUrl) {
+                  setErrors({ ...errors, letterboxdUrl: undefined })
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.letterboxdUrl}
+              aria-describedby={errors.letterboxdUrl ? 'letterboxd-error' : undefined}
+              inputMode="url"
+              autoComplete="url"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors',
+                errors.letterboxdUrl
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-zinc-800 focus:ring-zinc-600'
+              )}
+            />
+            {errors.letterboxdUrl && (
+              <p
+                id="letterboxd-error"
+                className="text-xs text-red-400 flex items-center gap-1"
+                role="alert"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {errors.letterboxdUrl}
+              </p>
+            )}
+          </div>
+
+          {/* Spotify URL */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="spotifyUrl"
+              className="text-sm font-medium text-zinc-400"
+            >
+              Spotify URL
+            </label>
+            <input
+              type="url"
+              id="spotifyUrl"
+              placeholder="https://open.spotify.com/user/username"
+              value={spotifyUrl}
+              onChange={(e) => {
+                setSpotifyUrl(e.target.value)
+                if (errors.spotifyUrl) {
+                  setErrors({ ...errors, spotifyUrl: undefined })
+                }
+              }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.spotifyUrl}
+              aria-describedby={errors.spotifyUrl ? 'spotify-error' : undefined}
+              inputMode="url"
+              autoComplete="url"
+              className={cn(
+                'px-3 py-2 bg-zinc-900 border rounded-lg',
+                'text-base sm:text-sm text-zinc-100',
+                'placeholder:text-zinc-600',
+                'focus:outline-none focus:ring-2 focus:border-transparent',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-colors',
+                errors.spotifyUrl
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-zinc-800 focus:ring-zinc-600'
+              )}
+            />
+            {errors.spotifyUrl && (
+              <p
+                id="spotify-error"
+                className="text-xs text-red-400 flex items-center gap-1"
+                role="alert"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {errors.spotifyUrl}
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Note about bio field */}
         <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <p className="text-xs text-blue-300">
-            Note: Bio updates will be available after the database migration is complete.
+            Note: Bio and social media updates will be available after the database migration is complete.
           </p>
         </div>
 
