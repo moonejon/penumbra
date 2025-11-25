@@ -84,17 +84,21 @@ export default async function ReadingListDetailPage({ params }: PageProps) {
   }
 
   // Fetch reading list - use appropriate function based on authentication
-  const result = currentUserId
+  // For authenticated users, first try authenticated fetch (which validates ownership)
+  // If that fails with "Unauthorized", fall back to public fetch (allows viewing public lists)
+  let result = currentUserId
     ? await fetchReadingList(listId)
     : await fetchReadingListPublic(listId)
 
+  // If authenticated user got "Unauthorized", try public fetch as fallback
+  // This allows authenticated users to view public lists they don't own
+  if (currentUserId && !result.success && result.error?.includes('Unauthorized')) {
+    result = await fetchReadingListPublic(listId)
+  }
+
   // Handle errors
   if (!result.success || !result.data) {
-    // If the error is unauthorized, redirect to home
-    if (result.error?.includes('Unauthorized')) {
-      redirect('/')
-    }
-    // Otherwise, show not found
+    // Show not found for any remaining errors
     notFound()
   }
 
