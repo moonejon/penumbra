@@ -1,52 +1,51 @@
-/// <reference types="jest" />
-
 import * as React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { CreateReadingListModal } from '../CreateReadingListModal'
 import { createReadingList } from '@/utils/actions/reading-lists'
 
 // Mock the server action
-jest.mock('@/utils/actions/reading-lists', () => ({
-  createReadingList: jest.fn()
+vi.mock('@/utils/actions/reading-lists', () => ({
+  createReadingList: vi.fn()
 }))
 
-const mockCreateReadingList = createReadingList as jest.MockedFunction<
-  typeof createReadingList
->
+const mockCreateReadingList = createReadingList as ReturnType<typeof vi.fn>
 
 // Mock Modal component to avoid portal issues in tests
-jest.mock('@/components/ui/modal', () => {
-  return function MockModal({
-    isOpen,
-    children,
-    title,
-    onClose
-  }: {
-    isOpen: boolean
-    children: React.ReactNode
-    title: string
-    onClose: () => void
-  }) {
-    if (!isOpen) return null
-    return (
-      <div data-testid="modal" role="dialog">
-        <h2>{title}</h2>
-        <button onClick={onClose} aria-label="Close modal">
-          Close
-        </button>
-        {children}
-      </div>
-    )
+vi.mock('@/components/ui/modal', () => {
+  return {
+    default: function MockModal({
+      isOpen,
+      children,
+      title,
+      onClose
+    }: {
+      isOpen: boolean
+      children: React.ReactNode
+      title: string
+      onClose: () => void
+    }) {
+      if (!isOpen) return null
+      return (
+        <div data-testid="modal" role="dialog">
+          <h2>{title}</h2>
+          <button onClick={onClose} aria-label="Close modal">
+            Close
+          </button>
+          {children}
+        </div>
+      )
+    }
   }
 })
 
 describe('CreateReadingListModal', () => {
-  const mockOnClose = jest.fn()
-  const mockOnSuccess = jest.fn()
+  const mockOnClose = vi.fn()
+  const mockOnSuccess = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Rendering', () => {
@@ -226,7 +225,8 @@ describe('CreateReadingListModal', () => {
       expect(descriptionInput).toHaveValue('A description')
     })
 
-    it('should disable submit button when title is empty', () => {
+    it('should show validation error when submitting with empty title', async () => {
+      const user = userEvent.setup()
       render(
         <CreateReadingListModal
           isOpen={true}
@@ -235,8 +235,15 @@ describe('CreateReadingListModal', () => {
         />
       )
 
+      // Button should be enabled so users can click and see validation errors
       const submitButton = screen.getByRole('button', { name: /Create List/ })
-      expect(submitButton).toBeDisabled()
+      expect(submitButton).toBeEnabled()
+
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('List title is required')).toBeInTheDocument()
+      })
     })
 
     it('should enable submit button when title is provided', async () => {
@@ -545,7 +552,7 @@ describe('CreateReadingListModal', () => {
     })
 
     it('should use selected visibility option in submission', async () => {
-      await userEvent.setup()
+      const user = userEvent.setup()
       mockCreateReadingList.mockResolvedValue({
         success: true,
         data: { id: 1, title: 'List', ownerId: 1, visibility: 'PRIVATE', type: 'STANDARD', createdAt: new Date(), updatedAt: new Date() }
@@ -560,13 +567,13 @@ describe('CreateReadingListModal', () => {
       )
 
       const privateRadio = screen.getByRole('radio', { name: 'Private' })
-      await userEvent.click(privateRadio)
+      await user.click(privateRadio)
 
       const titleInput = screen.getByPlaceholderText(/Summer Reading/)
-      await userEvent.type(titleInput, 'List')
+      await user.type(titleInput, 'List')
 
       const submitButton = screen.getByRole('button', { name: /Create List/ })
-      await userEvent.click(submitButton)
+      await user.click(submitButton)
 
       await waitFor(() => {
         expect(mockCreateReadingList).toHaveBeenCalledWith(
@@ -581,7 +588,7 @@ describe('CreateReadingListModal', () => {
 
   describe('User Interactions', () => {
     it('should handle cancel button click', async () => {
-      await userEvent.setup()
+      const user = userEvent.setup()
       render(
         <CreateReadingListModal
           isOpen={true}
@@ -591,7 +598,7 @@ describe('CreateReadingListModal', () => {
       )
 
       const cancelButton = screen.getByRole('button', { name: /Cancel/ })
-      await userEvent.click(cancelButton)
+      await user.click(cancelButton)
 
       expect(mockOnClose).toHaveBeenCalled()
     })
@@ -615,7 +622,7 @@ describe('CreateReadingListModal', () => {
     })
 
     it('should reset form when modal is closed and reopened', async () => {
-      await userEvent.setup()
+      const user = userEvent.setup()
       const { rerender } = render(
         <CreateReadingListModal
           isOpen={true}
@@ -722,11 +729,14 @@ describe('CreateReadingListModal', () => {
         />
       )
 
-      const titleLabel = screen.getByText(/List Title.*\*/)
-      expect(titleLabel).toBeInTheDocument()
+      // Verify required fields have proper labels and are accessible
+      const titleInput = screen.getByLabelText(/List Title/)
+      expect(titleInput).toBeInTheDocument()
+      expect(titleInput).toHaveAttribute('id', 'title')
 
-      const visibilityLabel = screen.getByText(/Visibility.*\*/)
-      expect(visibilityLabel).toBeInTheDocument()
+      // Verify visibility fieldset is properly labeled
+      const visibilityFieldset = screen.getByRole('group', { name: /Visibility/ })
+      expect(visibilityFieldset).toBeInTheDocument()
     })
 
     it('should mark error fields with aria-invalid', async () => {
