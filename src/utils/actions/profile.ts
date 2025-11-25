@@ -216,3 +216,54 @@ export async function getUserProfile() {
     };
   }
 }
+
+/**
+ * Get a public user profile by Clerk user ID (no authentication required)
+ * @param clerkId - The Clerk ID of the user whose profile to fetch
+ * @returns User profile data or error message
+ */
+export async function getPublicUserProfile(clerkId: string) {
+  try {
+    // Fetch user from database by clerkId
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: {
+        id: true,
+        clerkId: true,
+        name: true,
+        email: true,
+        profileImageUrl: true,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Build profile object matching UserProfile type
+    const profile: UserProfile = {
+      id: user.clerkId,
+      name: user.name,
+      email: user.email,
+      profileImageUrl: user.profileImageUrl,
+      bio: null, // Bio field doesn't exist in schema yet
+    };
+
+    return {
+      success: true,
+      profile,
+    };
+  } catch (error) {
+    console.error("Get public user profile error:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to retrieve profile. Please try again.",
+    };
+  }
+}
