@@ -235,7 +235,7 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading, setError }) => {
             type: "api_error",
             message: "Too many requests. Please wait a moment and try again.",
           };
-        } else if (err.message.includes("fetch") || err.message.includes("network")) {
+        } else if (err.message.toLowerCase().includes("fetch") || err.message.toLowerCase().includes("network")) {
           error = {
             type: "network",
             message: "Network error. Please check your connection and try again.",
@@ -307,7 +307,6 @@ const Search: FC<SearchProps> = ({ setBookData, setLoading, setError }) => {
             <Controller
               name="isbn"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <input
                   id="isbn-input"

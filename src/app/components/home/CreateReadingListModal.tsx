@@ -63,7 +63,7 @@ export function CreateReadingListModal({
   const [formData, setFormData] = React.useState<FormData>({
     title: '',
     description: '',
-    visibility: 'PRIVATE'
+    visibility: 'PUBLIC'
   })
 
   const [errors, setErrors] = React.useState<FormErrors>({})
@@ -76,7 +76,7 @@ export function CreateReadingListModal({
       setFormData({
         title: '',
         description: '',
-        visibility: 'PRIVATE'
+        visibility: 'PUBLIC'
       })
       setErrors({})
     }
@@ -194,10 +194,10 @@ export function CreateReadingListModal({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="title"
-            className="text-sm font-medium text-zinc-300"
+            className="text-sm font-medium"
           >
-            List Title
-            <span className="text-red-400 ml-1">*</span>
+            <span className="text-zinc-300">List Title</span>{' '}
+            <span className="text-red-400">*</span>
           </label>
           <input
             ref={titleInputRef}
@@ -209,7 +209,6 @@ export function CreateReadingListModal({
             disabled={isSubmitting}
             aria-invalid={!!errors.title}
             aria-describedby={errors.title ? 'title-error' : undefined}
-            maxLength={100}
             inputMode="text"
             autoComplete="off"
             autoCapitalize="words"
@@ -259,7 +258,6 @@ export function CreateReadingListModal({
             aria-invalid={!!errors.description}
             aria-describedby={errors.description ? 'description-error' : undefined}
             rows={3}
-            maxLength={500}
             inputMode="text"
             autoComplete="off"
             className={cn(
@@ -292,12 +290,12 @@ export function CreateReadingListModal({
         </div>
 
         {/* Visibility Field */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-zinc-300">
-            Visibility
-            <span className="text-red-400 ml-1">*</span>
-          </label>
-          <div className="space-y-2">
+        <fieldset className="flex flex-col gap-1.5" aria-labelledby="visibility-legend">
+          <legend id="visibility-legend" className="text-sm font-medium">
+            <span className="text-zinc-300">Visibility</span>{' '}
+            <span className="text-red-400">*</span>
+          </legend>
+          <div className="space-y-2" role="group">
             {VISIBILITY_OPTIONS.map(option => (
               <label
                 key={option.value}
@@ -324,7 +322,7 @@ export function CreateReadingListModal({
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         {/* Buttons */}
         <div className="flex gap-3 pt-4 border-t border-zinc-800">
@@ -340,7 +338,7 @@ export function CreateReadingListModal({
           <Button
             type="submit"
             variant="default"
-            disabled={isSubmitting || !formData.title.trim()}
+            disabled={isSubmitting}
             className="flex-1 min-h-[44px]"
           >
             {isSubmitting ? 'Creating...' : 'Create List'}
