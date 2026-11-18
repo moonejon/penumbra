@@ -87,15 +87,20 @@ export async function fetchBooksPaginated({
   if (authors) {
     // For author matching, we support comma-separated author names
     // Each author term is matched case-insensitively against the authors array
-    const authorTerms = authors.split(",").map(a => a.trim()).filter(Boolean);
+    const authorTerms = authors
+      .split(",")
+      .map((a) => a.trim())
+      .filter(Boolean);
 
     // Build OR conditions for each author search term
-    const authorConditions: Prisma.BookWhereInput[] = authorTerms.map(term => ({
-      // Use hasSome for exact matching of author names
-      authors: {
-        hasSome: [term],
-      },
-    }));
+    const authorConditions: Prisma.BookWhereInput[] = authorTerms.map(
+      (term) => ({
+        // Use hasSome for exact matching of author names
+        authors: {
+          hasSome: [term],
+        },
+      }),
+    );
 
     if (authorConditions.length > 0) {
       titleAuthorFilters.push({
@@ -128,7 +133,7 @@ export async function fetchBooksPaginated({
       visibilityFilter,
       ...(titleAuthorFilters.length > 0 ? [searchFilter] : []),
       ...otherFilters,
-    ].filter(f => Object.keys(f).length > 0),
+    ].filter((f) => Object.keys(f).length > 0),
   };
 
   const [results, totalCount] = await prisma.$transaction([
@@ -177,7 +182,7 @@ export async function fetchBooksPaginated({
  */
 export async function updateBook(
   bookId: number,
-  updates: Partial<BookImportDataType>
+  updates: Partial<BookImportDataType>,
 ) {
   const user = await getCurrentUser();
 
@@ -245,9 +250,9 @@ export async function refetchBookMetadata(bookId: number) {
       `https://api2.isbndb.com/book/${book.isbn13}`,
       {
         headers: {
-          Authorization: process.env.NEXT_PUBLIC_ISBN_DB_API_KEY || "",
+          Authorization: process.env.ISBN_DB_API_KEY || "",
         },
-      }
+      },
     );
 
     if (!response.ok) {

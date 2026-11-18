@@ -1,3 +1,7 @@
+"use server";
+
+import { getCurrentUser } from "@/utils/permissions";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fetchMetadata = async (isbn: string): Promise<any> => {
   // Log the incoming request to track which ISBNs are being processed
@@ -5,14 +9,19 @@ export const fetchMetadata = async (isbn: string): Promise<any> => {
   console.log(`[ISBN API] Timestamp: ${new Date().toISOString()}`);
 
   const headers = new Headers();
-  headers.set("Authorization", `${process.env.NEXT_PUBLIC_ISBN_DB_API_KEY}`);
+  headers.set("Authorization", `${process.env.ISBN_DB_API_KEY}`);
   headers.set("Content-Type", "application/json");
 
+  const user = await getCurrentUser();
+
   // Log API key status (without exposing the actual key)
-  const hasApiKey = !!process.env.NEXT_PUBLIC_ISBN_DB_API_KEY;
-  console.log(`[ISBN API] API key present: ${hasApiKey}`);
-  if (!hasApiKey) {
-    console.error(`[ISBN API] Missing API key - this will likely fail`);
+  const isAuthorized = !!process.env.ISBN_DB_API_KEY && user.clerkId;
+  // const hasApiKey = !!process.env.ISBN_DB_API_KEY;
+  console.log(`User Authorization: ${isAuthorized}`);
+  if (!isAuthorized) {
+    console.error(
+      `[ISBN API] Missing API key or user not authorized - this will likely fail`,
+    );
   }
 
   try {
